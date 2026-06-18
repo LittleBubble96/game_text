@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameLogic.Data;
+using TEngine;
 
 namespace GameLogic.GamePlay.CorePlay
 {
@@ -253,6 +254,7 @@ namespace GameLogic.GamePlay.CorePlay
             _isGameRunning = false;
             DebugLog($"关卡 {_currentLevelIndex} 通关!");
             OnLevelCompleted?.Invoke(_currentLevelIndex);
+            GameEvent.Send(EventDefine.Event_LevelCompleted, _currentLevelIndex);
         }
 
         // ================ 存档 ================
@@ -288,7 +290,7 @@ namespace GameLogic.GamePlay.CorePlay
         public string GetLevelName()
         {
             if (_currentLevelData == null) return "未加载";
-            return $"第{_currentLevelData.level}关 - 『{_currentLevelData.baseCharacter}』";
+            return $"第{_currentLevelData.level}关 - {_currentLevelData.baseCharacter}";
         }
 
         /// <summary>是否有下一关</summary>

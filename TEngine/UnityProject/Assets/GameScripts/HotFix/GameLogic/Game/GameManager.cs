@@ -1,9 +1,11 @@
+using System;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
 using GameLogic.GamePlay.CorePlay.View;
 using TEngine;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace GameLogic
 {
@@ -34,19 +36,47 @@ namespace GameLogic
         {
             base.OnInit();
             InitModules();
-            BindEvents();
+            CreateAppPauseBridge();
         }
 
-        private void BindEvents()
+        /// <summary>创建 MonoBehaviour 桥接，监听 Unity OnApplicationPause 并转发</summary>
+        private void CreateAppPauseBridge()
         {
-            Utility.Unity.AddOnApplicationPauseListener(OnApplicationPause);
+            var go = new GameObject("[GameManagerBridge]");
+            Object.DontDestroyOnLoad(go);
+            go.hideFlags = HideFlags.HideAndDontSave;
+            var bridge = go.AddComponent<AppPauseBridge>();
+            bridge.OnAppPause += HandleAppPause;
+            bridge.OnAppQuit += HandleAppQuit;
         }
 
-        private void OnApplicationPause(bool pauseStatus)
+        private void HandleAppPause(bool pauseStatus)
         {
             if (pauseStatus)
             {
                 SaveGameProgress();
+            }
+        }
+
+        private void HandleAppQuit()
+        {
+            SaveGameProgress();
+        }
+
+        /// <summary>Monobehaviour 桥接：将 Unity OnApplicationPause / OnApplicationQuit 转发给 GameManager</summary>
+        private class AppPauseBridge : MonoBehaviour
+        {
+            public event Action<bool> OnAppPause;
+            public event Action OnAppQuit;
+
+            private void OnApplicationQuit()
+            {
+                OnAppQuit?.Invoke();
+            }
+
+            private void OnApplicationPause(bool pauseStatus)
+            {
+                OnAppPause?.Invoke(pauseStatus);
             }
         }
         
@@ -63,8 +93,8 @@ namespace GameLogic
             _corePlayGamePlay.Initialize(_levelConfig);
             CurrentGamePlay = _corePlayGamePlay;
 
-            // 绑定通关事件 → 自动存档
-            CurrentGamePlay.OnLevelCompleted += GameEnd;
+            // 绑定全局通关事件 → 自动存档 + 弹出结算
+            GameEvent.AddEventListener<int>(EventDefine.Event_LevelCompleted, OnLevelCompleted);
 
             Debug.Log("[GameManager] 所有模块初始化完成");
         }
@@ -99,12 +129,13 @@ namespace GameLogic
                 _corePlayView = GenerateCorePlayView();
             }
             _corePlayView.Initialize(CurrentGamePlay, _levelConfig);
+            _corePlayView.OnEnterGameAnim();
             
             _corePlayGamePlay.LoadLevel(startLevelIndex, restoredAnswers);
             CurrentGamePlay.StartGame();
 
             Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelIndex}");
-            GameModule.UI.ShowUI<UICorePlay>();
+            GameModule.UI.ShowUIAsync<UICorePlay>();
         }
         
         private CorePlayView GenerateCorePlayView()
@@ -113,24 +144,17 @@ namespace GameLogic
             viewGo.transform.position = Vector3.zero;
             viewGo.transform.localScale = Vector3.one;
             var view = viewGo.AddComponent<CorePlayView>();
+            view.OnCreate();
             return view;
         }
 
         // ================ 通关处理 ================
-        private void GameEnd(int levelIndex)
-        {
-            OnLevelCompletedHandler(levelIndex);
-            Debug.Log("[GameManager] 游戏结束!");
-        }
-
-        private void OnLevelCompletedHandler(int levelIndex)
+        private void OnLevelCompleted(int levelIndex)
         {
             SaveGameProgress();
-        }
-
-        public void OnCorePlayLevelCompleted(int levelIndex)
-        {
-            SaveGameProgress();
+            Debug.Log($"[GameManager] 游戏通关! 关卡: {levelIndex}");
+            // 弹出结算界面
+            GameModule.UI.ShowUIAsync<UIFinish>(levelIndex);
         }
 
         /// <summary>加载下一关</summary>
@@ -145,6 +169,23 @@ namespace GameLogic
 
             var restoredAnswers = _restoreDataManager.CorePlayRestoreData.GetFoundAnswers(nextLevel);
             _corePlayGamePlay.LoadLevel(nextLevel, restoredAnswers);
+            // 刷新 UI
+            GameModule.UI.ShowUIAsync<UICorePlay>();
+        }
+
+        /// <summary>返回主界面</summary>
+        public void ReturnToHome()
+        {
+            SaveGameProgress();
+            _corePlayView?.ClearAllHighlights();
+            _corePlayView?.OnEndGameAnim();
+            CurrentGamePlay?.EndGame();
+            
+            GameModule.UI.CloseUI<UICorePlay>();
+            GameModule.UI.CloseUI<UIFinish>();
+            GameModule.UI.ShowUIAsync<UIHome>();
+            
+            Debug.Log("[GameManager] 返回主界面");
         }
 
         // ================ 存档管理 ================

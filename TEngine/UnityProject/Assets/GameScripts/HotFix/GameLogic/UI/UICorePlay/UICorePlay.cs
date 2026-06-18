@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
+using TEngine;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ namespace GameLogic
     /// <summary>
     /// CorePlay 的 Canvas UI 管理 —— 通过 IGamePlay 接口获取数据，不依赖具体实现
     /// </summary>
+    [Window(UILayer.UI, location: "UICorePlay")]
     public class UICorePlay : UIWindow
     {
         private TMP_Text _levelNameText;
@@ -18,6 +20,8 @@ namespace GameLogic
         private TMP_Text _answerProgressText;
 
         private XYButton _submitButton;
+
+        private XYButton _backButton;
 
         private TMP_Text _resultTipText;
 
@@ -35,14 +39,21 @@ namespace GameLogic
             _answerDisplayText = FindChildComponent<TMP_Text>("Answer");
             _answerProgressText = FindChildComponent<TMP_Text>("AnswerProgress");
             _submitButton = CreateWidget<XYButton>("SubmitBtn");
+            _backButton = CreateWidget<XYButton>("BackBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
             _submitButton.OnAddListener(OnSubmit);
+            _backButton.OnAddListener(OnBackClick);
         }
         // ================ 初始化 ================
 
         private void OnSubmit()
         {
             GameManager.Instance.CurrentView.OnSubmitClicked();
+        }
+
+        private void OnBackClick()
+        {
+            GameManager.Instance.ReturnToHome();
         }
 
         protected override void RegisterEvent()

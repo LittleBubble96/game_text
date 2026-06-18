@@ -1,4 +1,4 @@
-﻿using GameLogic.Data;
+using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.View;
 using TEngine;
@@ -15,7 +15,7 @@ namespace GameLogic.GamePlay.CorePlay.View
     {
         
         private Color _highlightColor = new Color(1f, 0.85f, 0.2f);
-        private Color _defaultStrokeColor = Color.white;
+        private Color _defaultStrokeColor = Color.black;
         private float _highlightZOffset = -1f;
 
         // ================ 内部状态 ================
@@ -26,10 +26,23 @@ namespace GameLogic.GamePlay.CorePlay.View
         private StrokeInputHandler _strokeInputHandler;
         private bool _isInitialized;
 
+        private GameViewRoot _gameViewRoot;
+        
+
         // ================ 属性 ================
 
 
         // ================ 动态初始化 ================
+
+        public void OnCreate()
+        {
+             GameObject gameViewRoot = GameModule.Resource.LoadGameObject("GameViewRoot" , transform);
+             if (gameViewRoot)
+             {
+                 _gameViewRoot = gameViewRoot.GetComponent<GameViewRoot>();
+                 _gameViewRoot?.Init();
+             }
+        }
 
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
         public void Initialize(IGamePlay gamePlay, LevelDataConfigParse levelConfig)
@@ -166,7 +179,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnLevelCompleted(int levelIndex)
         {
-            GameManager.Instance?.OnCorePlayLevelCompleted(levelIndex);
+            ClearAllHighlights();
         }
 
         // ================ 视觉更新 ================
@@ -211,6 +224,25 @@ namespace GameLogic.GamePlay.CorePlay.View
                     pos.z = 0;
                     strokes[i].transform.localPosition = pos;
                 }
+            }
+        }
+
+        // ================ 动画接口 ================
+
+        /// <summary>进入游戏动画：背景淡入</summary>
+        public void OnEnterGameAnim()
+        {
+            _gameViewRoot?.OnEnterGameAnim();
+        }
+
+        /// <summary>退出游戏动画：背景淡出 + 销毁 DrawCharacter</summary>
+        public void OnEndGameAnim()
+        {
+            _gameViewRoot?.OnEndGameAnim();
+            if (_drawCharacter != null)
+            {
+                Destroy(_drawCharacter.gameObject);
+                _drawCharacter = null;
             }
         }
 
