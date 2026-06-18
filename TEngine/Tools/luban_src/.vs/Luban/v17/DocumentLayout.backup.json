@@ -1,0 +1,229 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\globalconfigloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\globalconfigloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{26003D67-6228-4848-8B8F-985992800237}|Luban\\Luban.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{26003D67-6228-4848-8B8F-985992800237}|Luban\\Luban.csproj|solutionrelative:luban\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D1DC8E2-6581-4E35-A098-A8ED9264361C}|Luban.DataTarget.Builtin\\Luban.DataTarget.Builtin.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.datatarget.builtin\\binary\\binaryrecordoffsetlengthdatatarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D1DC8E2-6581-4E35-A098-A8ED9264361C}|Luban.DataTarget.Builtin\\Luban.DataTarget.Builtin.csproj|solutionrelative:luban.datatarget.builtin\\binary\\binaryrecordoffsetlengthdatatarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\datatarget\\dataexporterbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\datatarget\\dataexporterbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\defs\\deffield.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\defs\\deffield.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\defs\\defassembly.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\defs\\defassembly.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\codetarget\\codetargetbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\codetarget\\codetargetbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\outputsaver\\outputsaverbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\outputsaver\\outputsaverbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\builtinoptionnames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\builtinoptionnames.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{701EA9C0-C680-4FA3-B51B-CEC79BCFE56B}|Luban.Schema.Builtin\\Luban.Schema.Builtin.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.schema.builtin\\excelschemaloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{701EA9C0-C680-4FA3-B51B-CEC79BCFE56B}|Luban.Schema.Builtin\\Luban.Schema.Builtin.csproj|solutionrelative:luban.schema.builtin\\excelschemaloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\pipeline\\defaultpipeline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\pipeline\\defaultpipeline.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDEA1339-94A4-4A2D-8C09-707296306F60}|Luban.CSharp\\Luban.CSharp.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.csharp\\codetarget\\csharplazyloadbincodetarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EDEA1339-94A4-4A2D-8C09-707296306F60}|Luban.CSharp\\Luban.CSharp.csproj|solutionrelative:luban.csharp\\codetarget\\csharplazyloadbincodetarget.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|d:\\svnproject\\tile\\tools\\luban\\tools\\luban_src\\luban.core\\codetarget\\allinonetemplatecodetargetbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C89F41B6-D378-4558-A8F8-AEE4A68600DE}|Luban.Core\\Luban.Core.csproj|solutionrelative:luban.core\\codetarget\\allinonetemplatecodetargetbase.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GlobalConfigLoader.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\GlobalConfigLoader.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\GlobalConfigLoader.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\GlobalConfigLoader.cs",
+              "RelativeToolTip": "Luban.Core\\GlobalConfigLoader.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAswDMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-17T07:49:11.787Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "DataExporterBase.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\DataTarget\\DataExporterBase.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\DataTarget\\DataExporterBase.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\DataTarget\\DataExporterBase.cs",
+              "RelativeToolTip": "Luban.Core\\DataTarget\\DataExporterBase.cs",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAuwBIAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T10:25:50.159Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DefField.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Defs\\DefField.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\Defs\\DefField.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Defs\\DefField.cs",
+              "RelativeToolTip": "Luban.Core\\Defs\\DefField.cs",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAtwGgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T10:21:24.88Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ExcelSchemaLoader.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Schema.Builtin\\ExcelSchemaLoader.cs",
+              "RelativeDocumentMoniker": "Luban.Schema.Builtin\\ExcelSchemaLoader.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Schema.Builtin\\ExcelSchemaLoader.cs",
+              "RelativeToolTip": "Luban.Schema.Builtin\\ExcelSchemaLoader.cs",
+              "ViewState": "AgIAABwAAAAAAAAAAAAAwCkAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T02:49:37.322Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "DefaultPipeline.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Pipeline\\DefaultPipeline.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\Pipeline\\DefaultPipeline.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Pipeline\\DefaultPipeline.cs",
+              "RelativeToolTip": "Luban.Core\\Pipeline\\DefaultPipeline.cs",
+              "ViewState": "AgIAABYAAAAAAAAAAAAAACQAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T02:48:54.264Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "DefAssembly.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Defs\\DefAssembly.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\Defs\\DefAssembly.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\Defs\\DefAssembly.cs",
+              "RelativeToolTip": "Luban.Core\\Defs\\DefAssembly.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAtwDEAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-13T02:47:06.899Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "CsharpLazyLoadBinCodeTarget.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.CSharp\\CodeTarget\\CsharpLazyLoadBinCodeTarget.cs",
+              "RelativeDocumentMoniker": "Luban.CSharp\\CodeTarget\\CsharpLazyLoadBinCodeTarget.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.CSharp\\CodeTarget\\CsharpLazyLoadBinCodeTarget.cs",
+              "RelativeToolTip": "Luban.CSharp\\CodeTarget\\CsharpLazyLoadBinCodeTarget.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T12:51:00.937Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "BuiltinOptionNames.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\BuiltinOptionNames.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\BuiltinOptionNames.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\BuiltinOptionNames.cs",
+              "RelativeToolTip": "Luban.Core\\BuiltinOptionNames.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAwwAYAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T12:47:05.321Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "AllInOneTemplateCodeTargetBase.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\CodeTarget\\AllInOneTemplateCodeTargetBase.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\CodeTarget\\AllInOneTemplateCodeTargetBase.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\CodeTarget\\AllInOneTemplateCodeTargetBase.cs",
+              "RelativeToolTip": "Luban.Core\\CodeTarget\\AllInOneTemplateCodeTargetBase.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T12:46:52.105Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CodeTargetBase.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\CodeTarget\\CodeTargetBase.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\CodeTarget\\CodeTargetBase.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\CodeTarget\\CodeTargetBase.cs",
+              "RelativeToolTip": "Luban.Core\\CodeTarget\\CodeTargetBase.cs",
+              "ViewState": "AgIAAGsAAAAAAAAAAAAtwHQAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T12:45:20.44Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "OutputSaverBase.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\OutputSaver\\OutputSaverBase.cs",
+              "RelativeDocumentMoniker": "Luban.Core\\OutputSaver\\OutputSaverBase.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.Core\\OutputSaver\\OutputSaverBase.cs",
+              "RelativeToolTip": "Luban.Core\\OutputSaver\\OutputSaverBase.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAawAYAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T11:56:44.703Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban\\Program.cs",
+              "RelativeDocumentMoniker": "Luban\\Program.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban\\Program.cs",
+              "RelativeToolTip": "Luban\\Program.cs",
+              "ViewState": "AgIAAG8AAAAAAAAAAAAIwHYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T11:35:04.613Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "BinaryRecordOffsetLengthDataTarget.cs",
+              "DocumentMoniker": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.DataTarget.Builtin\\Binary\\BinaryRecordOffsetLengthDataTarget.cs",
+              "RelativeDocumentMoniker": "Luban.DataTarget.Builtin\\Binary\\BinaryRecordOffsetLengthDataTarget.cs",
+              "ToolTip": "D:\\svnProject\\tile\\Tools\\luban\\Tools\\luban_src\\Luban.DataTarget.Builtin\\Binary\\BinaryRecordOffsetLengthDataTarget.cs",
+              "RelativeToolTip": "Luban.DataTarget.Builtin\\Binary\\BinaryRecordOffsetLengthDataTarget.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-12T09:48:19.654Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ using GameLogic.GamePlay.CorePlay;
 using TEngine;
 using TMPro;
 using UnityEngine;
+using RTLTMPro;
 using UnityEngine.UI;
 
 namespace GameLogic
@@ -14,10 +15,10 @@ namespace GameLogic
     [Window(UILayer.UI, location: "UICorePlay")]
     public class UICorePlay : UIWindow
     {
-        private TMP_Text _levelNameText;
+        private RTLTextMeshPro _levelNameText;
 
-        private TMP_Text _answerDisplayText;
-        private TMP_Text _answerProgressText;
+        private RTLTextMeshPro _answerDisplayText;
+        private RTLTextMeshPro _answerProgressText;
 
         private XYButton _submitButton;
 
@@ -35,9 +36,9 @@ namespace GameLogic
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
-            _levelNameText = FindChildComponent<TMP_Text>("Titile");
-            _answerDisplayText = FindChildComponent<TMP_Text>("Answer");
-            _answerProgressText = FindChildComponent<TMP_Text>("AnswerProgress");
+            _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
+            _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
+            _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
             _submitButton = CreateWidget<XYButton>("SubmitBtn");
             _backButton = CreateWidget<XYButton>("BackBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");

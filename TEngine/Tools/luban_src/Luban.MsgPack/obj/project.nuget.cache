@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "dgSpecHash": "1RJhFXmse5w=",
+  "success": true,
+  "projectFilePath": "E:\\fork\\projectt\\Tools\\luban\\Tools\\luban_src\\Luban.MsgPack\\Luban.MsgPack.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Administrator\\.nuget\\packages\\messagepack\\2.5.192\\messagepack.2.5.192.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\messagepack.annotations\\2.5.192\\messagepack.annotations.2.5.192.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\microsoft.net.stringtools\\17.6.3\\microsoft.net.stringtools.17.6.3.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\nlog\\5.3.4\\nlog.5.3.4.nupkg.sha512",
+    "C:\\Users\\Administrator\\.nuget\\packages\\scriban\\5.12.0\\scriban.5.12.0.nupkg.sha512"
+  ],
+  "logs": []
+}

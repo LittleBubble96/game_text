@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Luban": {
+      "commandName": "Project",
+      "commandLineArgs": "-t client\n-c cs-lazyload-bin\n-d bin bin-offsetlength\n--conf luban.conf\n-x outputCodeDir=Unity\\Code\\\n-x outputDataDir=Unity\\bytes\\\n-x bin-offsetlength.outputDataDir=Unity\\offset\\",
+      "workingDirectory": "D:\\svnProject\\tile\\Tools\\luban"
+    }
+  }
+}

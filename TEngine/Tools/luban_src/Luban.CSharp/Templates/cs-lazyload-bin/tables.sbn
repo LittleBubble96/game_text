@@ -1,0 +1,99 @@
+using Luban;
+using System.Collections.Generic;
+        {{count = 0}}{{~for table in __tables ~}}{{count = count + 1}}{{~if table.comment != '' ~}}
+        /// <summary>
+        /// {{escape_comment table.comment}}
+        /// </summary>
+        {{~end~}}
+        {{~end~}}
+{{namespace_with_grace_begin __namespace}}
+    public partial class {{__name}}
+    {
+
+        public static readonly int TABLE_COUNT = {{count}};
+
+        System.Func<string, ByteBuf> m_offsetLoader;
+        System.Func<string, int, int, ByteBuf> m_byteBufLoader;
+        System.Func<string, ByteBuf> m_attrByteBufLoader;
+        public Dictionary<string, byte[]> binaryStreams;
+        
+
+        public {{__name}}()
+        {
+
+        }
+
+        public void SetOffsetLoader(System.Func<string, ByteBuf> _offsetLoader,System.Func<string, int, int, ByteBuf> _byteBufLoader)
+        {
+            m_offsetLoader = _offsetLoader;
+            m_byteBufLoader = _byteBufLoader;
+            binaryStreams = new Dictionary<string, byte[]>(TABLE_COUNT/2);
+        }
+
+
+        public void SetAttrLoader(System.Func<string, ByteBuf> _attrByteBufLoader)
+        {
+            m_attrByteBufLoader = _attrByteBufLoader;
+        }
+
+
+
+{{~for table in __tables ~}}
+    {{~if table.comment != '' ~}}
+    /// <summary>
+    /// {{escape_comment table.comment}}
+    /// </summary>
+    {{~end~}}
+        private {{table.full_name}} m_{{table.name}};
+        public {{table.full_name}} {{format_property_name __code_style table.name}}_Attr 
+        {
+            get
+            {
+                if (m_{{table.name}} == null)
+                {
+                    m_{{table.name}} = new {{table.full_name}}(m_attrByteBufLoader("{{table.output_data_file}}"));
+                    m_{{table.name}}.ResolveRef(this);
+                }
+                else if (!m_{{table.name}}.isFull)
+                {
+                    m_{{table.name}} = new {{table.full_name}}(m_attrByteBufLoader("{{table.output_data_file}}"));
+                    m_{{table.name}}.ResolveRef(this);
+                }
+                return m_{{table.name}};
+            }
+        }
+
+        public {{table.full_name}} {{format_property_name __code_style table.name}}
+        {
+            get
+            {
+                if (m_{{table.name}} == null)
+                {
+                    m_{{table.name}} = new {{table.full_name}}(m_offsetLoader("{{table.output_data_file}}_offset"), "{{table.output_data_file}}", m_byteBufLoader);
+                    m_{{table.name}}.ResolveRef(this);
+                }
+                return m_{{table.name}};
+            }
+        }
+
+        public void {{table.name}}_Dispose()
+        {
+            if (m_{{table.name}} == null)
+                return;
+            if (binaryStreams.ContainsKey(m_{{table.name}}._fileName))
+                binaryStreams.Remove(m_{{table.name}}._fileName);
+            m_{{table.name}} = null;        
+        }
+
+
+{{~end~}}
+
+        public void DisposeAll()
+        {
+            {{~for table in __tables ~}}
+            {{table.name}}_Dispose();
+            {{~end~}}
+        }
+    }
+
+{{namespace_with_grace_end __namespace}}

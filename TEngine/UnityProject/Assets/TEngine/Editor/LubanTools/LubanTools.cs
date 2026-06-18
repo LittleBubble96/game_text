@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -5,8 +6,10 @@ namespace TEngine.Editor
 {
     public static class LubanTools
     {
+        private static Action _onExportFinish;
+        
         [MenuItem("TEngine/Luban/转表 &X", priority = -100)]
-        private static void ZhuanXiaoYi()
+        private static void ExportConfigs()
         {
 #if UNITY_EDITOR_OSX || UNITY_EDITOR_LINUX
             string path = Application.dataPath + "/../../Configs/GameConfig/gen_code_bin_to_project_lazyload.sh";
@@ -15,6 +18,12 @@ namespace TEngine.Editor
 #endif
             Debug.Log($"执行转表：{path}");
             ShellHelper.RunByPath(path);
+            _onExportFinish?.Invoke();
+        }
+        
+        public static void BindExportFinish(Action onExportFinish)
+        {
+            _onExportFinish = onExportFinish;
         }
     }
 }
