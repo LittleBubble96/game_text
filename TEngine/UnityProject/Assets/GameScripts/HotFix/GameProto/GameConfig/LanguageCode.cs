@@ -17,6 +17,10 @@ namespace GameConfig
         /// 中文
         /// </summary>
         Ch = 1,
+        /// <summary>
+        /// 英文
+        /// </summary>
+        En = 2,
     }
 
 } 

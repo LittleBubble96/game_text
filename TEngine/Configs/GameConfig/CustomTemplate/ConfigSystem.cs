@@ -1,3 +1,4 @@
+using System.IO;
 using Luban;
 using GameConfig;
 using TEngine;
@@ -55,4 +56,20 @@ public class ConfigSystem
         byte[] bytes = textAsset.bytes;
         return new ByteBuf(bytes);
     }
+
+#if UNITY_EDITOR
+
+    public void LoadEditor()
+    {
+        _tables = new Tables(AttrByteLoaderEditor);
+        _init = true;
+    }
+
+    private static ByteBuf AttrByteLoaderEditor(string file)
+    {
+        string path = "Assets/AssetRaw/Configs/bytes/" + file + ".bytes";
+        var asset = File.ReadAllBytes(Path.Combine(Application.dataPath.Replace("Assets", ""), path));
+        return new ByteBuf(asset);
+    }
+#endif
 }

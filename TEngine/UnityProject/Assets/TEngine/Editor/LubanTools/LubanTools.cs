@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace TEngine.Editor
 {
@@ -16,9 +18,23 @@ namespace TEngine.Editor
 #elif UNITY_EDITOR_WIN
             string path = Application.dataPath + "/../../Configs/GameConfig/gen_code_bin_to_project_lazyload.bat";
 #endif
-            Debug.Log($"执行转表：{path}");
-            ShellHelper.RunByPath(path);
-            _onExportFinish?.Invoke();
+            var startInfo = new ProcessStartInfo()
+            {
+                FileName = path,
+            };
+            using (var myProcess = Process.Start(startInfo))
+            {
+                if (myProcess != null)
+                {
+                    myProcess.WaitForExit();
+                    var exitCode = myProcess.ExitCode;
+                    Debug.Log($"Process Exit Code {exitCode}");
+                }
+
+                // Debug.Log($"执行转表：{path}");
+                // ShellHelper.RunByPath(path);
+                _onExportFinish?.Invoke();
+            }
         }
         
         public static void BindExportFinish(Action onExportFinish)

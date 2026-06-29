@@ -69,7 +69,7 @@ public class ConfigSystem
     {
         string path = "Assets/AssetRaw/Configs/bytes/" + file + ".bytes";
         var asset = File.ReadAllBytes(Path.Combine(Application.dataPath.Replace("Assets", ""), path));
-        return new ByteBuf(asset,8,asset.Length-5);
+        return new ByteBuf(asset);
     }
 #endif
 }
