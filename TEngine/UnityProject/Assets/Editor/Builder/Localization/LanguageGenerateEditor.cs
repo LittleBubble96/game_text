@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using GameConfig;
 using GameConfig.language;
+using GameLogic.Data;
+using GameLogic.GamePlay.CorePlay;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -41,6 +44,12 @@ namespace Builder
 
         /// <summary>设置面板字体名称后缀</summary>
         private const string SettingSuffix = "_Setting";
+
+        /// <summary>关卡字体输出子目录</summary>
+        private const string LevelSubDir = "Level";
+
+        /// <summary>关卡字体名称后缀</summary>
+        private const string LevelSuffix = "_Level";
 
         /// <summary>SDF 字体使用的 Shader 名称</summary>
         private const string SDFShaderName = "TextMeshPro/Distance Field";
@@ -216,6 +225,27 @@ namespace Builder
                     }
                 }
 
+                // ---- 4.5 收集关卡文字并生成独立的关卡字体资源 ----
+                EditorUtility.DisplayProgressBar("多语言字体生成", "收集关卡文字 ...", 0.93f);
+                HashSet<char> levelChars = CollectLevelCharsForFontGroup();
+
+                if (levelChars.Count > 0)
+                {
+                    string levelDir = Path.Combine(OutputFontDir, LevelSubDir);
+                    EnsureDirectory(levelDir);
+
+                    // 关卡文字使用主游戏字体，优先匹配 AaFengKuangYuanShiRen
+                    string levelFont = fontGroups.ContainsKey("AaFengKuangYuanShiRen")
+                        ? "AaFengKuangYuanShiRen"
+                        : fontGroups.First().Key;
+
+                    BuildFontAsset(levelFont, levelChars, levelDir, LevelSuffix);
+                }
+                else
+                {
+                    Debug.LogWarning("[字体生成] 无关卡文字字符，跳过关卡字体生成。");
+                }
+
                 // ---- 5. 保存并刷新 ----
                 EditorUtility.DisplayProgressBar("多语言字体生成", "刷新资源数据库 ...", 0.98f);
                 AssetDatabase.SaveAssets();
@@ -327,13 +357,59 @@ namespace Builder
                         charSet.Add(c);
                 }
             }
-            
+
+            if (!settingOnly)
+            {
+                //添加白名单
+                foreach (var writeChar in GenerateTMPDefine.WhiteList)
+                {
+                    charSet.Add(writeChar);
+                }
+            }
+            return charSet;
+        }
+        
+        /// <summary>
+        /// 获取关卡得文字 生成一个单独得字体
+        /// </summary>
+        /// <returns></returns>
+        private static HashSet<char> CollectLevelCharsForFontGroup()
+        {
+            HashSet<char> chars = new HashSet<char>();
+            TextLevelDataScriptableObject levelDataScriptable = AssetDatabase.LoadAssetAtPath<TextLevelDataScriptableObject>(
+                "Assets/AssetRaw/Configs/LevelConfigs/TextLevelDataScriptableObject.asset");
+            foreach (var level in levelDataScriptable.levelDataList)
+            {
+                foreach (var c in level.baseCharacter)
+                {
+                    chars.Add(c);
+                }
+
+                foreach (var answer in level.answers)
+                {
+                    foreach (var c in answer.answerCharacter)
+                    {
+                        chars.Add(c);
+                    }
+                }
+            }
             //添加白名单
             foreach (var writeChar in GenerateTMPDefine.WhiteList)
             {
-                charSet.Add(writeChar);
+                chars.Add(writeChar);
             }
-            return charSet;
+            return chars;
+        }
+        
+        /// <summary>
+        /// 按顺序排序
+        /// </summary>
+        /// <param name="chars"></param>
+        /// <returns></returns>
+        private static string GetAllCharsByString(HashSet<char> chars)
+        {
+            var str = string.Concat(chars.OrderBy(c => (int)c));
+            return str;
         }
 
         /// <summary>
@@ -412,8 +488,8 @@ namespace Builder
                 return;
             }
 
-            // -- 将字符集转为字符串 --
-            string charString = GetCharString(characters);
+            // -- 将字符集转为字符串（按 Unicode 排序，确保 TryAddCharacters 顺序稳定） --
+            string charString = GetAllCharsByString(characters);
 
             // -- 创建字体，从 256×256 起步逐步扩容，最大 4096 --
             const int startAtlasSize = 256;
@@ -578,16 +654,6 @@ namespace Builder
             Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 无法全量预烘焙字符，" +
                              $"图集={currentW}×{currentH}，将依赖 Dynamic 模式。");
             return fontAsset != null;
-        }
-
-        /// <summary>
-        /// 将字符集合转为字符串（用于 TryAddCharacters 参数）。
-        /// </summary>
-        private static string GetCharString(HashSet<char> characters)
-        {
-            var arr = new char[characters.Count];
-            characters.CopyTo(arr);
-            return new string(arr);
         }
 
         /// <summary>
