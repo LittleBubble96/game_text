@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f494791c9b5ed874694848d003164f75
+guid: d71e2991c86bebb4db94e445e58774fd
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - AaFengKuangYuanShiRen
+  - Alimama FangYuanTi VF
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

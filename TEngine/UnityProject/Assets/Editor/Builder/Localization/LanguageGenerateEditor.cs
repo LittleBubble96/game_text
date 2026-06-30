@@ -25,13 +25,13 @@ namespace Builder
         #region 可调参数（按需修改）
 
         /// <summary>字体采样字号（值越大字形越清晰，图集消耗也越大）</summary>
-        private const int SamplingPointSize = 36;
+        private const int SamplingPointSize = 60;
 
         /// <summary>图集内边距（像素），防止 SDF 边缘溢出到相邻字形</summary>
         private const int AtlasPadding = 6;
 
         /// <summary>SDF 渲染模式</summary>
-        private const GlyphRenderMode RenderMode = GlyphRenderMode.SDFAA;
+        private const GlyphRenderMode RenderMode = GlyphRenderMode.SDF8;
 
         /// <summary>源字体(.ttf)所在目录</summary>
         private const string SourceFontDir = "Assets/AssetArt/Font";
@@ -517,7 +517,8 @@ namespace Builder
                 // ---- 更新已有资源：通过 CopySerialized 增量更新，保留旧材质引用 ----
                 var material     = oldFontAsset.material;
                 var atlasTexture = oldFontAsset.atlasTexture;
-
+                List<TMP_FontAsset> fullBacks = new List<TMP_FontAsset>();
+                fullBacks.AddRange(oldFontAsset.fallbackFontAssetTable);
                 EditorUtility.CopySerialized(fontAsset, oldFontAsset);
                 EditorUtility.CopySerialized(fontAsset.atlasTexture, oldFontAsset.atlasTexture);
                 oldFontAsset.material = material;
@@ -525,6 +526,11 @@ namespace Builder
 
                 // 更新材质属性
                 GenerateTMPUtility.UpdateMaterialProperty(material, oldFontAsset);
+                //关联fullback
+                foreach (var tmpFontAsset in fullBacks)
+                {
+                    oldFontAsset.fallbackFontAssetTable.Add(tmpFontAsset);
+                }
                 fontAsset = oldFontAsset;
             }
             else
@@ -569,7 +575,7 @@ namespace Builder
         /// <summary>
         /// 尝试创建 SDF 字体资源并预烘焙指定字符。
         /// 从给定的 atlasWidth/Height 开始，若字符无法全部装入图集，
-        /// 则逐步扩容（先扩宽，再扩高），最多 3 次尝试。
+        /// 则逐步扩容（交替扩宽/扩高，256×256→512×256→512×512→...→4096×4096）。
         /// 最终仍失败则回退到 Dynamic 模式（运行时按需生成）。
         /// </summary>
         /// <returns>true = 成功创建 FontAsset（至少尝试了添加字符）</returns>
@@ -579,12 +585,10 @@ namespace Builder
             string fontBaseName, string nameSuffix)
         {
             fontAsset = null;
-            int attempt = 0;
-            const int maxAttempts = 3;
             int currentW = atlasWidth;
             int currentH = atlasHeight;
 
-            while (attempt < maxAttempts)
+            while (true)
             {
                 // 如果之前创建的失败资源还在，需要销毁
                 if (fontAsset != null)
@@ -622,22 +626,29 @@ namespace Builder
                     return true;
                 }
 
-                // 图集大小不足，逐步扩容
-                attempt++;
+                // 图集大小不足，逐步扩容（交替扩宽/扩高，256×256→512×256→512×512→...→4096×4096）
+                if (currentW >= AtlasMaxSize && currentH >= AtlasMaxSize)
+                {
+                    // 已达到最大图集尺寸 4096×4096，无法继续扩容
+                    break;
+                }
 
-                if (attempt == 1)
+                if (currentW <= currentH)
                 {
-                    // 第 1 次重试：扩宽
-                    currentW = Math.Min(currentW * 2, AtlasMaxSize);
-                    Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 图集宽度不足，扩宽至 {currentW}×{currentH} 重试 ...");
+                    // 宽度 ≤ 高度：扩宽
+                    int newW = Math.Min(currentW * 2, AtlasMaxSize);
+                    Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 图集宽度不足，" +
+                                     $"从 {currentW}×{currentH} 扩宽至 {newW}×{currentH} 重试 ...");
+                    currentW = newW;
                 }
-                else if (attempt == 2)
+                else
                 {
-                    // 第 2 次重试：扩高
-                    currentH = Math.Min(currentH * 2, AtlasMaxSize);
-                    Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 图集高度不足，扩高至 {currentW}×{currentH} 重试 ...");
+                    // 高度 < 宽度：扩高
+                    int newH = Math.Min(currentH * 2, AtlasMaxSize);
+                    Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 图集高度不足，" +
+                                     $"从 {currentW}×{currentH} 扩高至 {currentW}×{newH} 重试 ...");
+                    currentH = newH;
                 }
-                // attempt == 3 时 while 条件不满足，会在下面记录 warning 后返回
             }
 
             // 已尝试所有扩容方案，仍有字符装不下（可能是个别异常字符）
