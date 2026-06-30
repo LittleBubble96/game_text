@@ -15,6 +15,7 @@ namespace Builder
         private static void OnExportFinish()
         {
             LanguageGenerateEditor.Generate();
+            LanguageGenerateKeyEditor.Generate();
         }
     }
 }

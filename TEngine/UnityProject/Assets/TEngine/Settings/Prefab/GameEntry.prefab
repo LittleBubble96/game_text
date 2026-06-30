@@ -44,9 +44,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 706e6317a59f61044b2805be79f6b284, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  innerLocalizationCsv: {fileID: 0}
-  allLanguage: []
-  useRuntimeModule: 1
 --- !u!1 &7696541953913300370
 GameObject:
   m_ObjectHideFlags: 0

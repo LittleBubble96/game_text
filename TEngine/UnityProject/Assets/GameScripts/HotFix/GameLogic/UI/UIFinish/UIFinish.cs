@@ -1,3 +1,5 @@
+using GameLogic.Localization;
+using RTLTMPro;
 using TEngine;
 using UnityEngine;
 
@@ -6,6 +8,8 @@ namespace GameLogic
     [Window(UILayer.Top, location: "UIFinish")]
     public class UIFinish : UIWindow
     {
+        private RTLTextMeshPro _nextBtnText;
+        private RTLTextMeshPro _homeBtnText;
         private XYButton _btnNext;
         private XYButton _btnHome;
         private GameObject _btnNextGo;
@@ -17,7 +21,9 @@ namespace GameLogic
             base.ScriptGenerator();
             _btnNext = CreateWidget<XYButton>("BtnNext");
             _btnHome = CreateWidget<XYButton>("BtnHome");
-            _btnNextGo = _btnNext?.gameObject;
+            _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("BtnNext/m_text");
+            _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("BtnHome/m_text");
+            _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
         }
@@ -37,6 +43,14 @@ namespace GameLogic
             {
                 _btnNextGo.SetActive(hasNextLevel);
             }
+
+            RefreshText();
+        }
+
+        private void RefreshText()
+        {
+            _nextBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.next_level_btn);
+            _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
         }
 
         private void OnBtnNextClick()

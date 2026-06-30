@@ -229,6 +229,13 @@ namespace GameLogic
         {
         }
 
+        /// <summary>
+        /// 语言切换时调用。子类重写以刷新多语言文本。
+        /// </summary>
+        protected virtual void OnLanguageChanged()
+        {
+        }
+
         internal void SetUpdateDirty()
         {
             _updateListValid = false;

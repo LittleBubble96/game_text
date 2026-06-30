@@ -38,6 +38,8 @@ namespace GameLogic.GamePlay.CorePlay
 
         public bool IsGameRunning => _isGameRunning;
         public int CurrentLevelIndex => _currentLevelIndex;
+        /// <summary>是否已加载有效关卡（_currentLevelIndex >= 0，区分首页 -1）</summary>
+        public bool HasValidLevel => _currentLevelIndex >= 0;
         public TextLevelData CurrentLevelData => _currentLevelData;
         public IReadOnlyCollection<int> SelectedStrokeIndices => _selectedStrokeIndices;
         public IReadOnlyCollection<int> FoundAnswerIndices => _foundAnswerIndices;
@@ -48,6 +50,15 @@ namespace GameLogic.GamePlay.CorePlay
         public void Initialize(LevelDataConfigParse levelConfig)
         {
             _levelConfig = levelConfig;
+        }
+
+        /// <summary>
+        /// 从缓存恢复初始关卡索引（仅设置索引，不加载关卡数据）。
+        /// 应在 Load() 存档后立即调用，保证 _currentLevelIndex 始终有效。
+        /// </summary>
+        public void InitLevelIndex(int levelIndex)
+        {
+            _currentLevelIndex = levelIndex >= 0 ? levelIndex : 0;
         }
 
         public void StartGame()
@@ -259,9 +270,10 @@ namespace GameLogic.GamePlay.CorePlay
 
         // ================ 存档 ================
 
-        /// <summary>获取当前存档数据</summary>
+        /// <summary>获取当前存档数据（未开始游戏时返回 null）</summary>
         public CorePlaySaveData GetSaveData()
         {
+            if (_currentLevelIndex < 0) return null;
             var data = new CorePlaySaveData { currentLevelIndex = _currentLevelIndex };
             data.levelProgresses.Add(new LevelSaveData
             {
@@ -271,9 +283,10 @@ namespace GameLogic.GamePlay.CorePlay
             return data;
         }
 
-        /// <summary>获取所有关卡的进度（用于批量保存）</summary>
+        /// <summary>将当前关卡进度写入 Restore 对象（未开始游戏时跳过，防止 -1 覆盖有效存档）</summary>
         public void ApplyToRestore(CorePlayRestore restore)
         {
+            if (_currentLevelIndex < 0) return;
             restore.SetCurrentLevel(_currentLevelIndex);
             restore.SetFoundAnswers(_currentLevelIndex, _foundAnswerIndices.ToList());
         }
@@ -284,13 +297,6 @@ namespace GameLogic.GamePlay.CorePlay
         public string GetBaseCharacter()
         {
             return _currentLevelData?.baseCharacter ?? "";
-        }
-
-        /// <summary>获取当前关卡名称</summary>
-        public string GetLevelName()
-        {
-            if (_currentLevelData == null) return "未加载";
-            return $"第{_currentLevelData.level}关 - {_currentLevelData.baseCharacter}";
         }
 
         /// <summary>是否有下一关</summary>

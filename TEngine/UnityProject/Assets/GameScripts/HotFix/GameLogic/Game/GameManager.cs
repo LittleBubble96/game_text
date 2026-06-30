@@ -19,7 +19,7 @@ namespace GameLogic
         // ================ 内部模块 ================
 
         private LevelDataConfigParse _levelConfig;
-        private GameRestoreDataManager _restoreDataManager;
+        private GameCacheManager _cacheManager;
 
         /// <summary>当前玩法（通过接口暴露，扩展时替换实现即可）</summary>
         public IGamePlay CurrentGamePlay { get; private set; }
@@ -37,6 +37,19 @@ namespace GameLogic
             base.OnInit();
             InitModules();
             CreateAppPauseBridge();
+        }
+
+        /// <summary>
+        /// Active：在 Singleton.Instance 创建后调用，用于加载缓存使设置数据（语言等）即时可用。
+        /// </summary>
+        public override void Active()
+        {
+            base.Active();
+            _cacheManager?.Load();
+
+            // 从缓存同步初始关卡索引到 gameplay（避免 _currentLevelIndex 长期为 -1）
+            int savedLevel = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelIndex ?? 0;
+            _corePlayGamePlay?.InitLevelIndex(savedLevel);
         }
 
         /// <summary>创建 MonoBehaviour 桥接，监听 Unity OnApplicationPause 并转发</summary>
@@ -87,7 +100,7 @@ namespace GameLogic
             _levelConfig = new LevelDataConfigParse();
             _levelConfig.LoadAllLevels();
 
-            _restoreDataManager = new GameRestoreDataManager();
+            _cacheManager = new GameCacheManager();
 
             _corePlayGamePlay = new CorePlayGamePlay();
             _corePlayGamePlay.Initialize(_levelConfig);
@@ -115,13 +128,12 @@ namespace GameLogic
                 return;
             }
 
-            _restoreDataManager.Load();
-
-            int startLevelIndex = _restoreDataManager.CorePlayRestoreData.SaveData?.currentLevelIndex ?? 0;
-            if (startLevelIndex >= _levelConfig.LevelCount)
+            int startLevelIndex = _cacheManager.CorePlayRestore.SaveData?.currentLevelIndex ?? 0;
+            // 防御：兼容旧存档可能残留的 -1（首页退出未开始游戏的情况）
+            if (startLevelIndex < 0 || startLevelIndex >= _levelConfig.LevelCount)
                 startLevelIndex = 0;
 
-            var restoredAnswers = _restoreDataManager.CorePlayRestoreData.GetFoundAnswers(startLevelIndex);
+            var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers(startLevelIndex);
 
             // 先初始化视图，再加载关卡（确保视图能响应 OnLevelLoaded）
             if (_corePlayView == null)
@@ -167,7 +179,7 @@ namespace GameLogic
                 return;
             }
 
-            var restoredAnswers = _restoreDataManager.CorePlayRestoreData.GetFoundAnswers(nextLevel);
+            var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers(nextLevel);
             _corePlayGamePlay.LoadLevel(nextLevel, restoredAnswers);
             // 刷新 UI
             GameModule.UI.ShowUIAsync<UICorePlay>();
@@ -192,15 +204,15 @@ namespace GameLogic
 
         public void SaveGameProgress()
         {
-            if (_corePlayGamePlay == null || _restoreDataManager == null) return;
+            if (_corePlayGamePlay == null || _cacheManager == null) return;
 
-            _corePlayGamePlay.ApplyToRestore(_restoreDataManager.CorePlayRestoreData);
-            _restoreDataManager.Save();
+            _corePlayGamePlay.ApplyToRestore(_cacheManager.CorePlayRestore);
+            _cacheManager.Save();
         }
 
         public void ResetProgress()
         {
-            _restoreDataManager.DeleteSaveFile();
+            _cacheManager.DeleteAll();
             CurrentGamePlay.LoadLevel(0);
             _corePlayView?.ClearAllHighlights();
         }
@@ -208,6 +220,6 @@ namespace GameLogic
         // ================ 公共接口 ================
 
         public LevelDataConfigParse LevelConfig => _levelConfig;
-        public GameRestoreDataManager RestoreDataManager => _restoreDataManager;
+        public GameCacheManager CacheManager => _cacheManager;
     }
 }

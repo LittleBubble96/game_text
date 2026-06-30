@@ -345,6 +345,9 @@ namespace GameLogic
                 BindMemberProperty();
                 RegisterEvent();
                 OnCreate();
+
+                // 订阅语言切换事件（框架层 LocalizationManager 触发，由 RemoveAllUIEvent 自动清理）
+                AddUIEvent(TEngine.LocalizationModule.Event_LanguageChanged, HandleLanguageChanged);
             }
         }
 
@@ -509,6 +512,14 @@ namespace GameLogic
         protected virtual void Close()
         {
             UIModule.Instance.CloseUI(this.GetType());
+        }
+
+        /// <summary>
+        /// 语言切换事件回调（由 GameEvent 驱动，转发到虚方法 OnLanguageChanged）
+        /// </summary>
+        private void HandleLanguageChanged()
+        {
+            OnLanguageChanged();
         }
         
         internal void CancelHideToCloseTimer()

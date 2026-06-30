@@ -116,9 +116,9 @@ public class TextLevelEditorWindow : EditorWindow
     private void RefreshAssets()
     {
         _levelDataAsset = AssetDatabase.LoadAssetAtPath<TextLevelDataScriptableObject>(
-            "Assets/Resources/Res/TextLevelDataScriptableObject.asset");
+            "Assets/AssetRaw/Configs/LevelConfigs/TextLevelDataScriptableObject.asset");
         _graphicDataAsset = AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(
-            "Assets/Resources/Res/TextGraphicDataScriptableObject.asset");
+            "Assets/AssetRaw/Configs/LevelConfigs/TextGraphicDataScriptableObject.asset");
 
         _availableCharacters.Clear();
         _characterStrokeCount.Clear();

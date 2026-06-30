@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
+using GameLogic.Localization;
 using TEngine;
 using TMPro;
 using UnityEngine;
@@ -19,6 +20,8 @@ namespace GameLogic
 
         private RTLTextMeshPro _answerDisplayText;
         private RTLTextMeshPro _answerProgressText;
+        private RTLTextMeshPro _submitBtnText;
+        private RTLTextMeshPro _backBtnText;
 
         private XYButton _submitButton;
 
@@ -39,12 +42,15 @@ namespace GameLogic
             _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
             _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
+            _submitBtnText = FindChildComponent<RTLTextMeshPro>("SubmitBtn/m_text");
+            _backBtnText = FindChildComponent<RTLTextMeshPro>("BackBtn/m_text");
             _submitButton = CreateWidget<XYButton>("SubmitBtn");
             _backButton = CreateWidget<XYButton>("BackBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
             _submitButton.OnAddListener(OnSubmit);
             _backButton.OnAddListener(OnBackClick);
         }
+        
         // ================ 初始化 ================
 
         private void OnSubmit()
@@ -68,12 +74,19 @@ namespace GameLogic
             base.OnRefresh();
             if (_resultTipText != null)
                 _resultTipText.gameObject.SetActive(false);
-            SetLevelName( GameManager.Instance.CurrentGamePlay.GetLevelName());
             // 更新 UI
             if (GameManager.Instance.CurrentGamePlay is CorePlayGamePlay corePlay)
             {
                 RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
             }
+            RefreshText();
+        }
+
+        private void RefreshText()
+        {
+            _submitBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.submit_btn);
+            _backBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
+            SetLevelName();
         }
 
         protected override void OnUpdate()
@@ -87,15 +100,23 @@ namespace GameLogic
         
         // ================ 关卡信息 ================
 
+        /// <summary>获取当前关卡名称</summary>
+        private string GetLevelName()
+        {
+            if (GameManager.Instance.CurrentGamePlay == null) return "";
+            int level = GameManager.Instance.CurrentGamePlay.CurrentLevelIndex;
+            return string.Format(LocalizationHelper.GetLocalText(LanguageKey.level_title), level + 1, GameManager.Instance.CurrentGamePlay.CurrentLevelData.baseCharacter);
+        }
+        
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
         {
             ShowSubmitResult(success, answerCharacter, message);
         }
 
-        private void SetLevelName(string name)
+        private void SetLevelName()
         {
             if (_levelNameText != null)
-                _levelNameText.text = name;
+                _levelNameText.text = GetLevelName();
         }
 
         // ================ 答案显示 ================
@@ -104,9 +125,7 @@ namespace GameLogic
         {
             if (_answerDisplayText != null)
             {
-                _answerDisplayText.text = foundAnswers.Count > 0
-                    ? "已找到: " + string.Join("  ", foundAnswers)
-                    : "尚未找到答案";
+                _answerDisplayText.text = string.Join("  ", foundAnswers);
             }
 
             if (_answerProgressText != null)
