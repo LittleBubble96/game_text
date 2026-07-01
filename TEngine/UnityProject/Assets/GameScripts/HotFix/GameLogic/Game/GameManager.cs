@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
@@ -129,11 +130,12 @@ namespace GameLogic
             }
 
             int startLevelIndex = _cacheManager.CorePlayRestore.SaveData?.currentLevelIndex ?? 0;
-            // 防御：兼容旧存档可能残留的 -1（首页退出未开始游戏的情况）
+            // 防御：首页尚未开始游戏等边界情况
             if (startLevelIndex < 0 || startLevelIndex >= _levelConfig.LevelCount)
                 startLevelIndex = 0;
 
-            var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers(startLevelIndex);
+            var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers();
+            var cachedLevelData = _cacheManager.CorePlayRestore.GetCachedLevelData();
 
             // 先初始化视图，再加载关卡（确保视图能响应 OnLevelLoaded）
             if (_corePlayView == null)
@@ -143,7 +145,7 @@ namespace GameLogic
             _corePlayView.Initialize(CurrentGamePlay, _levelConfig);
             _corePlayView.OnEnterGameAnim();
             
-            _corePlayGamePlay.LoadLevel(startLevelIndex, restoredAnswers);
+            _corePlayGamePlay.LoadLevel(startLevelIndex, restoredAnswers, cachedLevelData);
             CurrentGamePlay.StartGame();
 
             Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelIndex}");
@@ -179,9 +181,8 @@ namespace GameLogic
                 return;
             }
 
-            var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers(nextLevel);
-            _corePlayGamePlay.LoadLevel(nextLevel, restoredAnswers);
-            // 刷新 UI
+            // 下一关没有缓存，直接从配置加载
+            _corePlayGamePlay.LoadLevel(nextLevel);
             GameModule.UI.ShowUIAsync<UICorePlay>();
         }
 
@@ -221,5 +222,6 @@ namespace GameLogic
 
         public LevelDataConfigParse LevelConfig => _levelConfig;
         public GameCacheManager CacheManager => _cacheManager;
+        
     }
 }

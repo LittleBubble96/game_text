@@ -10,7 +10,7 @@ namespace GameLogic.Data
     public class TextGraphicDataScriptableObject : ScriptableObject
     {
         //不序列花
-        [NonSerialized] private string _textResPath = "Assets/AssetArt/graphics.txt";
+        [NonSerialized] private string _textResPath = "Assets/AssetArt/ConfigData/graphics.txt";
         public List<TextGraphicData> TextGraphicDataList;
         [SerializeField] private float _pixelScale = 0.002f; // 缩放因子，将 0~1000 坐标缩小到合适大小
         [SerializeField] private int _curveSegments = 10; // 贝塞尔曲线采样点数

@@ -253,6 +253,20 @@ public class TextLevelEditorWindow : EditorWindow
         level.positionOffset = EditorGUILayout.Vector2Field("位置偏移", level.positionOffset);
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
 
+        // 通关所需答案个数
+        EditorGUI.BeginChangeCheck();
+        level.requiredAnswerCount = EditorGUILayout.IntField("通关所需答案个数", level.requiredAnswerCount);
+        if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
+
+        if (level.requiredAnswerCount <= 0)
+        {
+            EditorGUILayout.HelpBox("当前为 0，表示需要找出全部答案才能通关。", MessageType.Info);
+        }
+        else if (level.requiredAnswerCount > level.answers.Count)
+        {
+            EditorGUILayout.HelpBox($"所需答案数 ({level.requiredAnswerCount}) 超出了实际答案总数 ({level.answers.Count})，关卡将无法通关！", MessageType.Warning);
+        }
+
         if (!string.IsNullOrEmpty(level.baseCharacter) && _characterStrokeCount.ContainsKey(level.baseCharacter))
         {
             int strokeCount = _characterStrokeCount[level.baseCharacter];

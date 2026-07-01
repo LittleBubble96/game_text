@@ -24,7 +24,7 @@ namespace GameLogic.Data
         /// <summary>缓存数据容器</summary>
         public GameCacheData CacheData { get; private set; }
 
-        /// <summary>关卡缓存操作（兼容旧接口）</summary>
+        /// <summary>关卡缓存操作</summary>
         public CorePlayRestore CorePlayRestore { get; private set; }
 
         /// <summary>设置缓存（直接访问字段）</summary>

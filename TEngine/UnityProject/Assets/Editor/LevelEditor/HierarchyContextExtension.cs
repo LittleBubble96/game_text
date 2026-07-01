@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEditor.SceneManagement;
 
-namespace Level.Editor.Tools
+namespace LevelEditor
 {
     public static class HierarchyContextExtension
     {

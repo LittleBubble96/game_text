@@ -35,4 +35,41 @@ MonoBehaviour:
     - answerCharacter: "\u6708"
       strokeSets:
       - strokeIndices: 0a0000000b0000000900000008000000
+    - answerCharacter: "\u6CBD"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
+    - answerCharacter: "\u80E1"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u53E4"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000600000007000000
+    - answerCharacter: "\u6C41"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000
+    requiredAnswerCount: 0
+  - level: 2
+    baseCharacter: "\u5409"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 02000000
+      - strokeIndices: 05000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0200000005000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 000000000200000005000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+    - answerCharacter: "\u58EB"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000
     requiredAnswerCount: 0

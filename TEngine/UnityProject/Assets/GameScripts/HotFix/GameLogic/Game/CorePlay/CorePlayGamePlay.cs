@@ -79,19 +79,19 @@ namespace GameLogic.GamePlay.CorePlay
 
         // ================ 关卡加载 ================
 
-        /// <summary>加载指定关卡（从缓存恢复时使用）</summary>
+        /// <summary>加载指定关卡（从配置全新加载）</summary>
         public void LoadLevel(int levelIndex)
         {
-            LoadLevelInternal(levelIndex, null);
+            LoadLevelInternal(levelIndex, null, null);
         }
 
-        /// <summary>加载关卡并恢复已找到的答案</summary>
-        public void LoadLevel(int levelIndex, List<int> restoredFoundAnswers)
+        /// <summary>加载关卡，可选恢复已找到的答案 + 缓存关卡快照</summary>
+        public void LoadLevel(int levelIndex, List<int> restoredFoundAnswers, TextLevelData cachedLevelData = null)
         {
-            LoadLevelInternal(levelIndex, restoredFoundAnswers);
+            LoadLevelInternal(levelIndex, restoredFoundAnswers, cachedLevelData);
         }
 
-        private void LoadLevelInternal(int levelIndex, List<int> restoredFoundAnswers)
+        private void LoadLevelInternal(int levelIndex, List<int> restoredFoundAnswers, TextLevelData cachedLevelData)
         {
             if (_levelConfig == null)
             {
@@ -106,7 +106,19 @@ namespace GameLogic.GamePlay.CorePlay
             }
 
             _currentLevelIndex = levelIndex;
-            _currentLevelData = _levelConfig.GetLevelData(levelIndex);
+
+            // 关卡数据加载优先级：缓存快照 > 配置文件
+            if (cachedLevelData != null)
+            {
+                _currentLevelData = cachedLevelData;
+                DebugLog($"加载关卡 {levelIndex}: 使用缓存快照");
+            }
+            else
+            {
+                _currentLevelData = _levelConfig.GetLevelData(levelIndex);
+                DebugLog($"加载关卡 {levelIndex}: 使用配置文件");
+            }
+
             _selectedStrokeIndices.Clear();
             _foundAnswerIndices.Clear();
 
@@ -274,21 +286,19 @@ namespace GameLogic.GamePlay.CorePlay
         public CorePlaySaveData GetSaveData()
         {
             if (_currentLevelIndex < 0) return null;
-            var data = new CorePlaySaveData { currentLevelIndex = _currentLevelIndex };
-            data.levelProgresses.Add(new LevelSaveData
+            return new CorePlaySaveData
             {
-                levelIndex = _currentLevelIndex,
-                foundAnswerIndices = _foundAnswerIndices.ToList()
-            });
-            return data;
+                currentLevelIndex = _currentLevelIndex,
+                foundAnswerIndices = _foundAnswerIndices.ToList(),
+                cachedLevelData = _currentLevelData
+            };
         }
 
         /// <summary>将当前关卡进度写入 Restore 对象（未开始游戏时跳过，防止 -1 覆盖有效存档）</summary>
         public void ApplyToRestore(CorePlayRestore restore)
         {
             if (_currentLevelIndex < 0) return;
-            restore.SetCurrentLevel(_currentLevelIndex);
-            restore.SetFoundAnswers(_currentLevelIndex, _foundAnswerIndices.ToList());
+            restore.SaveCurrentProgress(_currentLevelIndex, _foundAnswerIndices.ToList(), _currentLevelData);
         }
 
         // ================ 关卡信息 ================
