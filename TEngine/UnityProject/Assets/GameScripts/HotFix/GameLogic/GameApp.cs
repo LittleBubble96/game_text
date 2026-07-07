@@ -42,6 +42,7 @@ public partial class GameApp
         GameLocalizationManager.Instance.Active();
         // 初始化 UI
         GameModule.UI.ShowUIAsync<UIHome>();
+        GameModule.UI.ShowUIAsync<UITop>();
     }
     
     private static void Release()

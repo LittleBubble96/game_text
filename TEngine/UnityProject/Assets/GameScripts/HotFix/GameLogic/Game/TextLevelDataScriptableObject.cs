@@ -66,7 +66,7 @@ namespace GameLogic.Data
         public static void CreateAsset()
         {
             TextLevelDataScriptableObject asset = CreateInstance<TextLevelDataScriptableObject>();
-            AssetDatabase.CreateAsset(asset, "Assets/Resources/Res/TextLevelDataScriptableObject.asset");
+            AssetDatabase.CreateAsset(asset, "Assets/AssetRaw/Configs/LevelConfigs/TextLevelDataScriptableObject.asset");
             AssetDatabase.SaveAssets();
             Selection.activeObject = asset;
         }
