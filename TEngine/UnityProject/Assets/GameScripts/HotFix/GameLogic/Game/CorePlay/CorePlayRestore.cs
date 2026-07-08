@@ -46,12 +46,18 @@ namespace GameLogic.GamePlay.CorePlay
         }
 
         /// <summary>保存当前关卡进度（答案 + 关卡数据快照）</summary>
+        /// <param name="levelDataCache">关卡数据快照；传 null 表示不更新缓存，保留已有数据</param>
         public void SaveCurrentProgress(int levelIndex, List<int> foundAnswerIndices, TextLevelData levelDataCache)
         {
             if (SaveData == null) InitOrResetData();
             SaveData.currentLevelIndex = levelIndex;
             SaveData.foundAnswerIndices = new List<int>(foundAnswerIndices);
-            SaveData.cachedLevelData = levelDataCache;
+            // 防御：只传入了有效关卡数据时才更新缓存快照，
+            // 避免 _currentLevelData 还是 null 时把已有缓存覆盖成空值。
+            if (levelDataCache != null)
+            {
+                SaveData.cachedLevelData = levelDataCache;
+            }
         }
 
         /// <summary>获取当前关卡已找到的答案索引</summary>
@@ -64,7 +70,11 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>获取当前关卡的缓存关卡数据快照（可能为 null）</summary>
         public TextLevelData GetCachedLevelData()
         {
-            return SaveData?.cachedLevelData;
+            var data = SaveData?.cachedLevelData;
+            // 防御：JsonUtility 可能将 null 反序列化为无效空实例
+            if (data != null && !data.IsValid())
+                return null;
+            return data;
         }
     }
 }

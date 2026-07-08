@@ -399,24 +399,27 @@ namespace GameLogic
                 return;
             }
 
-            if (window.HideTimeToClose <= 0)
+            window.StartOutAnimation(() =>
             {
-                CloseUI(type);
-                return;
-            }
+                if (window.HideTimeToClose <= 0)
+                {
+                    CloseUI(type);
+                    return;
+                }
 
-            window.CancelHideToCloseTimer();
-            window.Visible = false;
-            window.IsHide = true;
-            window.HideTimerId = GameModule.Timer.AddTimer((arg) =>
-            {
-                CloseUI(type);
-            },window.HideTimeToClose);
+                window.CancelHideToCloseTimer();
+                window.Visible = false;
+                window.IsHide = true;
+                window.HideTimerId = GameModule.Timer.AddTimer((arg) =>
+                {
+                    CloseUI(type);
+                }, window.HideTimeToClose);
 
-            if (window.FullScreen)
-            {
-                OnSetWindowVisible();
-            }
+                if (window.FullScreen)
+                {
+                    OnSetWindowVisible();
+                }
+            });
         }
 
         /// <summary>
@@ -475,6 +478,7 @@ namespace GameLogic
             window.InternalRefresh();
             OnSortWindowDepth(window.WindowLayer);
             OnSetWindowVisible();
+            window.StartInAnimation();
         }
 
         private void OnSortWindowDepth(int layer)

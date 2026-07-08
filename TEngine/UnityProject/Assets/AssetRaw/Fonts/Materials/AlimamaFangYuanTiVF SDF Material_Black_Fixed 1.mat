@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AlimamaFangYuanTiVF SDF Material_Black_Fixed
+  m_Name: AlimamaFangYuanTiVF SDF Material_Black_Fixed 1
   m_Shader: {fileID: 4800000, guid: fe155695c07554f4493276cf5d5761af, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

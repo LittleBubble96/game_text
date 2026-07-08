@@ -21,12 +21,9 @@ namespace GameLogic
         private RTLTextMeshPro _answerDisplayText;
         private RTLTextMeshPro _answerProgressText;
         private RTLTextMeshPro _submitBtnText;
-        private RTLTextMeshPro _backBtnText;
 
         private XYButton _submitButton;
-
-        private XYButton _backButton;
-
+        
         private TMP_Text _resultTipText;
 
         private float _resultTipDuration = 2f;
@@ -42,13 +39,10 @@ namespace GameLogic
             _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
             _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
-            _submitBtnText = FindChildComponent<RTLTextMeshPro>("SubmitBtn/m_text");
-            _backBtnText = FindChildComponent<RTLTextMeshPro>("BackBtn/m_text");
+            _submitBtnText = FindChildComponent<RTLTextMeshPro>("SubmitBtn/bg/m_text");
             _submitButton = CreateWidget<XYButton>("SubmitBtn");
-            _backButton = CreateWidget<XYButton>("BackBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
             _submitButton.OnAddListener(OnSubmit);
-            _backButton.OnAddListener(OnBackClick);
         }
         
         // ================ 初始化 ================
@@ -72,6 +66,7 @@ namespace GameLogic
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: true));
             if (_resultTipText != null)
                 _resultTipText.gameObject.SetActive(false);
             // 更新 UI
@@ -85,7 +80,6 @@ namespace GameLogic
         private void RefreshText()
         {
             _submitBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.submit_btn);
-            _backBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
             SetLevelName();
         }
 

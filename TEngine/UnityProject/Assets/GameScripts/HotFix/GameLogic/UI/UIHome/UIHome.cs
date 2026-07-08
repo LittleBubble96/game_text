@@ -43,6 +43,7 @@ namespace GameLogic
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
             OnTabBtnClick(ETabType.Level);
         }
 

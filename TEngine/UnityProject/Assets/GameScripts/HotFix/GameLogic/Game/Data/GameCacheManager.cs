@@ -92,6 +92,9 @@ namespace GameLogic.Data
                     InitAll();
                 }
 
+                // JsonUtility 可能将 JSON null 反序列化为默认空实例，需做有效性校验
+                ValidateCachedLevelData();
+
                 // 将关卡数据同步到 CorePlayRestore
                 CorePlayRestore.LoadFromData(CacheData.corePlaySaveData);
                 Debug.Log($"[GameCache] 缓存已加载: 关卡={CacheData.corePlaySaveData?.currentLevelIndex}");
@@ -121,6 +124,21 @@ namespace GameLogic.Data
             CacheData = new GameCacheData();
             CacheData.InitAll();
             CorePlayRestore.InitOrResetData();
+        }
+
+        /// <summary>
+        /// 校验缓存中的关卡数据快照有效性。
+        /// JsonUtility 反序列化时可能将 JSON null 创建为默认空实例
+        /// （baseCharacter 为空），需做二次校验并修正为 null。
+        /// </summary>
+        private void ValidateCachedLevelData()
+        {
+            var cached = CacheData?.corePlaySaveData?.cachedLevelData;
+            if (cached != null && !cached.IsValid())
+            {
+                Debug.LogWarning("[GameCache] 检测到无效的缓存关卡数据，已重置为 null。");
+                CacheData.corePlaySaveData.cachedLevelData = null;
+            }
         }
     }
 }

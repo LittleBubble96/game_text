@@ -53,6 +53,16 @@ namespace GameLogic.Data
         [Tooltip("所有可从基字中找到的答案")] public List<LevelAnswer> answers = new List<LevelAnswer>();
 
         [Tooltip("通关所需答案个数（0表示需要全部答对）")] public int requiredAnswerCount = 0;
+
+        /// <summary>
+        /// 校验关卡数据是否有效。
+        /// JsonUtility 可能将 JSON null 反序列化为默认空实例（baseCharacter=null），
+        /// 此时需要用此方法做二次校验，而非仅靠 null 判断。
+        /// </summary>
+        public bool IsValid()
+        {
+            return !string.IsNullOrEmpty(baseCharacter) && answers != null;
+        }
     }
 
 // ==================== ScriptableObject ====================

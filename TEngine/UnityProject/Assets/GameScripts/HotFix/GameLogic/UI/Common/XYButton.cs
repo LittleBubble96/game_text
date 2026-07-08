@@ -14,7 +14,32 @@ namespace GameLogic
         
         public void OnAddListener(UnityEngine.Events.UnityAction call)
         {
-            _button.onClick.AddListener(call);
+            _button.onClick.AddListener(() =>
+            {
+                UIWindow parentWindow = GetParentWindow();
+                if (parentWindow != null && parentWindow.IsAnimating)
+                {
+                    return;
+                }
+                call?.Invoke();
+            });
+        }
+
+        /// <summary>
+        /// 向上查找所属的 UIWindow。
+        /// </summary>
+        private UIWindow GetParentWindow()
+        {
+            UIBase current = Parent;
+            while (current != null)
+            {
+                if (current is UIWindow window)
+                {
+                    return window;
+                }
+                current = current.Parent;
+            }
+            return null;
         }
     }
 }

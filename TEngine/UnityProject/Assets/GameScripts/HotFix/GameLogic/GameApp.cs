@@ -41,8 +41,8 @@ public partial class GameApp
         // 加载设置（语言等），初始化多语言管理器
         GameLocalizationManager.Instance.Active();
         // 初始化 UI
-        GameModule.UI.ShowUIAsync<UIHome>();
         GameModule.UI.ShowUIAsync<UITop>();
+        GameModule.UI.ShowUIAsync<UIHome>();
     }
     
     private static void Release()

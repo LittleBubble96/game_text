@@ -357,14 +357,10 @@ namespace Builder
                         charSet.Add(c);
                 }
             }
-
-            if (!settingOnly)
+            //添加白名单
+            foreach (var writeChar in GenerateTMPDefine.WhiteList)
             {
-                //添加白名单
-                foreach (var writeChar in GenerateTMPDefine.WhiteList)
-                {
-                    charSet.Add(writeChar);
-                }
+                charSet.Add(writeChar);
             }
             return charSet;
         }

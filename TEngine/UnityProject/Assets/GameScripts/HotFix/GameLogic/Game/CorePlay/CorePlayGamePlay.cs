@@ -294,10 +294,16 @@ namespace GameLogic.GamePlay.CorePlay
             };
         }
 
-        /// <summary>将当前关卡进度写入 Restore 对象（未开始游戏时跳过，防止 -1 覆盖有效存档）</summary>
+        /// <summary>将当前关卡进度写入 Restore 对象</summary>
+        /// <remarks>
+        /// 关卡数据未加载（_currentLevelData == null）时不保存，
+        /// 防止 InitLevelIndex 仅设了索引但未进游戏时，用空 _foundAnswerIndices / null 数据
+        /// 覆盖已有有效存档。
+        /// </remarks>
         public void ApplyToRestore(CorePlayRestore restore)
         {
             if (_currentLevelIndex < 0) return;
+            if (_currentLevelData == null) return;
             restore.SaveCurrentProgress(_currentLevelIndex, _foundAnswerIndices.ToList(), _currentLevelData);
         }
 

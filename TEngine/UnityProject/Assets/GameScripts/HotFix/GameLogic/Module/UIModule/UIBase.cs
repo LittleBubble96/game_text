@@ -232,7 +232,7 @@ namespace GameLogic
         /// <summary>
         /// 语言切换时调用。子类重写以刷新多语言文本。
         /// </summary>
-        protected virtual void OnLanguageChanged()
+        internal virtual void OnLanguageChanged()
         {
         }
 

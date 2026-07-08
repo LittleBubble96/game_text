@@ -232,6 +232,13 @@ namespace GameLogic
         /// </summary>
         public bool IsHide { internal set; get; } = false;
 
+        /// <summary>
+        /// 是否正在播放动画（入场或退场）。
+        /// </summary>
+        public bool IsAnimating { get; private set; } = false;
+
+        private Action _onOutAnimationComplete;
+
         #endregion
 
         public void Init(string name, int layer, bool fullScreen, string assetName, bool fromResources, int hideTimeToClose)
@@ -514,12 +521,89 @@ namespace GameLogic
             UIModule.Instance.CloseUI(this.GetType());
         }
 
+        #region Animation
+
+        /// <summary>
+        /// 入场动画开始。子类重写以播放入场动画。
+        /// 动画完成后需调用 CompleteInAnimation()。
+        /// 默认实现：无动画，直接完成。
+        /// </summary>
+        protected virtual void OnInAnimation()
+        {
+            OnInAnimationComplete();
+        }
+
+        /// <summary>
+        /// 入场动画完成回调。子类可重写以执行入场动画后的逻辑。
+        /// </summary>
+        protected virtual void OnInAnimationComplete()
+        {
+            IsAnimating = false;
+        }
+
+        /// <summary>
+        /// 退场动画开始。子类重写以播放退场动画。
+        /// 动画完成后需调用 CompleteOutAnimation()。
+        /// 默认实现：无动画，直接完成。
+        /// </summary>
+        protected virtual void OnOutAnimation()
+        {
+            OnOutAnimationComplete();
+        }
+
+        /// <summary>
+        /// 退场动画完成回调。子类可重写以执行退场动画后的逻辑。
+        /// </summary>
+        protected virtual void OnOutAnimationComplete()
+        {
+            IsAnimating = false;
+        }
+
+        /// <summary>
+        /// 子类在入场动画完成后调用此方法通知框架。
+        /// </summary>
+        protected void CompleteInAnimation()
+        {
+            OnInAnimationComplete();
+        }
+
+        /// <summary>
+        /// 子类在退场动画完成后调用此方法通知框架。
+        /// 框架注册的后续操作（如关闭窗口）会在此之后执行。
+        /// </summary>
+        protected void CompleteOutAnimation()
+        {
+            var callback = _onOutAnimationComplete;
+            _onOutAnimationComplete = null;
+            OnOutAnimationComplete();
+            callback?.Invoke();
+        }
+
+        internal void StartInAnimation()
+        {
+            IsAnimating = true;
+            OnInAnimation();
+        }
+
+        internal void StartOutAnimation(Action onComplete)
+        {
+            IsAnimating = true;
+            _onOutAnimationComplete = onComplete;
+            OnOutAnimation();
+        }
+
+        #endregion
+
         /// <summary>
         /// 语言切换事件回调（由 GameEvent 驱动，转发到虚方法 OnLanguageChanged）
         /// </summary>
         private void HandleLanguageChanged()
         {
             OnLanguageChanged();
+            for (int i = ListChild.Count - 1; i >= 0; i--)
+            {
+                ListChild[i].OnLanguageChanged();
+            }
         }
         
         internal void CancelHideToCloseTimer()

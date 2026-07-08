@@ -24,7 +24,7 @@ namespace GameLogic.UI
             RefreshText();
         }
 
-        protected override void OnLanguageChanged()
+        internal override void OnLanguageChanged()
         {
             base.OnLanguageChanged();
             RefreshText();

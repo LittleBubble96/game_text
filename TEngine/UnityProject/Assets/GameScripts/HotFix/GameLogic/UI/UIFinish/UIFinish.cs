@@ -1,3 +1,4 @@
+using DG.Tweening;
 using GameLogic.Localization;
 using RTLTMPro;
 using TEngine;
@@ -14,15 +15,20 @@ namespace GameLogic
         private XYButton _btnHome;
         private GameObject _btnNextGo;
 
+        private Animation _animation;
+        private string _animShowName = "UIFinishShowAnim";
+        private string _animHideName = "UIFinishHideAnim";
+
         private int _completedLevelIndex;
 
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
-            _btnNext = CreateWidget<XYButton>("BtnNext");
-            _btnHome = CreateWidget<XYButton>("BtnHome");
-            _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("BtnNext/m_text");
-            _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("BtnHome/m_text");
+            _animation = transform.GetComponent<Animation>();
+            _btnNext = CreateWidget<XYButton>("VictoryPanel/ButtonNext");
+            _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonBack");
+            _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonNext/Text");
+            _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonBack/Text");
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
@@ -31,6 +37,7 @@ namespace GameLogic
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
 
             if (_userDatas != null && _userDatas.Length > 0 && _userDatas[0] is int levelIndex)
             {
@@ -46,6 +53,17 @@ namespace GameLogic
 
             RefreshText();
         }
+
+        protected override void OnInAnimation()
+        {
+            _animation.PlayAnimWithDelayAnimLen(_animShowName, base.OnInAnimation).Forget();
+        }
+
+        protected override void OnOutAnimation()
+        {
+            _animation.PlayAnimWithDelayAnimLen(_animHideName, base.OnOutAnimation).Forget();
+        }
+
 
         private void RefreshText()
         {
