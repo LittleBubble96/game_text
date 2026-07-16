@@ -43,7 +43,7 @@ namespace GameLogic.Data
     [Serializable]
     public class TextLevelData
     {
-        [Tooltip("关卡编号")] public int level;
+        [Tooltip("关卡名称（唯一标识）")] public string levelName;
 
         [Tooltip("基字，例如'树'")] public string baseCharacter;
 
@@ -61,7 +61,7 @@ namespace GameLogic.Data
         /// </summary>
         public bool IsValid()
         {
-            return !string.IsNullOrEmpty(baseCharacter) && answers != null;
+            return !string.IsNullOrEmpty(baseCharacter) && !string.IsNullOrEmpty(levelName) && answers != null;
         }
     }
 
@@ -99,6 +99,8 @@ public class TextLevelEditorWindow : EditorWindow
     // 新增/编辑状态
     private string _newAnswerCharacter = "";
     private List<int> _newStrokeIndices = new List<int>();
+    private int _selectedExistingAnswerIndex = 0; // 0 = "-- 输入新字 --"
+    private int _selectedCommonAnswerIndex = 0; // 0 = "-- 常用答案 --"
 
     // 编辑状态：当前编辑哪个答案的哪组笔画 (-1表示无，-2表示新增模式)
     private int _editingAnswerIndex = -1;
@@ -189,7 +191,7 @@ public class TextLevelEditorWindow : EditorWindow
         if (GUILayout.Button("+ 新建关卡"))
         {
             TextLevelData newLevel = new TextLevelData();
-            newLevel.level = _levelDataAsset.levelDataList.Count + 1;
+            newLevel.levelName = "Level_" + System.Guid.NewGuid().ToString().Substring(0, 8);
             _levelDataAsset.levelDataList.Add(newLevel);
             _selectedLevelIndex = _levelDataAsset.levelDataList.Count - 1;
             ResetEditState();
@@ -206,8 +208,8 @@ public class TextLevelEditorWindow : EditorWindow
 
             GUI.backgroundColor = bgColor;
             string label = string.IsNullOrEmpty(level.baseCharacter)
-                ? $"关卡 {level.level} (未设置)"
-                : $"关卡 {level.level}: {level.baseCharacter}";
+                ? $"{level.levelName} (未设置)"
+                : $"{level.levelName}: {level.baseCharacter}";
             if (GUILayout.Button(label, GUILayout.Height(30)))
             {
                 _selectedLevelIndex = i;
@@ -232,11 +234,11 @@ public class TextLevelEditorWindow : EditorWindow
 
         _detailScroll = EditorGUILayout.BeginScrollView(_detailScroll);
 
-        GUILayout.Label($"关卡 {level.level} 详情", EditorStyles.boldLabel);
+        GUILayout.Label($"关卡 {level.levelName} 详情", EditorStyles.boldLabel);
 
-        // 关卡编号
+        // 关卡名称
         EditorGUI.BeginChangeCheck();
-        level.level = EditorGUILayout.IntField("关卡编号", level.level);
+        level.levelName = EditorGUILayout.TextField("关卡名称", level.levelName);
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
 
         // 基字选择
@@ -323,13 +325,32 @@ public class TextLevelEditorWindow : EditorWindow
         // ===== 新增笔画组合区域 =====
         GUILayout.Label("添加笔画组合", EditorStyles.boldLabel);
 
-        // 目标字输入
+        // 目标字输入（第一行：常用答案 + 已有答案下拉 + 手动输入）
+        string[] existingAnswerOptions = GetExistingAnswerOptions(level);
+        string[] commonAnswerOptions = GetCommonAnswerOptions();
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label("目标字:", GUILayout.Width(50));
+        GUILayout.Label("常用答案:", GUILayout.Width(60));
+        EditorGUI.BeginChangeCheck();
+        _selectedCommonAnswerIndex = EditorGUILayout.Popup(_selectedCommonAnswerIndex, commonAnswerOptions, GUILayout.Width(110));
+        if (EditorGUI.EndChangeCheck() && _selectedCommonAnswerIndex > 0)
+        {
+            _newAnswerCharacter = commonAnswerOptions[_selectedCommonAnswerIndex];
+        }
+        GUILayout.Label("已有:", GUILayout.Width(35));
+        EditorGUI.BeginChangeCheck();
+        _selectedExistingAnswerIndex = EditorGUILayout.Popup(_selectedExistingAnswerIndex, existingAnswerOptions, GUILayout.Width(120));
+        if (EditorGUI.EndChangeCheck() && _selectedExistingAnswerIndex > 0)
+        {
+            _newAnswerCharacter = existingAnswerOptions[_selectedExistingAnswerIndex];
+        }
+        GUILayout.Label("或输入:", GUILayout.Width(50));
         _newAnswerCharacter = EditorGUILayout.TextField(_newAnswerCharacter, GUILayout.Width(80));
+        EditorGUILayout.EndHorizontal();
+
+        // 笔画索引输入（第二行）
+        EditorGUILayout.BeginHorizontal();
         GUILayout.Label("笔画索引:", GUILayout.Width(60));
         string strokeInput = EditorGUILayout.TextField(string.Join(",", _newStrokeIndices), GUILayout.ExpandWidth(true));
-        ParseStrokeInput(strokeInput);
 
         if (GUILayout.Button("+ 添加", GUILayout.Width(60)))
         {
@@ -337,7 +358,9 @@ public class TextLevelEditorWindow : EditorWindow
         }
         EditorGUILayout.EndHorizontal();
 
-        EditorGUILayout.HelpBox("笔画索引用逗号分隔（支持中文/英文逗号）。如目标字已有答案，将追加为新组合；否则新建答案。", MessageType.None);
+        ParseStrokeInput(strokeInput);
+
+        EditorGUILayout.HelpBox("笔画索引用逗号或英文句号分隔（支持中/英文逗号、空格、英文句号）。如目标字已有答案，将追加为新组合；否则新建答案。", MessageType.None);
 
         EditorGUILayout.Space();
 
@@ -367,7 +390,7 @@ public class TextLevelEditorWindow : EditorWindow
         GUI.backgroundColor = new Color(1f, 0.3f, 0.3f);
         if (GUILayout.Button("删除此关卡", GUILayout.Width(100)))
         {
-            if (EditorUtility.DisplayDialog("确认删除", $"确认删除关卡 {level.level}: {level.baseCharacter}？", "删除", "取消"))
+            if (EditorUtility.DisplayDialog("确认删除", $"确认删除关卡 {level.levelName}: {level.baseCharacter}？", "删除", "取消"))
             {
                 _levelDataAsset.levelDataList.RemoveAt(_selectedLevelIndex);
                 _selectedLevelIndex = -1;
@@ -526,12 +549,35 @@ public class TextLevelEditorWindow : EditorWindow
 
     // ==================== 辅助方法 ====================
 
+    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" };
+
+    private string[] GetCommonAnswerOptions()
+    {
+        var options = new List<string> { "-- 常用答案 --" };
+        options.AddRange(_commonAnswerChars);
+        return options.ToArray();
+    }
+
+    private string[] GetExistingAnswerOptions(TextLevelData level)
+    {
+        var options = new List<string> { "-- 输入新字 --" };
+        if (level != null && level.answers != null)
+        {
+            foreach (var ans in level.answers)
+            {
+                if (!string.IsNullOrEmpty(ans.answerCharacter))
+                    options.Add(ans.answerCharacter);
+            }
+        }
+        return options.ToArray();
+    }
+
     private void ParseStrokeInput(string input)
     {
         _newStrokeIndices.Clear();
         if (string.IsNullOrWhiteSpace(input)) return;
 
-        string[] parts = input.Split(new[] { ',', '，', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        string[] parts = input.Split(new[] { ',', '，', ' ', '.' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (string part in parts)
         {
             if (int.TryParse(part.Trim(), out int index) && index >= 0)
@@ -578,6 +624,8 @@ public class TextLevelEditorWindow : EditorWindow
 
         _newAnswerCharacter = "";
         _newStrokeIndices.Clear();
+        _selectedExistingAnswerIndex = 0;
+        _selectedCommonAnswerIndex = 0;
         EditorUtility.SetDirty(_levelDataAsset);
     }
 
@@ -681,6 +729,8 @@ public class TextLevelEditorWindow : EditorWindow
         _editingSetIndex = -1;
         _newAnswerCharacter = "";
         _newStrokeIndices.Clear();
+        _selectedExistingAnswerIndex = 0;
+        _selectedCommonAnswerIndex = 0;
         ResetStrokeHighlight();
     }
 
@@ -697,6 +747,20 @@ public class TextLevelEditorWindow : EditorWindow
         {
             EditorUtility.DisplayDialog("错误", $"字符 '{ch}' 在图形数据中未找到", "确定");
             return;
+        }
+
+        // 如果当前不是 LevelEditScene，自动打开该场景
+        const string levelEditScenePath = "Assets/Scenes/LevelEditScene.unity";
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != levelEditScenePath)
+        {
+            if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                EditorSceneManager.OpenScene(levelEditScenePath);
+            }
+            else
+            {
+                return;
+            }
         }
 
         // 在场景中查找 DrawCharacter

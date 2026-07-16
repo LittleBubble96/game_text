@@ -10,7 +10,7 @@ namespace GameLogic.GamePlay.CorePlay
     [Serializable]
     public class CorePlaySaveData
     {
-        public int currentLevelIndex;
+        public int currentLevelId = 1;
 
         /// <summary>当前关卡已找到的答案索引</summary>
         public List<int> foundAnswerIndices = new List<int>();
@@ -29,28 +29,28 @@ namespace GameLogic.GamePlay.CorePlay
 
         public void InitOrResetData()
         {
-            SaveData = new CorePlaySaveData { currentLevelIndex = 0 };
+            SaveData = new CorePlaySaveData { currentLevelId = 1 };
         }
 
         /// <summary>从存档数据恢复</summary>
         public void LoadFromData(CorePlaySaveData data)
         {
-            SaveData = data ?? new CorePlaySaveData { currentLevelIndex = 0 };
+            SaveData = data ?? new CorePlaySaveData { currentLevelId = 1 };
         }
 
-        /// <summary>更新当前关卡索引</summary>
-        public void SetCurrentLevel(int levelIndex)
+        /// <summary>更新当前关卡ID</summary>
+        public void SetCurrentLevel(int levelId)
         {
             if (SaveData == null) InitOrResetData();
-            SaveData.currentLevelIndex = levelIndex;
+            SaveData.currentLevelId = levelId;
         }
 
         /// <summary>保存当前关卡进度（答案 + 关卡数据快照）</summary>
         /// <param name="levelDataCache">关卡数据快照；传 null 表示不更新缓存，保留已有数据</param>
-        public void SaveCurrentProgress(int levelIndex, List<int> foundAnswerIndices, TextLevelData levelDataCache)
+        public void SaveCurrentProgress(int levelId, List<int> foundAnswerIndices, TextLevelData levelDataCache)
         {
             if (SaveData == null) InitOrResetData();
-            SaveData.currentLevelIndex = levelIndex;
+            SaveData.currentLevelId = levelId;
             SaveData.foundAnswerIndices = new List<int>(foundAnswerIndices);
             // 防御：只传入了有效关卡数据时才更新缓存快照，
             // 避免 _currentLevelData 还是 null 时把已有缓存覆盖成空值。

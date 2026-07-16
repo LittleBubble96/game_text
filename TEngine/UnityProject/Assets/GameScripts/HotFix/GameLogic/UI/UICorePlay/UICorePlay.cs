@@ -18,7 +18,7 @@ namespace GameLogic
     {
         private RTLTextMeshPro _levelNameText;
 
-        private RTLTextMeshPro _answerDisplayText;
+        // private RTLTextMeshPro _answerDisplayText;
         private RTLTextMeshPro _answerProgressText;
         private RTLTextMeshPro _submitBtnText;
 
@@ -31,17 +31,20 @@ namespace GameLogic
         private float _resultTipTimer;
         private bool _isShowingTip;
         
+        private CorePlayLayoutWidget _layoutWidget;
+        
         private CorePlayGamePlay CorePlayGamePlay => GameManager.Instance?.CurrentGamePlay as CorePlayGamePlay;
 
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
             _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
-            _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
+            // _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
             _submitBtnText = FindChildComponent<RTLTextMeshPro>("SubmitBtn/bg/m_text");
             _submitButton = CreateWidget<XYButton>("SubmitBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
+            _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Layout");
             _submitButton.OnAddListener(OnSubmit);
         }
         
@@ -50,11 +53,6 @@ namespace GameLogic
         private void OnSubmit()
         {
             GameManager.Instance.CurrentView.OnSubmitClicked();
-        }
-
-        private void OnBackClick()
-        {
-            GameManager.Instance.ReturnToHome();
         }
 
         protected override void RegisterEvent()
@@ -75,6 +73,7 @@ namespace GameLogic
                 RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
             }
             RefreshText();
+            _layoutWidget.Activate();
         }
 
         private void RefreshText()
@@ -98,8 +97,8 @@ namespace GameLogic
         private string GetLevelName()
         {
             if (GameManager.Instance.CurrentGamePlay == null) return "";
-            int level = GameManager.Instance.CurrentGamePlay.CurrentLevelIndex;
-            return string.Format(LocalizationHelper.GetLocalText(LanguageKey.level_title), level + 1, GameManager.Instance.CurrentGamePlay.CurrentLevelData.baseCharacter);
+            int level = GameManager.Instance.CurrentGamePlay.CurrentLevelId;
+            return string.Format(LocalizationHelper.GetLocalText(LanguageKey.level_title), level, GameManager.Instance.CurrentGamePlay.CurrentLevelData.baseCharacter);
         }
         
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
@@ -117,10 +116,10 @@ namespace GameLogic
 
         public void RefreshAnswerDisplay(List<string> foundAnswers, int requiredCount)
         {
-            if (_answerDisplayText != null)
-            {
-                _answerDisplayText.text = string.Join("  ", foundAnswers);
-            }
+            // if (_answerDisplayText != null)
+            // {
+            //     _answerDisplayText.text = string.Join("  ", foundAnswers);
+            // }
 
             if (_answerProgressText != null)
             {
@@ -174,7 +173,7 @@ namespace GameLogic
 
         public void ClearAll()
         {
-            if (_answerDisplayText != null) _answerDisplayText.text = "尚未找到答案";
+            // if (_answerDisplayText != null) _answerDisplayText.text = "尚未找到答案";
             if (_answerProgressText != null) _answerProgressText.text = "0/0";
             HideResultTip();
         }

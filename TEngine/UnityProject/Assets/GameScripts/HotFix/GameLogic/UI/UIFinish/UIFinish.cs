@@ -19,7 +19,7 @@ namespace GameLogic
         private string _animShowName = "UIFinishShowAnim";
         private string _animHideName = "UIFinishHideAnim";
 
-        private int _completedLevelIndex;
+        private int _completedLevelId;
 
         protected override void ScriptGenerator()
         {
@@ -39,13 +39,13 @@ namespace GameLogic
             base.OnRefresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
 
-            if (_userDatas != null && _userDatas.Length > 0 && _userDatas[0] is int levelIndex)
+            if (_userDatas != null && _userDatas.Length > 0 && _userDatas[0] is int levelId)
             {
-                _completedLevelIndex = levelIndex;
+                _completedLevelId = levelId;
             }
 
-            // 判断是否还有下一关
-            bool hasNextLevel = _completedLevelIndex + 1 < (GameManager.Instance.LevelConfig?.LevelCount ?? 0);
+            // 判断是否还有下一关（检查 levelId+1 是否存在于关卡表）
+            bool hasNextLevel = GameManager.Instance.LevelConfig?.GetLevelNameByLevelId(_completedLevelId + 1) != null;
             if (_btnNextGo != null)
             {
                 _btnNextGo.SetActive(hasNextLevel);

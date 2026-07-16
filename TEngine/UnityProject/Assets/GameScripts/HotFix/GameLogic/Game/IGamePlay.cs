@@ -12,8 +12,8 @@ namespace GameLogic.GamePlay
         void EndGame();
         bool IsGameOver();
 
-        /// <summary>当前关卡索引</summary>
-        int CurrentLevelIndex { get; }
+        /// <summary>当前关卡ID</summary>
+        int CurrentLevelId { get; }
         
         /// <summary>当前关卡数据</summary>
         TextLevelData CurrentLevelData { get; }
@@ -25,7 +25,7 @@ namespace GameLogic.GamePlay
         void SubmitAnswer();
 
         /// <summary>加载指定关卡</summary>
-        void LoadLevel(int levelIndex);
+        void LoadLevel(int levelId);
         
         /// <summary>关卡通关事件</summary>
         event Action<int> OnLevelCompleted;

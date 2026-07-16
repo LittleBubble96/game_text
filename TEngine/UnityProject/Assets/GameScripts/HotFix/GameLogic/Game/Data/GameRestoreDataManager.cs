@@ -59,7 +59,7 @@ namespace GameLogic.Data
                 string json = File.ReadAllText(filePath);
                 CorePlaySaveData data = JsonUtility.FromJson<CorePlaySaveData>(json);
                 CorePlayRestoreData.LoadFromData(data);
-                Debug.Log($"[RestoreDataManager] 存档已加载: 当前关卡 {data?.currentLevelIndex}");
+                Debug.Log($"[RestoreDataManager] 存档已加载: 当前关卡ID {data?.currentLevelId}");
             }
             catch (System.Exception e)
             {

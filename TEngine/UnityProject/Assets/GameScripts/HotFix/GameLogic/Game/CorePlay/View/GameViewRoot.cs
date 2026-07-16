@@ -9,7 +9,17 @@ namespace GameLogic.GamePlay.CorePlay.View
         [SerializeField]
         private SpriteRenderer bg;
 
+        [SerializeField]
+        private Transform characterRoot;
+        
+        [SerializeField]
+        private Transform slotRoot;
+
         private Sequence _rootSeq;
+        
+        public Transform CharacterRoot => characterRoot;
+        
+        public Transform SlotRoot => slotRoot;
 
         public void Init()
         {

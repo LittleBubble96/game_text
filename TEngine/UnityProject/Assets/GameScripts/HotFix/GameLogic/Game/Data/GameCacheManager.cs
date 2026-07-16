@@ -97,7 +97,7 @@ namespace GameLogic.Data
 
                 // 将关卡数据同步到 CorePlayRestore
                 CorePlayRestore.LoadFromData(CacheData.corePlaySaveData);
-                Debug.Log($"[GameCache] 缓存已加载: 关卡={CacheData.corePlaySaveData?.currentLevelIndex}");
+                Debug.Log($"[GameCache] 缓存已加载: 关卡ID={CacheData.corePlaySaveData?.currentLevelId}");
             }
             catch (System.Exception e)
             {

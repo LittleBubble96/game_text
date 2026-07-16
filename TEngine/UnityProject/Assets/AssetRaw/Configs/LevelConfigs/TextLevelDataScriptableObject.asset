@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TextLevelDataScriptableObject
   m_EditorClassIdentifier: 
   levelDataList:
-  - level: 1
+  - levelName: Level_1
     baseCharacter: "\u6E56"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -48,7 +48,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000
     requiredAnswerCount: 0
-  - level: 2
+  - levelName: Level_2
     baseCharacter: "\u5409"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -73,3 +73,103 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 030000000400000005000000
     requiredAnswerCount: 0
+  - levelName: Level_3
+    baseCharacter: "\u5E72"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 01000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0100000002000000
+    requiredAnswerCount: 3
+  - levelName: Level_4
+    baseCharacter: "\u738B"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 01000000
+      - strokeIndices: 03000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+      - strokeIndices: 0000000003000000
+      - strokeIndices: 0100000003000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 000000000100000003000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0100000002000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 010000000200000003000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 000000000200000003000000
+    requiredAnswerCount: 7
+  - levelName: Level_5
+    baseCharacter: "\u672C"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 04000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000004000000
+    - answerCharacter: "\u4EBA"
+      strokeSets:
+      - strokeIndices: 0200000003000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+      - strokeIndices: 0100000004000000
+    - answerCharacter: "\u6728"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000
+    - answerCharacter: "\u5927"
+      strokeSets:
+      - strokeIndices: 000000000200000003000000
+    requiredAnswerCount: 6
+  - levelName: Level_6
+    baseCharacter: "\u5446"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 02000000
+      - strokeIndices: 03000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 010000000000000002000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0200000003000000
+    - answerCharacter: "\u5929"
+      strokeSets:
+      - strokeIndices: 02000000030000000500000006000000
+    - answerCharacter: "\u6728"
+      strokeSets:
+      - strokeIndices: 03000000040000000500000006000000
+    - answerCharacter: "\u4EBA"
+      strokeSets:
+      - strokeIndices: 0500000006000000
+    - answerCharacter: "\u5927"
+      strokeSets:
+      - strokeIndices: 030000000500000006000000
+    - answerCharacter: "\u4E0D"
+      strokeSets:
+      - strokeIndices: 02000000040000000500000006000000
+    requiredAnswerCount: 7

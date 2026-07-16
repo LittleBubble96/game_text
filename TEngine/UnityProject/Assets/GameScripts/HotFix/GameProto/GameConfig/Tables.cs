@@ -69,6 +69,24 @@ public partial class Tables
             m_TbLanguageContent.ResolveRef(this);
         }
     }
+    private level.TbLevel m_TbLevel;
+    public level.TbLevel TbLevel 
+    {
+        get
+        {
+            if (m_TbLevel == null)
+            {
+                m_TbLevel = new level.TbLevel(defaultLoader("level_tblevel"));
+                m_TbLevel.ResolveRef(this);
+            }
+            return m_TbLevel;
+        }
+        set
+        {
+            m_TbLevel = value;
+            m_TbLevel.ResolveRef(this);
+        }
+    }
 
     #endregion
 

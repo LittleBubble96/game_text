@@ -27,7 +27,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         private bool _isInitialized;
 
         private GameViewRoot _gameViewRoot;
-        
+        private GameSlotView _gameSlotView;
 
         // ================ 属性 ================
 
@@ -42,6 +42,14 @@ namespace GameLogic.GamePlay.CorePlay.View
                  _gameViewRoot = gameViewRoot.GetComponent<GameViewRoot>();
                  _gameViewRoot?.Init();
              }
+             CreateSlotView();
+        }
+
+        private void CreateSlotView()
+        {
+            if (_gameViewRoot == null || _gameViewRoot.SlotRoot == null) return;
+            _gameSlotView = new GameSlotView();
+            _gameSlotView.OnCreate(_gameViewRoot.SlotRoot);
         }
 
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
@@ -85,9 +93,11 @@ namespace GameLogic.GamePlay.CorePlay.View
         private void CreateDrawCharacter()
         {
             var dcGo = new GameObject("DrawCharacter");
-            dcGo.transform.SetParent(transform);
+            dcGo.transform.SetParent(_gameViewRoot.CharacterRoot);
             _drawCharacter = dcGo.AddComponent<DrawCharacter>();
             _drawCharacter.DefaultStrokeColor = _defaultStrokeColor;
+            dcGo.transform.localPosition = Vector3.zero;
+            dcGo.transform.localScale = Vector3.one;
         }
 
         private void CreateStrokeInputHandler()
@@ -119,6 +129,8 @@ namespace GameLogic.GamePlay.CorePlay.View
                     corePlay.OnAnswerSubmitted -= OnAnswerSubmitted;
                 }
             }
+            _gameSlotView?.OnDestroy();
+            _gameSlotView = null;
         }
 
         // ================ 关卡渲染 ================
@@ -126,6 +138,20 @@ namespace GameLogic.GamePlay.CorePlay.View
         private void OnLevelLoaded(TextLevelData levelData)
         {
             RenderLevel(levelData);
+
+            // 初始化 slot 视图（答案数量）
+            int requiredCount = (_gamePlay as CorePlayGamePlay)?.GetRequiredAnswerCount() ?? levelData.answers.Count;
+            _gameSlotView?.InitSlotView(requiredCount);
+
+            // 恢复已找到的答案
+            if (_gamePlay is CorePlayGamePlay corePlay)
+            {
+                var foundAnswers = corePlay.GetFoundAnswerCharacters();
+                if (foundAnswers != null && foundAnswers.Count > 0)
+                {
+                    _gameSlotView?.RestoreAnswers(foundAnswers);
+                }
+            }
         }
 
         /// <summary>渲染关卡：解析数据并绘制笔画</summary>
@@ -177,7 +203,7 @@ namespace GameLogic.GamePlay.CorePlay.View
                 ClearAllHighlights();
         }
 
-        private void OnLevelCompleted(int levelIndex)
+        private void OnLevelCompleted(int levelId)
         {
             ClearAllHighlights();
         }

@@ -48,9 +48,9 @@ namespace GameLogic
             base.Active();
             _cacheManager?.Load();
 
-            // 从缓存同步初始关卡索引到 gameplay（避免 _currentLevelIndex 长期为 -1）
-            int savedLevel = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelIndex ?? 0;
-            _corePlayGamePlay?.InitLevelIndex(savedLevel);
+            // 从缓存同步初始关卡ID到 gameplay（避免 _currentLevelId 长期为 -1）
+            int savedLevel = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelId ?? 1;
+            _corePlayGamePlay?.InitLevelId(savedLevel);
         }
 
         /// <summary>创建 MonoBehaviour 桥接，监听 Unity OnApplicationPause 并转发</summary>
@@ -129,10 +129,10 @@ namespace GameLogic
                 return;
             }
 
-            int startLevelIndex = _cacheManager.CorePlayRestore.SaveData?.currentLevelIndex ?? 0;
-            // 防御：首页尚未开始游戏等边界情况
-            if (startLevelIndex < 0 || startLevelIndex >= _levelConfig.LevelCount)
-                startLevelIndex = 0;
+            int startLevelId = _cacheManager.CorePlayRestore.SaveData?.currentLevelId ?? 1;
+            // 防御：检查关卡ID是否有效
+            if (_levelConfig.GetLevelNameByLevelId(startLevelId) == null)
+                startLevelId = 1;
 
             var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers();
             var cachedLevelData = _cacheManager.CorePlayRestore.GetCachedLevelData();
@@ -145,10 +145,10 @@ namespace GameLogic
             _corePlayView.Initialize(CurrentGamePlay, _levelConfig);
             _corePlayView.OnEnterGameAnim();
             
-            _corePlayGamePlay.LoadLevel(startLevelIndex, restoredAnswers, cachedLevelData);
+            _corePlayGamePlay.LoadLevel(startLevelId, restoredAnswers, cachedLevelData);
             CurrentGamePlay.StartGame();
 
-            Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelIndex}");
+            Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelId}");
             GameModule.UI.ShowUIAsync<UICorePlay>();
         }
         
@@ -163,26 +163,26 @@ namespace GameLogic
         }
 
         // ================ 通关处理 ================
-        private void OnLevelCompleted(int levelIndex)
+        private void OnLevelCompleted(int levelId)
         {
             SaveGameProgress();
-            Debug.Log($"[GameManager] 游戏通关! 关卡: {levelIndex}");
+            Debug.Log($"[GameManager] 游戏通关! 关卡: {levelId}");
             // 弹出结算界面
-            GameModule.UI.ShowUIAsync<UIFinish>(levelIndex);
+            GameModule.UI.ShowUIAsync<UIFinish>(levelId);
         }
 
         /// <summary>加载下一关</summary>
         public void LoadNextCorePlayLevel()
         {
-            int nextLevel = CurrentGamePlay.CurrentLevelIndex + 1;
-            if (nextLevel >= _levelConfig.LevelCount)
+            int nextLevelId = CurrentGamePlay.CurrentLevelId + 1;
+            if (_levelConfig.GetLevelNameByLevelId(nextLevelId) == null)
             {
                 Debug.Log("[GameManager] 已通过所有关卡!");
                 return;
             }
 
             // 下一关没有缓存，直接从配置加载
-            _corePlayGamePlay.LoadLevel(nextLevel);
+            _corePlayGamePlay.LoadLevel(nextLevelId);
             GameModule.UI.ShowUIAsync<UICorePlay>();
         }
 
@@ -214,7 +214,7 @@ namespace GameLogic
         public void ResetProgress()
         {
             _cacheManager.DeleteAll();
-            CurrentGamePlay.LoadLevel(0);
+            CurrentGamePlay.LoadLevel(1);
             _corePlayView?.ClearAllHighlights();
         }
 

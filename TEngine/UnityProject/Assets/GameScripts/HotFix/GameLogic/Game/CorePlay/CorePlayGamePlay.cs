@@ -15,7 +15,7 @@ namespace GameLogic.GamePlay.CorePlay
 
         private LevelDataConfigParse _levelConfig;
         private TextLevelData _currentLevelData;
-        private int _currentLevelIndex = -1;
+        private int _currentLevelId = -1;
         private HashSet<int> _selectedStrokeIndices = new HashSet<int>();
         private HashSet<int> _foundAnswerIndices = new HashSet<int>();
         private bool _isGameRunning;
@@ -37,9 +37,9 @@ namespace GameLogic.GamePlay.CorePlay
         // ================ 属性 ================
 
         public bool IsGameRunning => _isGameRunning;
-        public int CurrentLevelIndex => _currentLevelIndex;
-        /// <summary>是否已加载有效关卡（_currentLevelIndex >= 0，区分首页 -1）</summary>
-        public bool HasValidLevel => _currentLevelIndex >= 0;
+        public int CurrentLevelId => _currentLevelId;
+        /// <summary>是否已加载有效关卡（_currentLevelId >= 1，区分首页 -1）</summary>
+        public bool HasValidLevel => _currentLevelId >= 1;
         public TextLevelData CurrentLevelData => _currentLevelData;
         public IReadOnlyCollection<int> SelectedStrokeIndices => _selectedStrokeIndices;
         public IReadOnlyCollection<int> FoundAnswerIndices => _foundAnswerIndices;
@@ -53,12 +53,12 @@ namespace GameLogic.GamePlay.CorePlay
         }
 
         /// <summary>
-        /// 从缓存恢复初始关卡索引（仅设置索引，不加载关卡数据）。
-        /// 应在 Load() 存档后立即调用，保证 _currentLevelIndex 始终有效。
+        /// 从缓存恢复初始关卡ID（仅设置ID，不加载关卡数据）。
+        /// 应在 Load() 存档后立即调用，保证 _currentLevelId 始终有效。
         /// </summary>
-        public void InitLevelIndex(int levelIndex)
+        public void InitLevelId(int levelId)
         {
-            _currentLevelIndex = levelIndex >= 0 ? levelIndex : 0;
+            _currentLevelId = levelId >= 1 ? levelId : 1;
         }
 
         public void StartGame()
@@ -80,18 +80,18 @@ namespace GameLogic.GamePlay.CorePlay
         // ================ 关卡加载 ================
 
         /// <summary>加载指定关卡（从配置全新加载）</summary>
-        public void LoadLevel(int levelIndex)
+        public void LoadLevel(int levelId)
         {
-            LoadLevelInternal(levelIndex, null, null);
+            LoadLevelInternal(levelId, null, null);
         }
 
         /// <summary>加载关卡，可选恢复已找到的答案 + 缓存关卡快照</summary>
-        public void LoadLevel(int levelIndex, List<int> restoredFoundAnswers, TextLevelData cachedLevelData = null)
+        public void LoadLevel(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData = null)
         {
-            LoadLevelInternal(levelIndex, restoredFoundAnswers, cachedLevelData);
+            LoadLevelInternal(levelId, restoredFoundAnswers, cachedLevelData);
         }
 
-        private void LoadLevelInternal(int levelIndex, List<int> restoredFoundAnswers, TextLevelData cachedLevelData)
+        private void LoadLevelInternal(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData)
         {
             if (_levelConfig == null)
             {
@@ -99,24 +99,30 @@ namespace GameLogic.GamePlay.CorePlay
                 return;
             }
 
-            if (levelIndex < 0 || levelIndex >= _levelConfig.LevelCount)
+            if (levelId <= 0 || levelId > _levelConfig.MaxLevelId)
             {
-                DebugLogError($"关卡索引超出范围: {levelIndex}/{_levelConfig.LevelCount}");
+                DebugLogError($"关卡ID超出范围: {levelId}/{_levelConfig.MaxLevelId}");
                 return;
             }
 
-            _currentLevelIndex = levelIndex;
+            _currentLevelId = levelId;
 
-            // 关卡数据加载优先级：缓存快照 > 配置文件
+            // 关卡数据加载优先级：缓存快照 > 配置文件（通过 levelId -> levelName -> 配置）
             if (cachedLevelData != null)
             {
                 _currentLevelData = cachedLevelData;
-                DebugLog($"加载关卡 {levelIndex}: 使用缓存快照");
+                DebugLog($"加载关卡 {levelId}: 使用缓存快照");
             }
             else
             {
-                _currentLevelData = _levelConfig.GetLevelData(levelIndex);
-                DebugLog($"加载关卡 {levelIndex}: 使用配置文件");
+                _currentLevelData = _levelConfig.GetLevelDataByLevelId(levelId);
+                DebugLog($"加载关卡 {levelId}: 使用配置文件");
+            }
+
+            if (_currentLevelData == null)
+            {
+                DebugLogError($"关卡 {levelId} 对应的关卡数据未找到");
+                return;
             }
 
             _selectedStrokeIndices.Clear();
@@ -134,7 +140,7 @@ namespace GameLogic.GamePlay.CorePlay
 
             _isGameRunning = true;
 
-            DebugLog($"加载关卡 {levelIndex}: 基字『{_currentLevelData.baseCharacter}』, 共 {_currentLevelData.answers.Count} 个答案, 已找到 {_foundAnswerIndices.Count} 个");
+            DebugLog($"加载关卡 {levelId}: 基字『{_currentLevelData.baseCharacter}』, 共 {_currentLevelData.answers.Count} 个答案, 已找到 {_foundAnswerIndices.Count} 个");
             OnLevelLoaded?.Invoke(_currentLevelData);
 
             // 如果已经全部完成，直接通关
@@ -275,9 +281,9 @@ namespace GameLogic.GamePlay.CorePlay
         private void CompleteLevel()
         {
             _isGameRunning = false;
-            DebugLog($"关卡 {_currentLevelIndex} 通关!");
-            OnLevelCompleted?.Invoke(_currentLevelIndex);
-            GameEvent.Send(EventDefine.Event_LevelCompleted, _currentLevelIndex);
+            DebugLog($"关卡 {_currentLevelId} 通关!");
+            OnLevelCompleted?.Invoke(_currentLevelId);
+            GameEvent.Send(EventDefine.Event_LevelCompleted, _currentLevelId);
         }
 
         // ================ 存档 ================
@@ -285,10 +291,10 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>获取当前存档数据（未开始游戏时返回 null）</summary>
         public CorePlaySaveData GetSaveData()
         {
-            if (_currentLevelIndex < 0) return null;
+            if (_currentLevelId < 1) return null;
             return new CorePlaySaveData
             {
-                currentLevelIndex = _currentLevelIndex,
+                currentLevelId = _currentLevelId,
                 foundAnswerIndices = _foundAnswerIndices.ToList(),
                 cachedLevelData = _currentLevelData
             };
@@ -297,14 +303,14 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>将当前关卡进度写入 Restore 对象</summary>
         /// <remarks>
         /// 关卡数据未加载（_currentLevelData == null）时不保存，
-        /// 防止 InitLevelIndex 仅设了索引但未进游戏时，用空 _foundAnswerIndices / null 数据
+        /// 防止 InitLevelId 仅设了ID但未进游戏时，用空 _foundAnswerIndices / null 数据
         /// 覆盖已有有效存档。
         /// </remarks>
         public void ApplyToRestore(CorePlayRestore restore)
         {
-            if (_currentLevelIndex < 0) return;
+            if (_currentLevelId < 1) return;
             if (_currentLevelData == null) return;
-            restore.SaveCurrentProgress(_currentLevelIndex, _foundAnswerIndices.ToList(), _currentLevelData);
+            restore.SaveCurrentProgress(_currentLevelId, _foundAnswerIndices.ToList(), _currentLevelData);
         }
 
         // ================ 关卡信息 ================
@@ -315,10 +321,10 @@ namespace GameLogic.GamePlay.CorePlay
             return _currentLevelData?.baseCharacter ?? "";
         }
 
-        /// <summary>是否有下一关</summary>
+        /// <summary>是否有下一关（检查 levelId+1 是否存在于关卡表）</summary>
         public bool HasNextLevel()
         {
-            return _currentLevelIndex + 1 < TotalLevelCount;
+            return _levelConfig?.GetLevelNameByLevelId(_currentLevelId + 1) != null;
         }
 
         /// <summary>获取已找到的答案字符列表</summary>

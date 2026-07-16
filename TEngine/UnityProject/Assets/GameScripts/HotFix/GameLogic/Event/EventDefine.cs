@@ -11,5 +11,8 @@
 
         /// <summary>UITop 金币数量更新事件，携带 int</summary>
         public static int Event_UITopCoinUpdate = "Event_UITopCoinUpdate".GetHashCode();
+
+        /// <summary>Slot 布局数据更新事件，携带 SlotViewLayoutData</summary>
+        public static int Event_SlotLayoutUpdate = "Event_SlotLayoutUpdate".GetHashCode();
     }
 }
