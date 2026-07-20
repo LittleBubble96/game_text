@@ -87,6 +87,24 @@ public partial class Tables
             m_TbLevel.ResolveRef(this);
         }
     }
+    private reward.TbReward m_TbReward;
+    public reward.TbReward TbReward 
+    {
+        get
+        {
+            if (m_TbReward == null)
+            {
+                m_TbReward = new reward.TbReward(defaultLoader("reward_tbreward"));
+                m_TbReward.ResolveRef(this);
+            }
+            return m_TbReward;
+        }
+        set
+        {
+            m_TbReward = value;
+            m_TbReward.ResolveRef(this);
+        }
+    }
 
     #endregion
 

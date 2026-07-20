@@ -18,6 +18,7 @@ public sealed partial class ConfLevel : Luban.BeanBase
     {
         Id = _buf.ReadInt();
         LevelName = _buf.ReadString();
+        RewardId = _buf.ReadInt();
     }
 
     public static ConfLevel DeserializeConfLevel(ByteBuf _buf)
@@ -33,6 +34,10 @@ public sealed partial class ConfLevel : Luban.BeanBase
     /// 关卡名称
     /// </summary>
     public readonly string LevelName;
+    /// <summary>
+    /// 关卡奖励id
+    /// </summary>
+    public readonly int RewardId;
    
     public const int __ID__ = -98546506;
     public override int GetTypeId() => __ID__;
@@ -46,6 +51,7 @@ public sealed partial class ConfLevel : Luban.BeanBase
         return "{ "
         + "id:" + Id + ","
         + "levelName:" + LevelName + ","
+        + "rewardId:" + RewardId + ","
         + "}";
     }
 }

@@ -341,6 +341,47 @@ namespace GameLogic.GamePlay.CorePlay
             return result;
         }
 
+        // ================ 道具提示 ================
+
+        /// <summary>
+        /// 获取一个随机未找到答案的笔画索引列表（随机选择一组笔画组合）。
+        /// 返回 null 表示没有剩余答案可提示。
+        /// </summary>
+        public List<int> GetRandomUnfoundAnswerStrokeSet()
+        {
+            if (_currentLevelData == null) return null;
+
+            // 收集所有未找到的答案
+            var unfoundAnswers = new List<LevelAnswer>();
+            for (int i = 0; i < _currentLevelData.answers.Count; i++)
+            {
+                if (!_foundAnswerIndices.Contains(i))
+                    unfoundAnswers.Add(_currentLevelData.answers[i]);
+            }
+
+            if (unfoundAnswers.Count == 0) return null;
+
+            // 随机选一个未找到的答案
+            int randAnsIdx = UnityEngine.Random.Range(0, unfoundAnswers.Count);
+            LevelAnswer selectedAnswer = unfoundAnswers[randAnsIdx];
+
+            if (selectedAnswer.strokeSets == null || selectedAnswer.strokeSets.Count == 0)
+                return null;
+
+            // 从该答案的多组笔画组合中随机选一组
+            int randSetIdx = UnityEngine.Random.Range(0, selectedAnswer.strokeSets.Count);
+            StrokeSet selectedSet = selectedAnswer.strokeSets[randSetIdx];
+
+            return selectedSet.strokeIndices;
+        }
+
+        /// <summary>是否还有未被找到的答案</summary>
+        public bool HasUnfoundAnswers()
+        {
+            if (_currentLevelData == null) return false;
+            return _foundAnswerIndices.Count < _currentLevelData.answers.Count;
+        }
+
         // ================ 工具 ================
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]

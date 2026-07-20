@@ -150,7 +150,7 @@ MonoBehaviour:
       - CollectPath: Assets/AssetRaw/UIRaw/Atlas
         CollectorGUID: 6d11fa91acc253840a648b58f23db139
         CollectorType: 0
-        AddressRuleName: AddressByFileName
+        AddressRuleName: AddressByFolderAndFileName
         PackRuleName: PackDirectory
         FilterRuleName: CollectAll
         AssetTags: 

@@ -10,36 +10,28 @@
 using Luban;
 
 
-namespace GameConfig.item
+namespace GameConfig.reward
 {
-public sealed partial class Item : Luban.BeanBase
+public sealed partial class ConfReward : Luban.BeanBase
 {
-    public Item(ByteBuf _buf) 
+    public ConfReward(ByteBuf _buf) 
     {
         Id = _buf.ReadInt();
-        Name = _buf.ReadString();
-        ResIcon = _buf.ReadString();
+        {int n0 = System.Math.Min(_buf.ReadSize(), _buf.Size);Rewards = new System.Collections.Generic.Dictionary<int, int>(n0 * 3 / 2);for(var i0 = 0 ; i0 < n0 ; i0++) { int _k0;  _k0 = _buf.ReadInt(); int _v0;  _v0 = _buf.ReadInt();     Rewards.Add(_k0, _v0);}}
     }
 
-    public static Item DeserializeItem(ByteBuf _buf)
+    public static ConfReward DeserializeConfReward(ByteBuf _buf)
     {
-        return new item.Item(_buf);
+        return new reward.ConfReward(_buf);
     }
 
     /// <summary>
-    /// 这是id
+    /// 奖励id
     /// </summary>
     public readonly int Id;
-    /// <summary>
-    /// 名字
-    /// </summary>
-    public readonly string Name;
-    /// <summary>
-    /// icon资源
-    /// </summary>
-    public readonly string ResIcon;
+    public readonly System.Collections.Generic.Dictionary<int, int> Rewards;
    
-    public const int __ID__ = 2107285806;
+    public const int __ID__ = -1104894030;
     public override int GetTypeId() => __ID__;
 
     public  void ResolveRef(Tables tables)
@@ -50,8 +42,7 @@ public sealed partial class Item : Luban.BeanBase
     {
         return "{ "
         + "id:" + Id + ","
-        + "name:" + Name + ","
-        + "resIcon:" + ResIcon + ","
+        + "rewards:" + Luban.StringUtil.CollectionToString(Rewards) + ","
         + "}";
     }
 }

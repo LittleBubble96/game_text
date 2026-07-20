@@ -1,4 +1,6 @@
-﻿namespace GameLogic
+﻿using System.Collections.Generic;
+
+namespace GameLogic
 {
     public static class EventDefine
     {
@@ -14,5 +16,14 @@
 
         /// <summary>Slot 布局数据更新事件，携带 SlotViewLayoutData</summary>
         public static int Event_SlotLayoutUpdate = "Event_SlotLayoutUpdate".GetHashCode();
+
+        /// <summary>道具提示高亮笔画事件，携带 List&lt;int&gt;（需要高亮的笔画索引列表）</summary>
+        public static int Event_PropTipHighlight = "Event_PropTipHighlight".GetHashCode();
+
+        /// <summary>清除提示高亮事件</summary>
+        public static int Event_PropTipClearHighlight = "Event_PropTipClearHighlight".GetHashCode();
+
+        /// <summary>道具数量变化事件，携带 PropType 和 int（新数量）</summary>
+        public static int Event_PropCountChanged = "Event_PropCountChanged".GetHashCode();
     }
 }

@@ -41,8 +41,8 @@ namespace GameLogic
             _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
             // _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
-            _submitBtnText = FindChildComponent<RTLTextMeshPro>("SubmitBtn/bg/m_text");
-            _submitButton = CreateWidget<XYButton>("SubmitBtn");
+            _submitBtnText = FindChildComponent<RTLTextMeshPro>("Buttom/SubmitBtn/bg/m_text");
+            _submitButton = CreateWidget<XYButton>("Buttom/SubmitBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Layout");
             _submitButton.OnAddListener(OnSubmit);

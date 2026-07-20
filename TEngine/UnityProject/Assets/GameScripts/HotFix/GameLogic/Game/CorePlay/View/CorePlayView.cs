@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.View;
@@ -17,6 +18,15 @@ namespace GameLogic.GamePlay.CorePlay.View
         private Color _highlightColor = new Color(1f, 0.85f, 0.2f);
         private Color _defaultStrokeColor = Color.black;
         private float _highlightZOffset = -1f;
+
+        // ================ 提示闪烁 ================
+        private Color _tipHighlightColor = new Color(1f, 0.4f, 0.1f, 1f);
+        private Color _tipFadeColor = new Color(1f, 0.4f, 0.1f, 0.2f);
+        private float _tipBlinkSpeed = 5f;
+        private float _tipBlinkDuration = 2f;
+        private List<int> _tipHighlightStrokes;
+        private float _tipBlinkTimer;
+        private bool _tipBlinkActive;
 
         // ================ 内部状态 ================
 
@@ -80,6 +90,10 @@ namespace GameLogic.GamePlay.CorePlay.View
                 corePlay.OnAnswerSubmitted += OnAnswerSubmitted;
             }
 
+            // 绑定提示道具事件
+            GameEvent.AddEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
+            GameEvent.AddEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
+
             _isInitialized = true;
 
             // 如果当前已有关卡数据，立刻渲染
@@ -129,6 +143,10 @@ namespace GameLogic.GamePlay.CorePlay.View
                     corePlay.OnAnswerSubmitted -= OnAnswerSubmitted;
                 }
             }
+
+            GameEvent.RemoveEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
+            GameEvent.RemoveEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
+
             _gameSlotView?.OnDestroy();
             _gameSlotView = null;
         }
@@ -193,6 +211,10 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnStrokeSelectionChanged(int strokeIndex, bool isSelected)
         {
+            // 用户选中任意笔画后，清除提示闪烁效果
+            if (isSelected)
+                ClearTipBlink();
+
             UpdateStrokeVisual(strokeIndex, isSelected);
         }
 
@@ -251,6 +273,72 @@ namespace GameLogic.GamePlay.CorePlay.View
                     strokes[i].transform.localPosition = pos;
                 }
             }
+
+            // 同时清除提示闪烁
+            ClearTipBlink();
+        }
+
+        // ================ 提示闪烁效果 ================
+
+        private void Update()
+        {
+            if (!_tipBlinkActive || _drawCharacter == null) return;
+
+            _tipBlinkTimer -= Time.deltaTime;
+
+            // 闪烁2秒后自动消失
+            if (_tipBlinkTimer <= 0)
+            {
+                ClearTipBlink();
+                return;
+            }
+
+            // 闪烁效果：在亮色和暗色之间切换
+            float t = Mathf.PingPong(Time.time * _tipBlinkSpeed, 1f);
+            Color blinkColor = Color.Lerp(_tipFadeColor, _tipHighlightColor, t);
+
+            if (_tipHighlightStrokes != null)
+            {
+                foreach (int idx in _tipHighlightStrokes)
+                {
+                    _drawCharacter.SetStrokeColor(idx, blinkColor);
+                }
+            }
+        }
+
+        /// <summary>开始提示高亮闪烁</summary>
+        private void OnPropTipHighlight(List<int> strokeIndices)
+        {
+            if (strokeIndices == null || strokeIndices.Count == 0 || _drawCharacter == null) return;
+
+            // 先清除之前的闪烁
+            ClearTipBlink();
+
+            _tipHighlightStrokes = new List<int>(strokeIndices);
+            _tipBlinkTimer = _tipBlinkDuration;
+            _tipBlinkActive = true;
+        }
+
+        /// <summary>清除提示高亮闪烁</summary>
+        private void OnPropTipClearHighlight()
+        {
+            ClearTipBlink();
+        }
+
+        private void ClearTipBlink()
+        {
+            _tipBlinkActive = false;
+            _tipBlinkTimer = 0;
+
+            // 恢复提示笔画为默认颜色
+            if (_tipHighlightStrokes != null && _drawCharacter != null)
+            {
+                foreach (int idx in _tipHighlightStrokes)
+                {
+                    _drawCharacter.SetStrokeColor(idx, _defaultStrokeColor);
+                }
+            }
+            _tipHighlightStrokes = null;
         }
 
         // ================ 动画接口 ================

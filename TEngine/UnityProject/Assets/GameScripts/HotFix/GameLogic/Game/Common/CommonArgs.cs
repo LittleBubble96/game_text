@@ -21,6 +21,11 @@
         {
             return new CommonArgs<T,T1,T2,T3>() { Arg1 = arg1, Arg2 = arg2, Arg3 = arg3, Arg4 = arg4 };
         }
+
+        public static CommonArgs<T,T1,T2,T3,T4> Create<T,T1,T2,T3,T4>(T arg1, T1 arg2, T2 arg3, T3 arg4, T4 arg5)
+        {
+            return new CommonArgs<T,T1,T2,T3,T4>() { Arg1 = arg1, Arg2 = arg2, Arg3 = arg3, Arg4 = arg4, Arg5 = arg5 };
+        }
     }
 
     public class CommonArgs<T> : CommonArgs
@@ -41,5 +46,10 @@
     public class CommonArgs<T,T1,T2,T3> : CommonArgs<T,T1,T2>
     {
         public T3 Arg4 { get; set; }
+    }
+
+    public class CommonArgs<T,T1,T2,T3,T4> : CommonArgs<T,T1,T2,T3>
+    {
+        public T4 Arg5 { get; set; }
     }
 }

@@ -10,6 +10,10 @@ namespace GameLogic
     public class EffectManager : Singleton<EffectManager>
     {
         private uint _generateId = 0;
+
+        /// <summary>
+        /// 活跃特效字典。
+        /// </summary>
         private readonly Dictionary<uint, EffectMono> _activeEffects = new Dictionary<uint, EffectMono>();
 
         /// <summary>
@@ -19,14 +23,8 @@ namespace GameLogic
         /// <param name="parent">父节点。</param>
         /// <param name="args">动态参数CommonArgs，可为null。</param>
         /// <returns>特效ID，0表示失败。</returns>
-        public uint PlayEffect(string effectName, Transform parent, object args = null)
+        public uint PlayEffect(string effectName, Transform parent, CommonArgs args = null)
         {
-            if (string.IsNullOrEmpty(effectName))
-            {
-                Log.Error("[EffectManager] PlayEffect failed: effectName is null or empty.");
-                return 0;
-            }
-
             GameObject effect = GameDataPoolManager.Instance.AllocateGameObject(effectName, parent);
             if (effect == null)
             {
@@ -46,7 +44,6 @@ namespace GameLogic
             mono.EffectName = effectName;
             mono.Args = args;
             mono.OnDestroyed += OnEffectDestroyed;
-            mono.PlayEffect();
 
             _activeEffects[_generateId] = mono;
             return _generateId;
@@ -102,7 +99,10 @@ namespace GameLogic
             GameDataPoolManager.Instance.RecycleGameObject(mono.gameObject, mono.EffectName);
         }
 
-        private void OnEffectDestroyed(EffectMono mono) { }
+        private void OnEffectDestroyed(EffectMono mono)
+        {
+            // 回调预留，可扩展
+        }
 
         protected override void OnRelease()
         {

@@ -19,7 +19,7 @@ namespace GameLogic
         /// <summary>
         /// 特效动态参数。
         /// </summary>
-        public object Args { get; set; }
+        public CommonArgs Args { get; set; }
 
         /// <summary>
         /// 销毁完成回调。
