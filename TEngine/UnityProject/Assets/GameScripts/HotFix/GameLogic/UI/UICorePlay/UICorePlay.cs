@@ -1,12 +1,10 @@
 using System.Collections.Generic;
-using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
 using GameLogic.Localization;
 using TEngine;
 using TMPro;
 using UnityEngine;
 using RTLTMPro;
-using UnityEngine.UI;
 
 namespace GameLogic
 {
@@ -33,6 +31,8 @@ namespace GameLogic
         
         private CorePlayLayoutWidget _layoutWidget;
         
+        private CorePlayPropWidget _propWidget;
+        
         private CorePlayGamePlay CorePlayGamePlay => GameManager.Instance?.CurrentGamePlay as CorePlayGamePlay;
 
         protected override void ScriptGenerator()
@@ -45,6 +45,7 @@ namespace GameLogic
             _submitButton = CreateWidget<XYButton>("Buttom/SubmitBtn");
             _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Layout");
+            _propWidget = CreateWidget<CorePlayPropWidget>("Buttom/Props/TipProp");
             _submitButton.OnAddListener(OnSubmit);
         }
         
@@ -65,6 +66,7 @@ namespace GameLogic
         {
             base.OnRefresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: true));
+            GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
             if (_resultTipText != null)
                 _resultTipText.gameObject.SetActive(false);
             // 更新 UI

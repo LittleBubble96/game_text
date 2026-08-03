@@ -26,8 +26,14 @@ namespace GameLogic
         /// <summary>动画时长</summary>
         private const float AnimDuration = 0.25f;
 
+        /// <summary>金币增加动画时长</summary>
+        private const float CoinAddAnimDuration = 0.6f;
+
         /// <summary>起始偏移（屏幕上方，用于滑入）</summary>
         private const float SlideOffsetY = 80f;
+
+        /// <summary>当前正在执行的金币增加动画 Tween，防止重复动画冲突</summary>
+        private Tweener _coinAddTweener;
 
         protected override void ScriptGenerator()
         {
@@ -40,7 +46,7 @@ namespace GameLogic
                 _coinCanvasGroup = _coinTf.GetComponent<CanvasGroup>();
                 if (_coinCanvasGroup == null)
                     _coinCanvasGroup = _coinTf.gameObject.AddComponent<CanvasGroup>();
-                _coinCountText = FindChildComponent<TMP_Text>("CoinSlot/root/Coin/Text (TMP)");
+                _coinCountText = FindChildComponent<TMP_Text>("CoinSlot/root/Coin/Text");
             }
 
             if (_backTf != null)
@@ -66,9 +72,18 @@ namespace GameLogic
             base.RegisterEvent();
             AddUIEvent<UITopData>(EventDefine.Event_UITopUpdate, OnTopDataUpdate);
             AddUIEvent<int>(EventDefine.Event_UITopCoinUpdate, OnCoinCountUpdate);
+            AddUIEvent<int>(EventDefine.Event_UITopCoinAddAnim, OnCoinAddAnim);
+            EffectTargetRegistry.Register(EffectTargetRegistry.Key.TopCoin , _coinTf);
         }
-
+        
         #endregion
+
+        protected override void OnRefresh()
+        {
+            base.OnRefresh();
+            // 初始化金币为逻辑数量
+            OnCoinCountUpdate(PropDefine.CoinCount);
+        }
 
         #region 事件处理
 
@@ -118,6 +133,37 @@ namespace GameLogic
             {
                 _coinCountText.text = coinCount.ToString();
             }
+        }
+
+        /// <summary>
+        /// 收到金币增加动画事件：在 0.6s 内从当前值滚动递增到目标值
+        /// </summary>
+        /// <param name="addCount">增加的金币数量</param>
+        private void OnCoinAddAnim(int addCount)
+        {
+            if (_coinCountText == null) return;
+
+            // 终止之前的动画
+            _coinAddTweener?.Kill();
+
+            int startValue = int.TryParse(_coinCountText.text, out int current) ? current : 0;
+            int targetValue = startValue + addCount;
+
+            _coinAddTweener = DOTween.To(
+                () => (float)startValue,
+                val =>
+                {
+                    int displayVal = Mathf.RoundToInt(val);
+                    _coinCountText.text = displayVal.ToString();
+                },
+                (float)targetValue,
+                CoinAddAnimDuration
+            ).SetEase(Ease.OutCubic)
+             .OnComplete(() =>
+             {
+                 _coinCountText.text = targetValue.ToString();
+                 _coinAddTweener = null;
+             });
         }
 
         #endregion
@@ -187,6 +233,8 @@ namespace GameLogic
         protected override void OnDestroy()
         {
             // 清理 DOTween
+            _coinAddTweener?.Kill();
+            _coinAddTweener = null;
             if (_coinTf != null) DOTween.Kill(_coinTf);
             if (_backTf != null) DOTween.Kill(_backTf);
             if (_coinCanvasGroup != null) DOTween.Kill(_coinCanvasGroup);

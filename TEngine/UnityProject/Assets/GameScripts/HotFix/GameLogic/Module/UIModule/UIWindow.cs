@@ -548,7 +548,7 @@ namespace GameLogic
         /// </summary>
         protected virtual void OnOutAnimation()
         {
-            OnOutAnimationComplete();
+            CompleteOutAnimation();
         }
 
         /// <summary>

@@ -25,5 +25,8 @@ namespace GameLogic
 
         /// <summary>道具数量变化事件，携带 PropType 和 int（新数量）</summary>
         public static int Event_PropCountChanged = "Event_PropCountChanged".GetHashCode();
+
+        /// <summary>UITop 金币增加动画事件，携带 int（增加数量），0.6s 内完成递增</summary>
+        public static int Event_UITopCoinAddAnim = "Event_UITopCoinAddAnim".GetHashCode();
     }
 }

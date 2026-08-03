@@ -6,15 +6,14 @@ namespace GameLogic.Data
 {
     /// <summary>
     /// 通用游戏缓存管理器 —— JSON 本地存储
-    /// 统一管理关卡缓存、设置缓存、自定义类缓存。
+    /// 统一管理关卡缓存、设置缓存、道具缓存。
     ///
     /// 使用示例：
     ///   var cache = new GameCacheManager();
     ///   cache.Load();
-    ///   cache.GameSettings.masterVolume = 0.5f;               // 改设置
+    ///   cache.GameSettings.language = "zh";                   // 改设置
     ///   cache.CorePlayRestore.SetCurrentLevel(3);             // 改关卡
-    ///   cache.CacheData.SetCustomData("hero", myHeroData);    // 存自定义类
-    ///   var hero = cache.CacheData.GetCustomData<HeroData>("hero"); // 读自定义类
+    ///   cache.CacheData.gamePropData.tipCount = 5;            // 改道具
     ///   cache.Save();   // 一次性保存全部
     /// </summary>
     public class GameCacheManager

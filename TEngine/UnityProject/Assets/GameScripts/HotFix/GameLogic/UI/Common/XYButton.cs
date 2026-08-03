@@ -5,6 +5,8 @@ namespace GameLogic
     public class XYButton : UIWidget
     {
         private Button _button;
+        
+        public bool Interactable { get => _button.interactable; set => _button.interactable = value; }
 
         protected override void BindMemberProperty()
         {

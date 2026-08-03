@@ -32,6 +32,7 @@ public partial class GameApp
         Utility.Unity.AddDestroyListener(Release);
         Log.Warning("======= StartGameLogic =======");
         StartGameLogic();
+        GMSingle.Instance.Activate();
     }
     
     private static void StartGameLogic()

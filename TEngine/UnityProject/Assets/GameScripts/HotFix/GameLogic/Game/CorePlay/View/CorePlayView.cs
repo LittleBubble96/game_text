@@ -15,8 +15,8 @@ namespace GameLogic.GamePlay.CorePlay.View
     public class CorePlayView : MonoBehaviour
     {
         
-        private Color _highlightColor = new Color(1f, 0.85f, 0.2f);
-        private Color _defaultStrokeColor = Color.black;
+        private Color _highlightColor = Color.black;
+        private Color _defaultStrokeColor = Color.white * 0.5f;
         private float _highlightZOffset = -1f;
 
         // ================ 提示闪烁 ================
@@ -65,6 +65,12 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
         public void Initialize(IGamePlay gamePlay, LevelDataConfigParse levelConfig)
         {
+            // 如果已初始化，先反注册所有事件，避免重复注册
+            if (_isInitialized)
+            {
+                RemoveEventListeners();
+            }
+
             _gamePlay = gamePlay;
             _levelConfig = levelConfig;
 
@@ -133,6 +139,15 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnDestroy()
         {
+            RemoveEventListeners();
+
+            _gameSlotView?.OnDestroy();
+            _gameSlotView = null;
+        }
+
+        /// <summary>移除所有事件监听，防止重复注册或泄漏</summary>
+        private void RemoveEventListeners()
+        {
             if (_gamePlay != null)
             {
                 _gamePlay.OnLevelCompleted -= OnLevelCompleted;
@@ -146,9 +161,6 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             GameEvent.RemoveEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
             GameEvent.RemoveEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
-
-            _gameSlotView?.OnDestroy();
-            _gameSlotView = null;
         }
 
         // ================ 关卡渲染 ================

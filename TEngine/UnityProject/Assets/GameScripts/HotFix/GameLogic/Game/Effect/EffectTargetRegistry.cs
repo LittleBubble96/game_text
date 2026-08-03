@@ -28,8 +28,8 @@ namespace GameLogic
             _targets.Remove(key);
         }
 
-        /// <summary>
         /// 获取已注册的目标点。
+        /// <summary>
         /// </summary>
         public static Transform Get(string key)
         {

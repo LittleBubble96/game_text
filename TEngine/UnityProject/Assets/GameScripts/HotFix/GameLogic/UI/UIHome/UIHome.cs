@@ -44,6 +44,7 @@ namespace GameLogic
         {
             base.OnRefresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
+            GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
             OnTabBtnClick(ETabType.Level);
         }
 
