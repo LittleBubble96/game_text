@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.Data;
+using TEngine;
 using UnityEngine;
 
 namespace GameLogic.View
@@ -9,6 +11,13 @@ namespace GameLogic.View
     {
         private List<GameObject> _strokeObjects = new List<GameObject>();
         private Color _defaultStrokeColor = Color.white;
+
+        /// <summary>笔画材质模板资源名（AddressByFileName 规则，放 AssetRaw/Materials 下）。
+        /// 用材质资源而非 Shader.Find，确保打包后 shader 引用被静态收集、运行时不会丢失。</summary>
+        private const string StrokeMaterialPath = "StrokeMaterial";
+
+        /// <summary>笔画材质模板（全局共享，loading 阶段异步预加载，Draw 时直接取用）</summary>
+        private static Material _strokeMaterialTemplate;
 
         public List<GameObject> StrokeObjects => _strokeObjects;
 
@@ -37,12 +46,15 @@ namespace GameLogic.View
         }
 
         /// <summary>
-        /// 画一个汉字（传入你解析好的 TextGraphicData）
+        /// 画一个汉字（传入你解析好的 TextGraphicData）。
+        /// 异步：取材质模板需 await（模板在 loading 阶段预加载，此处通常直接命中缓存）。
         /// </summary>
-        public void Draw(TextGraphicData data, bool showStrokeIndices = false)
+        public async UniTask DrawAsync(TextGraphicData data, bool showStrokeIndices = false)
         {
             Clear();
             _strokeObjects = new List<GameObject>();
+
+            Material template = await GetStrokeMaterialTemplateAsync();
 
             for (int i = 0; i < data.strokes.Count; i++)
             {
@@ -54,14 +66,15 @@ namespace GameLogic.View
                 // 1. 创建笔画物体
                 GameObject strokeObj = new GameObject($"Stroke_{strokeIndex}");
                 strokeObj.transform.SetParent(transform);
+                strokeObj.transform.localPosition = Vector3.zero;
                 _strokeObjects.Add(strokeObj);
 
                 // 2. 组件
                 MeshFilter mf = strokeObj.AddComponent<MeshFilter>();
                 MeshRenderer mr = strokeObj.AddComponent<MeshRenderer>();
 
-                // 3. 默认材质（使用 sharedMaterial 避免编辑模式下泄漏）
-                Material mat = new Material(Shader.Find("Unlit/Color"));
+                // 3. 默认材质：克隆材质模板（保留逐笔画独立着色），shader 引用随模板资源打包进包
+                Material mat = new Material(template);
                 mat.color = _defaultStrokeColor;
                 mr.sharedMaterial = mat;
 
@@ -99,6 +112,36 @@ namespace GameLogic.View
                     AddStrokeIndexLabel(strokeObj, strokeIndex, points);
                 }
             }
+        }
+
+        /// <summary>
+        /// 在 loading 阶段异步预加载笔画材质模板（全局静态缓存，所有 DrawCharacter 共享）。
+        /// 这样 Draw 时无需同步加载、不卡帧，且 shader 引用随材质资源打包进包。
+        /// </summary>
+        public static async UniTask PreloadStrokeMaterialAsync()
+        {
+            if (_strokeMaterialTemplate != null) return;
+
+            _strokeMaterialTemplate = await GameModule.Resource.LoadAssetAsync<Material>(StrokeMaterialPath);
+            if (_strokeMaterialTemplate == null)
+            {
+                Debug.LogError($"[DrawCharacter] 笔画材质模板预加载失败: {StrokeMaterialPath}，回退到内置 Unlit/Color");
+                _strokeMaterialTemplate = new Material(Shader.Find("Unlit/Color"));
+            }
+        }
+
+        /// <summary>
+        /// 取笔画材质模板（异步）。模板已在 loading 阶段预加载，通常直接返回缓存；
+        /// 用 await UniTask.Yield() 保持异步契约，调用方据此编排顺序，不引入任何同步加载。
+        /// </summary>
+        private static async UniTask<Material> GetStrokeMaterialTemplateAsync()
+        {
+            await UniTask.Yield();
+            if (_strokeMaterialTemplate == null)
+            {
+                Debug.LogError($"[DrawCharacter] 笔画材质模板未预加载: {StrokeMaterialPath}，请确认 loading 阶段调用了 PreloadStrokeMaterialAsync");
+            }
+            return _strokeMaterialTemplate;
         }
 
         /// <summary>

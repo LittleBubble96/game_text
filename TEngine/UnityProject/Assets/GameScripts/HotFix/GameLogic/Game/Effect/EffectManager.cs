@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
 
@@ -17,15 +18,15 @@ namespace GameLogic
         private readonly Dictionary<uint, EffectMono> _activeEffects = new Dictionary<uint, EffectMono>();
 
         /// <summary>
-        /// 播放特效。
+        /// 播放特效（异步：对象池冷启动时需加载资源）。
         /// </summary>
         /// <param name="effectName">特效资源名称（即资源路径）。</param>
         /// <param name="parent">父节点。</param>
         /// <param name="args">动态参数CommonArgs，可为null。</param>
         /// <returns>特效ID，0表示失败。</returns>
-        public uint PlayEffect(string effectName, Transform parent, CommonArgs args = null)
+        public async UniTask<uint> PlayEffectAsync(string effectName, Transform parent, CommonArgs args = null)
         {
-            GameObject effect = GameDataPoolManager.Instance.AllocateGameObject(effectName, parent);
+            GameObject effect = await GameDataPoolManager.Instance.AllocateGameObjectAsync(effectName, parent);
             if (effect == null)
             {
                 Log.Error($"[EffectManager] PlayEffect failed: resource '{effectName}' not found.");

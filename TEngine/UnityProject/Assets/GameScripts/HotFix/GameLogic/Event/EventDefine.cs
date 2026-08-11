@@ -17,6 +17,9 @@ namespace GameLogic
         /// <summary>Slot 布局数据更新事件，携带 SlotViewLayoutData</summary>
         public static int Event_SlotLayoutUpdate = "Event_SlotLayoutUpdate".GetHashCode();
 
+        /// <summary>Character 渲染区布局数据更新事件，携带 ContentViewLayoutData（可用宽高，世界坐标）</summary>
+        public static int Event_CharacterLayoutUpdate = "Event_CharacterLayoutUpdate".GetHashCode();
+
         /// <summary>道具提示高亮笔画事件，携带 List&lt;int&gt;（需要高亮的笔画索引列表）</summary>
         public static int Event_PropTipHighlight = "Event_PropTipHighlight".GetHashCode();
 

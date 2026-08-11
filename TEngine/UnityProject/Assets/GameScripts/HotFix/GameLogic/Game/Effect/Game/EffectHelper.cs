@@ -93,7 +93,7 @@ namespace GameLogic
                     })
                 );
 
-                EffectManager.Instance.PlayEffect(effectName, parent, args);
+                EffectManager.Instance.PlayEffectAsync(effectName, parent, args).Forget();
 
                 // 每个金币间隔一小段时间发射
                 await UniTask.Delay(TimeSpan.FromSeconds(0.03));

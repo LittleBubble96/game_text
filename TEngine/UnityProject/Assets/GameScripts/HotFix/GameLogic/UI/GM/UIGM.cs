@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using GameLogic.GamePlay.CorePlay;
 using TEngine;
@@ -21,9 +22,9 @@ namespace GameLogic
         protected override void OnCreate()
         {
             base.OnCreate();
-            _topBtnTf = FindChildComponent<RectTransform>("UITopBtns");
-            _scrollContent = FindChildComponent<RectTransform>("ScrollView/Viewport/Content");
-            _closeBtn = CreateWidget<XYButton>("CloseBtn");
+            _topBtnTf = FindChildComponent<RectTransform>("Panel/UITopBtns");
+            _scrollContent = FindChildComponent<RectTransform>("Panel/ScrollView/Viewport/Content");
+            _closeBtn = CreateWidget<XYButton>("Panel/CloseBtn");
             _closeBtn.OnAddListener(Hide);
         }
 
@@ -31,31 +32,34 @@ namespace GameLogic
         {
             base.OnRefresh();
             if (_groupDic != null) return; // 防止重复生成
-            GenerateGmItems();
+            // OnRefresh 由框架同步调用，无法 await；异步生成以 fire-and-forget 方式启动，
+            // 内部按顺序 await 各 CreateWidgetByPathAsync，保证 _curTitle/_curGroup 状态流正确。
+            GenerateGmItemsAsync().Forget();
         }
 
         #region 公共接口
+
 
         private string _curTitle;
         private GmGroupWidget _curGroup;
         private Dictionary<string, List<GmGroupWidget>> _groupDic;
 
-        private void CreateTopBtn(string title)
+        private async UniTask CreateTopBtnAsync(string title)
         {
             if (_groupDic == null)
                 _groupDic = new Dictionary<string, List<GmGroupWidget>>();
 
             _curTitle = title;
             _groupDic.Add(title, new List<GmGroupWidget>());
-            GmTopBtnWidget btnWidget = CreateWidgetByPath<GmTopBtnWidget>(_topBtnTf, TopBtnRes);
+            GmTopBtnWidget btnWidget = await CreateWidgetByPathAsync<GmTopBtnWidget>(_topBtnTf, TopBtnRes);
             btnWidget.Init(title, OnClickTopBtn);
         }
 
-        private GmGroupWidget CreateGmGroup(string groupTitle)
+        private async UniTask<GmGroupWidget> CreateGmGroupAsync(string groupTitle)
         {
             if (_groupDic.TryGetValue(_curTitle, out var groups))
             {
-                GmGroupWidget groupWidget = CreateWidgetByPath<GmGroupWidget>(_scrollContent, GmGroupRes);
+                GmGroupWidget groupWidget = await CreateWidgetByPathAsync<GmGroupWidget>(_scrollContent, GmGroupRes);
                 _curGroup = groupWidget;
                 _curGroup.SetTitle(groupTitle);
                 groups.Add(groupWidget);
@@ -63,18 +67,18 @@ namespace GameLogic
             return _curGroup;
         }
 
-        private void CreateBtn(string s, Action action)
+        private async UniTask CreateBtnAsync(string s, Action action)
         {
             if (_curGroup == null)
                 return;
-            _curGroup.CreateBtn(s, action);
+            await _curGroup.CreateBtnAsync(s, action);
         }
 
-        private void CreateBtnAndInput(string s, Action<string> action)
+        private async UniTask CreateBtnAndInputAsync(string s, Action<string> action)
         {
             if (_curGroup == null)
                 return;
-            _curGroup.CreateBtnAndInput(s, action);
+            await _curGroup.CreateBtnAndInputAsync(s, action);
         }
 
         private void OnClickTopBtn(string title)
@@ -99,14 +103,14 @@ namespace GameLogic
 
         #region 具体功能
 
-        private void GenerateGmItems()
+        private async UniTaskVoid GenerateGmItemsAsync()
         {
             #region 局内
 
-            CreateTopBtn("局内");
+            await CreateTopBtnAsync("局内");
 
-            CreateGmGroup("关卡");
-            CreateBtnAndInput("跳转关卡", (levelId) =>
+            await CreateGmGroupAsync("关卡");
+            await CreateBtnAndInputAsync("跳转关卡", (levelId) =>
             {
                 if (int.TryParse(levelId, out int id) && id >= 1)
                 {
@@ -115,12 +119,12 @@ namespace GameLogic
                     Debug.Log($"[GM] 跳转至关卡 {id}");
                 }
             });
-            CreateBtn("下一关", () =>
+            await CreateBtnAsync("下一关", () =>
             {
                 GameManager.Instance.LoadNextCorePlayLevel();
                 Debug.Log("[GM] 加载下一关");
             });
-            CreateBtn("直接通关", () =>
+            await CreateBtnAsync("直接通关", () =>
             {
                 var gameplay = GameManager.Instance.CurrentGamePlay as CorePlayGamePlay;
                 if (gameplay != null && gameplay.CurrentLevelData != null)
@@ -131,15 +135,15 @@ namespace GameLogic
                     Debug.Log($"[GM] 直接通关 关卡 {levelId}");
                 }
             });
-            CreateBtn("重置进度", () =>
+            await CreateBtnAsync("重置进度", () =>
             {
                 GameManager.Instance.ResetProgress();
                 Debug.Log("[GM] 进度已重置");
             });
 
-            CreateGmGroup("道具");
-            
-            CreateBtnAndInput("设置提示数量", (num) =>
+            await CreateGmGroupAsync("道具");
+
+            await CreateBtnAndInputAsync("设置提示数量", (num) =>
             {
                 if (int.TryParse(num, out int count))
                 {
@@ -147,7 +151,7 @@ namespace GameLogic
                     Debug.Log($"[GM] 提示道具设为 {count}");
                 }
             });
-            CreateBtnAndInput("设置金币数量", (num) =>
+            await CreateBtnAndInputAsync("设置金币数量", (num) =>
             {
                 if (int.TryParse(num, out int count))
                 {
@@ -155,14 +159,14 @@ namespace GameLogic
                     Debug.Log($"[GM] 金币设为 {count}");
                 }
             });
-            CreateBtn("道具设为999", () =>
+            await CreateBtnAsync("道具设为999", () =>
             {
                 PropDefine.InitPropCounts(999, 999);
                 Debug.Log("[GM] 道具均设为 999");
             });
 
-            CreateGmGroup("状态");
-            CreateBtn("打印当前状态", () =>
+            await CreateGmGroupAsync("状态");
+            await CreateBtnAsync("打印当前状态", () =>
             {
                 var gm = GameManager.Instance;
                 var gp = gm.CurrentGamePlay as CorePlayGamePlay;
@@ -181,9 +185,9 @@ namespace GameLogic
 
             #region 活动
 
-            CreateTopBtn("活动");
-            CreateGmGroup("活动");
-            CreateBtn("打开活动弹窗", () =>
+            await CreateTopBtnAsync("活动");
+            await CreateGmGroupAsync("活动");
+            await CreateBtnAsync("打开活动弹窗", () =>
             {
                 // TODO: 接入活动弹窗
                 Debug.Log("[GM] 活动弹窗（待实现）");
@@ -193,14 +197,14 @@ namespace GameLogic
 
             #region 其他
 
-            CreateTopBtn("其他");
-            CreateGmGroup("导航");
-            CreateBtn("返回主界面", () =>
+            await CreateTopBtnAsync("其他");
+            await CreateGmGroupAsync("导航");
+            await CreateBtnAsync("返回主界面", () =>
             {
                 GameManager.Instance.ReturnToHome();
                 Debug.Log("[GM] 返回主界面");
             });
-            CreateBtn("关闭GM面板", () =>
+            await CreateBtnAsync("关闭GM面板", () =>
             {
                 GameModule.UI.CloseUI<UIGM>();
                 Debug.Log("[GM] GM面板已关闭");

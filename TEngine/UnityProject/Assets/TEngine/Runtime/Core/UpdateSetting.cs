@@ -166,7 +166,9 @@ namespace TEngine
         /// </summary>
         public string GetResDownLoadPath()
         {
-            return Path.Combine(ResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
+            return Path.Combine(ResDownLoadPath).Replace("\\", "/");
+
+            // return Path.Combine(ResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
         }
 
         /// <summary>
@@ -174,7 +176,9 @@ namespace TEngine
         /// </summary>
         public string GetFallbackResDownLoadPath()
         {
-            return Path.Combine(FallbackResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
+            return Path.Combine(FallbackResDownLoadPath).Replace("\\", "/");
+
+            // return Path.Combine(FallbackResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
         }
 
         /// <summary>

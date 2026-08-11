@@ -8,13 +8,13 @@
         protected override void OnCreate()
         {
             base.OnCreate();
-            _showGmBtn = CreateWidget<XYButton>("GM");
+            _showGmBtn = CreateWidget<XYButton>("Panel/GM");
             _showGmBtn.OnAddListener(OnClickShowGM);
         }
 
         private void OnClickShowGM()
         {
-            GameModule.UI.ShowUI<UIGM>();
+            GameModule.UI.ShowUIAsync<UIGM>();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
 
@@ -12,6 +13,19 @@ namespace GameLogic.GamePlay.CorePlay.View
         public Vector3 Bottom;
         public Vector3 Left;
         public Vector3 Right;
+    }
+
+    public struct ContentViewLayoutData
+    {
+        public Vector3 Top;
+        public Vector3 Bottom;
+        public Vector3 Left;
+        public Vector3 Right;
+
+        /// <summary>可用世界宽度（Right.x - Left.x）</summary>
+        public float AvailableWidth;
+        /// <summary>可用世界高度（Top.y - Bottom.y）</summary>
+        public float AvailableHeight;
     }
 
     public class GameSlotView
@@ -55,13 +69,13 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
         }
 
-        //游戏开始 初始化slot
-        public void InitSlotView(int count)
+        //游戏开始 初始化slot（异步：对象池冷启动时需加载资源，逐个 await 分配）
+        public async UniTask InitSlotViewAsync(int count)
         {
             RecycleSlotView();
             for (int i = 0; i < count; i++)
             {
-                GameSlotViewItem viewItem = GameDataPoolManager.Instance.AllocateComponent<GameSlotViewItem>(
+                GameSlotViewItem viewItem = await GameDataPoolManager.Instance.AllocateComponentAsync<GameSlotViewItem>(
                     GameSlotViewItem.ResPath, _slotRoot);
                 viewItem.ShowEmptyState();
                 _slotItems.Add(viewItem);

@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.Localization;
 using GameLogic.UI;
 using RTLTMPro;
@@ -62,7 +63,7 @@ namespace GameLogic
             {
                 btnWidget.DoUnSelect();
             }
-            OnSelectTab(index);
+            OnSelectTab(index).Forget();
             _curIndex = index;
             if (_tabBtnWidgets.TryGetValue(index, out var unSelectBtnWidget))
             {
@@ -73,9 +74,18 @@ namespace GameLogic
         #endregion
 
         #region TabContent
-        
-        private void OnSelectTab(ETabType index)
+
+        private void EnableTabBtn(bool enable)
         {
+            foreach (var tabBtnWidget in _tabBtnWidgets)
+            {
+                tabBtnWidget.Value.EnableBtn(enable);
+            }
+        }
+
+        private async UniTaskVoid OnSelectTab(ETabType index)
+        {
+            EnableTabBtn(false);
             bool isRight = index < _curIndex;
             if (_curIndex != ETabType.None)
             {
@@ -83,21 +93,22 @@ namespace GameLogic
             }
             if (!_tabContentWidgets.TryGetValue(index, out var widget))
             {
-                widget = GenerateUiWidget(index);
+                widget = await GenerateUiWidget(index);
                 widget.OnInit(_tabContentRect);
                 _tabContentWidgets.Add(index, widget);
             }
             widget.OnEnter(_curIndex == ETabType.None , isRight);
+            EnableTabBtn(true);
         }
 
-        private UIHomeTabContentWidget GenerateUiWidget(ETabType index)
+        private async UniTask<UIHomeTabContentWidget> GenerateUiWidget(ETabType index)
         {
             switch (index)
             {
                 case ETabType.Level:
-                    return CreateWidgetByPath<UIHomeLevelTabContentWidget>(_tabContentRect , UIHomeLevelTabContentWidget.LevelPrefabPath);
+                    return await CreateWidgetByPathAsync<UIHomeLevelTabContentWidget>(_tabContentRect , UIHomeLevelTabContentWidget.LevelPrefabPath);
                 case ETabType.Setting:
-                    return CreateWidgetByPath<UIHomeSettingTabContentWidget>(_tabContentRect , UIHomeSettingTabContentWidget.SettingPrefabPath);
+                    return await CreateWidgetByPathAsync<UIHomeSettingTabContentWidget>(_tabContentRect , UIHomeSettingTabContentWidget.SettingPrefabPath);
                 default:
                     return null;
             }

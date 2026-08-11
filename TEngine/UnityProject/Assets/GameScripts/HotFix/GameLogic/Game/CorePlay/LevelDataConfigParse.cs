@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using UnityEngine;
 
@@ -28,10 +29,10 @@ namespace GameLogic.GamePlay.CorePlay
         public Dictionary<string, TextGraphicData> GraphicDataMap { get; private set; }
 
         /// <summary>加载所有关卡配置</summary>
-        public void LoadAllLevels()
+        public async UniTask LoadAllLevels()
         {
-            _levelDataAsset = GameModule.Resource.LoadAsset<TextLevelDataScriptableObject>(LevelDataResPath);
-            _graphicDataAsset = GameModule.Resource.LoadAsset<TextGraphicDataScriptableObject>(GraphicDataResPath);
+            _levelDataAsset = await GameModule.Resource.LoadAssetAsync<TextLevelDataScriptableObject>(LevelDataResPath);
+            _graphicDataAsset = await GameModule.Resource.LoadAssetAsync<TextGraphicDataScriptableObject>(GraphicDataResPath);
 
             // 构建 LevelName -> TextLevelData 映射
             AllLevels = new List<TextLevelData>();

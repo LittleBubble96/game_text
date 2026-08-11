@@ -1,5 +1,8 @@
-﻿using GameLogic.Localization;
+﻿using Cysharp.Threading.Tasks;
+using GameLogic.Localization;
 using RTLTMPro;
+using TMPro;
+using UnityEngine;
 
 namespace GameLogic.UI
 {
@@ -22,6 +25,7 @@ namespace GameLogic.UI
         {
             base.OnRefresh();
             RefreshText();
+            EnableBtn(true);
         }
 
         internal override void OnLanguageChanged()
@@ -35,9 +39,16 @@ namespace GameLogic.UI
             _playBtnName.text = LocalizationHelper.GetLocalText(LanguageKey.start_game_btn);
         }
         
+
+        private void EnableBtn(bool enable)
+        {
+            _playBtn.Enable = enable;
+        }
+
         private void OnStartLevel()
         {
-            GameManager.Instance.StartGame();
+            EnableBtn(false);
+            GameManager.Instance.StartGame().Forget();
         }
     }
 }

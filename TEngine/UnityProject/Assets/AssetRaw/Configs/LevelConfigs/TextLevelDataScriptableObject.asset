@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TextLevelDataScriptableObject
   m_EditorClassIdentifier: 
   levelDataList:
-  - levelName: Level_1
+  - levelName: Level_6
     baseCharacter: "\u6E56"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -48,7 +48,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000
     requiredAnswerCount: 0
-  - levelName: Level_2
+  - levelName: Level_4
     baseCharacter: "\u5409"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -73,7 +73,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 030000000400000005000000
     requiredAnswerCount: 0
-  - levelName: Level_3
+  - levelName: Level_1
     baseCharacter: "\u5E72"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -88,7 +88,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0100000002000000
     requiredAnswerCount: 3
-  - levelName: Level_4
+  - levelName: Level_2
     baseCharacter: "\u738B"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -118,7 +118,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 000000000200000003000000
     requiredAnswerCount: 7
-  - levelName: Level_5
+  - levelName: Level_3
     baseCharacter: "\u672C"
     positionOffset: {x: -2, y: -1}
     answers:
@@ -143,7 +143,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 000000000200000003000000
     requiredAnswerCount: 6
-  - levelName: Level_6
+  - levelName: Level_5
     baseCharacter: "\u5446"
     positionOffset: {x: -2, y: -1}
     answers:

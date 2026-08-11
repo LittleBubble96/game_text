@@ -1,5 +1,6 @@
 
 using System;
+using Cysharp.Threading.Tasks;
 using GameLogic;
 using TEngine;
 using UnityEngine;
@@ -16,24 +17,24 @@ namespace GameLogic
         protected override void Release(bool isShutdown){}
     
         /// <summary>
-        /// 创建Actor对象。
+        /// 创建Actor对象（异步加载资源，对象池冷启动时使用）。
         /// </summary>
         /// <param name="actorName">对象名称。</param>
         /// <param name="target">对象持有实例。</param>
         /// <returns></returns>
-        public static PoolObjectItem CreateComponent<T>(string resPath) where T : MonoBehaviour
+        public static async UniTask<PoolObjectItem> CreateComponentAsync<T>(string resPath) where T : MonoBehaviour
         {
             var gameObjectItem = MemoryPool.Acquire<PoolObjectItem>();
-            var itemObj = GameModule.Resource.LoadGameObject(resPath);
+            var itemObj = await GameModule.Resource.LoadGameObjectAsync(resPath);
             var target = itemObj.GetOrAddComponent<T>();
             gameObjectItem.Initialize(resPath, target);
             return gameObjectItem;
         }
-        
-        public static PoolObjectItem CreateObject(string resPath)
+
+        public static async UniTask<PoolObjectItem> CreateObjectAsync(string resPath)
         {
             var gameObjectItem = MemoryPool.Acquire<PoolObjectItem>();
-            var target = GameModule.Resource.LoadGameObject(resPath);
+            var target = await GameModule.Resource.LoadGameObjectAsync(resPath);
             gameObjectItem.Initialize(resPath, target);
             return gameObjectItem;
         }
@@ -64,17 +65,17 @@ namespace GameLogic
         }
         
         
-        public void RegisterComponentPool<T>(string resPath, int capacity = 10) where T : MonoBehaviour
+        public async UniTask RegisterComponentPoolAsync<T>(string resPath, int capacity = 10) where T : MonoBehaviour
         {
             IObjectPool<PoolObjectItem> _pool = null;
             if (!_poolModule.HasObjectPool<PoolObjectItem>(resPath))
             {
                 _pool = _poolModule.CreateSingleSpawnObjectPool<PoolObjectItem>(resPath, capacity);
-                
+
                 for (int i = 0; i < capacity; i++)
                 {
-                    var ret = PoolObjectItem.CreateComponent<T>(resPath);
-                    _pool.Register(ret,false);
+                    var ret = await PoolObjectItem.CreateComponentAsync<T>(resPath);
+                    _pool.Register(ret, false);
                     var obj = ret.Target as T;
                     obj.transform.SetParent(_poolTransform);
                 }
@@ -89,17 +90,17 @@ namespace GameLogic
             }
         }
         
-        public void RegisterGameObjectPool(string resPath, int capacity = 10)
+        public async UniTask RegisterGameObjectPoolAsync(string resPath, int capacity = 10)
         {
             IObjectPool<PoolObjectItem> _pool = null;
             if (!_poolModule.HasObjectPool<PoolObjectItem>(resPath))
             {
                 _pool = _poolModule.CreateSingleSpawnObjectPool<PoolObjectItem>(resPath, capacity);
-                
+
                 for (int i = 0; i < capacity; i++)
                 {
-                    var ret = PoolObjectItem.CreateObject(resPath);
-                    _pool.Register(ret,false);
+                    var ret = await PoolObjectItem.CreateObjectAsync(resPath);
+                    _pool.Register(ret, false);
                     var obj = ret.Target as GameObject;
                     obj.transform.SetParent(_poolTransform);
                 }
@@ -131,55 +132,55 @@ namespace GameLogic
         
         
         /// <summary>
-        /// 组件对象
+        /// 组件对象（异步：对象池有可用实例时走 Spawn 同步返回，冷启动时异步加载资源）
         /// </summary>
         /// <param name="resPath"></param>
         /// <param name="parent"></param>
         /// <param name="capacity"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public T AllocateComponent<T>(string resPath, Transform parent, int capacity = 10) where T : MonoBehaviour
+        public async UniTask<T> AllocateComponentAsync<T>(string resPath, Transform parent, int capacity = 10) where T : MonoBehaviour
         {
             //string typeName = typeof(T).Name;
             PoolObjectItem ret;
             IObjectPool<PoolObjectItem> _pool = GetAndCreateObjectPool(resPath, capacity);
-            
+
             if (_pool.CanSpawn(resPath))
             {
                 ret = _pool.Spawn(resPath);
             }
             else
             {
-                ret = PoolObjectItem.CreateComponent<T>(resPath);
-                _pool.Register(ret,true);
+                ret = await PoolObjectItem.CreateComponentAsync<T>(resPath);
+                _pool.Register(ret, true);
             }
 
             var obj = ret.Target as T;
             obj.transform.SetParent(parent);
             return obj;
         }
-        
+
         /// <summary>
-        /// 实体对象
+        /// 实体对象（异步：对象池有可用实例时走 Spawn 同步返回，冷启动时异步加载资源）
         /// </summary>
         /// <param name="resPath"></param>
         /// <param name="parent"></param>
         /// <param name="capacity"></param>
         /// <returns></returns>
-        public GameObject AllocateGameObject(string resPath, Transform parent, int capacity = 10)
+        public async UniTask<GameObject> AllocateGameObjectAsync(string resPath, Transform parent, int capacity = 10)
         {
             //string typeName = typeof(T).Name;
             PoolObjectItem ret;
             IObjectPool<PoolObjectItem> _pool = GetAndCreateObjectPool(resPath, capacity);
-            
+
             if (_pool.CanSpawn(resPath))
             {
                 ret = _pool.Spawn(resPath);
             }
             else
             {
-                ret = PoolObjectItem.CreateObject(resPath);
-                _pool.Register(ret,true);
+                ret = await PoolObjectItem.CreateObjectAsync(resPath);
+                _pool.Register(ret, true);
             }
 
             var obj = ret.Target as GameObject;

@@ -1,4 +1,5 @@
 using Luban;
+using Cysharp.Threading.Tasks;
 
 {{namespace_with_grace_begin __namespace}}
 public partial class {{__name}}
@@ -29,15 +30,25 @@ public partial class {{__name}}
             m_{{table.name}}.ResolveRef(this);
         }
     }
+    public async UniTask {{table.name}}Async() 
+    {
+        if (m_{{table.name}} != null)
+        {
+            return;
+        }
+        m_{{table.name}} = new {{table.full_name}}(await defaultLoaderAsync("{{table.output_data_file}}"));
+        m_{{table.name}}.ResolveRef(this);
+    }
     {{~end~}}
 
     #endregion
 
     System.Func<string, ByteBuf> defaultLoader;
-
-    public {{__name}}(System.Func<string, ByteBuf> loader)
+    
+    public Tables(System.Func<string, ByteBuf> loader, System.Func<string, UniTask<ByteBuf>> loaderAsync)
     {
         SetDefaultLoader(loader);
+        SetDefaultLoaderAsync(loaderAsync);
         Init();
     }
     
@@ -46,10 +57,19 @@ public partial class {{__name}}
         defaultLoader = null;
         defaultLoader = loader;
     }
-
+    
+    System.Func<string, UniTask<ByteBuf>> defaultLoaderAsync;
+    
+    public void SetDefaultLoaderAsync(System.Func<string, UniTask<ByteBuf>> loaderAsync)
+    {
+        defaultLoaderAsync = null;
+        defaultLoaderAsync = loaderAsync;
+    }
     //public partial void Init();
-
-    public void Init(){}
+    
+    public void Init()
+    {
+    }
 }
 
 {{namespace_with_grace_end __namespace}}

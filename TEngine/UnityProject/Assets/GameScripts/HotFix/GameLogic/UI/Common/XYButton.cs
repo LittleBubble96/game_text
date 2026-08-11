@@ -8,6 +8,8 @@ namespace GameLogic
         
         public bool Interactable { get => _button.interactable; set => _button.interactable = value; }
 
+        public bool Enable { get => _button.enabled; set => _button.enabled = value; }
+
         protected override void BindMemberProperty()
         {
             base.BindMemberProperty();

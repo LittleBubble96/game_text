@@ -61,5 +61,10 @@ namespace GameLogic
             }, UnSelectFlexibleWidth, 0.18f);
             _isSelect = false;
         }
+
+        public void EnableBtn(bool enable)
+        {
+            _button.Interactable = enable;
+        }
     }
 }

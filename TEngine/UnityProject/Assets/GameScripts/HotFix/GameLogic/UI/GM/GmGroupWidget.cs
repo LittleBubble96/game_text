@@ -1,4 +1,5 @@
 ﻿using System;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -52,17 +53,17 @@ namespace GameLogic
                 _title.text = title;
         }
 
-        /// <summary>创建一个纯按钮 GM 项</summary>
-        public void CreateBtn(string label, Action action)
+        /// <summary>创建一个纯按钮 GM 项（异步加载资源）</summary>
+        public async UniTask CreateBtnAsync(string label, Action action)
         {
-            var widget = CreateWidgetByPath<GmBtnAndInputItemWidget>(_content, BtnAndInputRes);
+            var widget = await CreateWidgetByPathAsync<GmBtnAndInputItemWidget>(_content, BtnAndInputRes);
             widget.InitBtn(label, action);
         }
 
-        /// <summary>创建一个带输入框的按钮 GM 项</summary>
-        public void CreateBtnAndInput(string label, Action<string> action)
+        /// <summary>创建一个带输入框的按钮 GM 项（异步加载资源）</summary>
+        public async UniTask CreateBtnAndInputAsync(string label, Action<string> action)
         {
-            var widget = CreateWidgetByPath<GmBtnAndInputItemWidget>(_content, BtnAndInputRes);
+            var widget = await CreateWidgetByPathAsync<GmBtnAndInputItemWidget>(_content, BtnAndInputRes);
             widget.InitBtnAndInput(label, action);
         }
     }

@@ -6,6 +6,7 @@ using GameLogic.View;
 using UnityEngine;
 
 #if UNITY_EDITOR
+using Cysharp.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
@@ -734,7 +735,7 @@ public class TextLevelEditorWindow : EditorWindow
         ResetStrokeHighlight();
     }
 
-    private void RenderBaseCharacterInScene(string ch)
+    private async void RenderBaseCharacterInScene(string ch)
     {
         if (_graphicDataAsset == null)
         {
@@ -778,7 +779,9 @@ public class TextLevelEditorWindow : EditorWindow
         TextLevelData currentLevel = _levelDataAsset.levelDataList[_selectedLevelIndex];
         drawer.PositionOffset = currentLevel.positionOffset;
 
-        drawer.Draw(gd, showStrokeIndices: true);
+        // 编辑器预览不经过 loading 预加载，这里先确保材质模板就绪（静态缓存，幂等）
+        await DrawCharacter.PreloadStrokeMaterialAsync();
+        await drawer.DrawAsync(gd, showStrokeIndices: true);
 
         // 标记场景已修改
         EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());

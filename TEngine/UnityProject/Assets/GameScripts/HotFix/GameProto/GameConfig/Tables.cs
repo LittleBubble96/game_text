@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using Luban;
+using Cysharp.Threading.Tasks;
 
 namespace GameConfig
 {
@@ -33,6 +34,15 @@ public partial class Tables
             m_TbItem.ResolveRef(this);
         }
     }
+    public async UniTask TbItemAsync() 
+    {
+        if (m_TbItem != null)
+        {
+            return;
+        }
+        m_TbItem = new item.TbItem(await defaultLoaderAsync("item_tbitem"));
+        m_TbItem.ResolveRef(this);
+    }
     private language.TbLanguage m_TbLanguage;
     public language.TbLanguage TbLanguage 
     {
@@ -50,6 +60,15 @@ public partial class Tables
             m_TbLanguage = value;
             m_TbLanguage.ResolveRef(this);
         }
+    }
+    public async UniTask TbLanguageAsync() 
+    {
+        if (m_TbLanguage != null)
+        {
+            return;
+        }
+        m_TbLanguage = new language.TbLanguage(await defaultLoaderAsync("language_tblanguage"));
+        m_TbLanguage.ResolveRef(this);
     }
     private language.TbLanguageContent m_TbLanguageContent;
     public language.TbLanguageContent TbLanguageContent 
@@ -69,6 +88,15 @@ public partial class Tables
             m_TbLanguageContent.ResolveRef(this);
         }
     }
+    public async UniTask TbLanguageContentAsync() 
+    {
+        if (m_TbLanguageContent != null)
+        {
+            return;
+        }
+        m_TbLanguageContent = new language.TbLanguageContent(await defaultLoaderAsync("language_tblanguagecontent"));
+        m_TbLanguageContent.ResolveRef(this);
+    }
     private level.TbLevel m_TbLevel;
     public level.TbLevel TbLevel 
     {
@@ -86,6 +114,15 @@ public partial class Tables
             m_TbLevel = value;
             m_TbLevel.ResolveRef(this);
         }
+    }
+    public async UniTask TbLevelAsync() 
+    {
+        if (m_TbLevel != null)
+        {
+            return;
+        }
+        m_TbLevel = new level.TbLevel(await defaultLoaderAsync("level_tblevel"));
+        m_TbLevel.ResolveRef(this);
     }
     private reward.TbReward m_TbReward;
     public reward.TbReward TbReward 
@@ -105,14 +142,24 @@ public partial class Tables
             m_TbReward.ResolveRef(this);
         }
     }
+    public async UniTask TbRewardAsync() 
+    {
+        if (m_TbReward != null)
+        {
+            return;
+        }
+        m_TbReward = new reward.TbReward(await defaultLoaderAsync("reward_tbreward"));
+        m_TbReward.ResolveRef(this);
+    }
 
     #endregion
 
     System.Func<string, ByteBuf> defaultLoader;
-
-    public Tables(System.Func<string, ByteBuf> loader)
+    
+    public Tables(System.Func<string, ByteBuf> loader, System.Func<string, UniTask<ByteBuf>> loaderAsync)
     {
         SetDefaultLoader(loader);
+        SetDefaultLoaderAsync(loaderAsync);
         Init();
     }
     
@@ -121,10 +168,19 @@ public partial class Tables
         defaultLoader = null;
         defaultLoader = loader;
     }
-
+    
+    System.Func<string, UniTask<ByteBuf>> defaultLoaderAsync;
+    
+    public void SetDefaultLoaderAsync(System.Func<string, UniTask<ByteBuf>> loaderAsync)
+    {
+        defaultLoaderAsync = null;
+        defaultLoaderAsync = loaderAsync;
+    }
     //public partial void Init();
-
-    public void Init(){}
+    
+    public void Init()
+    {
+    }
 }
 
 }

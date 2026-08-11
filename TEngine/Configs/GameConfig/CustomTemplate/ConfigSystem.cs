@@ -1,4 +1,5 @@
 using System.IO;
+using Cysharp.Threading.Tasks;
 using Luban;
 using GameConfig;
 using TEngine;
@@ -37,7 +38,7 @@ public class ConfigSystem
     /// </summary>
     public void Load()
     {
-        _tables = new Tables(LoadByteBuf);
+        _tables = new Tables(LoadByteBuf,LoadByteBufAsync);
         _init = true;
     }
 
@@ -56,12 +57,28 @@ public class ConfigSystem
         byte[] bytes = textAsset.bytes;
         return new ByteBuf(bytes);
     }
+    
+    /// <summary>
+    /// 加载二进制配置。
+    /// </summary>
+    /// <param name="file">FileName</param>
+    /// <returns>ByteBuf</returns>
+    private async UniTask<ByteBuf> LoadByteBufAsync(string file)
+    {
+        if (_resourceModule == null)
+        {
+            _resourceModule = ModuleSystem.GetModule<IResourceModule>();
+        }
+        TextAsset textAsset = await _resourceModule.LoadAssetAsync<TextAsset>(file);
+        byte[] bytes = textAsset.bytes;
+        return new ByteBuf(bytes);
+    }
 
 #if UNITY_EDITOR
 
     public void LoadEditor()
     {
-        _tables = new Tables(AttrByteLoaderEditor);
+        _tables = new Tables(AttrByteLoaderEditor , null);
         _init = true;
     }
 

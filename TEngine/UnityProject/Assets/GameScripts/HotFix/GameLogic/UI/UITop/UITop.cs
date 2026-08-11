@@ -37,8 +37,8 @@ namespace GameLogic
 
         protected override void ScriptGenerator()
         {
-            _coinTf = FindChildComponent<RectTransform>("CoinSlot");
-            _backTf = FindChildComponent<RectTransform>("BackSlot");
+            _coinTf = FindChildComponent<RectTransform>("Panel/CoinSlot");
+            _backTf = FindChildComponent<RectTransform>("Panel/BackSlot");
 
             // 获取或添加 CanvasGroup（用于淡入淡出）
             if (_coinTf != null)
@@ -46,7 +46,7 @@ namespace GameLogic
                 _coinCanvasGroup = _coinTf.GetComponent<CanvasGroup>();
                 if (_coinCanvasGroup == null)
                     _coinCanvasGroup = _coinTf.gameObject.AddComponent<CanvasGroup>();
-                _coinCountText = FindChildComponent<TMP_Text>("CoinSlot/root/Coin/Text");
+                _coinCountText = FindChildComponent<TMP_Text>("Panel/CoinSlot/root/Coin/Text");
             }
 
             if (_backTf != null)

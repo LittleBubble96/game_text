@@ -30,6 +30,8 @@ namespace Procedure
         /// </summary>
         private LoadAssetCallbacks m_PreLoadAssetCallbacks;
 
+        private bool _isShaderLoadComplete = false;
+
         protected override void OnInit(ProcedureOwner procedureOwner)
         {
             base.OnInit(procedureOwner);
@@ -49,6 +51,7 @@ namespace Procedure
             GameEvent.Send("UILoadUpdate.RefreshVersion");
 
             PreloadResources();
+            RequestShaderWarmUp().Forget();
         }
 
         protected override void OnUpdate(ProcedureOwner procedureOwner, float elapseSeconds, float realElapseSeconds)
@@ -96,7 +99,32 @@ namespace Procedure
                 return;
             }
 
+            if (!_isShaderLoadComplete)
+            {
+                return;
+            }
             ChangeProcedureToLoadAssembly();
+        }
+        
+        private async UniTaskVoid RequestShaderWarmUp()
+        {
+            _isShaderLoadComplete = false;
+            // await UniTask.DelayFrame(1);
+            ResourceRequest shaderVariantCollectionRequest = 
+                 Resources.LoadAsync<ShaderVariantCollection>("MyShaderVariants");
+            await shaderVariantCollectionRequest.ToUniTask();
+            ShaderVariantCollection shaderVariantCollection = shaderVariantCollectionRequest.asset as ShaderVariantCollection;
+            if (shaderVariantCollection == null)
+            {
+                Log.Warning($"Load shaderVariantCollection failed.");
+                return;
+            }
+            //首次和每次shader更新后
+            if (shaderVariantCollection.isWarmedUp == false)
+            {
+                shaderVariantCollection.WarmUp();
+            }
+            _isShaderLoadComplete = true;
         }
 
 

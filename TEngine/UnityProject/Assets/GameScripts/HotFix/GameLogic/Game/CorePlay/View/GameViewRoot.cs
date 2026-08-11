@@ -11,6 +11,9 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         [SerializeField]
         private Transform characterRoot;
+
+        [SerializeField]
+        private Transform characterIkRoot;
         
         [SerializeField]
         private Transform slotRoot;
@@ -18,7 +21,9 @@ namespace GameLogic.GamePlay.CorePlay.View
         private Sequence _rootSeq;
         
         public Transform CharacterRoot => characterRoot;
-        
+
+        public Transform CharacterIkRoot => characterIkRoot;
+
         public Transform SlotRoot => slotRoot;
 
         public void Init()

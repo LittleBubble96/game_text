@@ -33,19 +33,18 @@ namespace GameLogic
         
         private CorePlayPropWidget _propWidget;
         
-        private CorePlayGamePlay CorePlayGamePlay => GameManager.Instance?.CurrentGamePlay as CorePlayGamePlay;
 
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
-            _levelNameText = FindChildComponent<RTLTextMeshPro>("Titile");
+            _levelNameText = FindChildComponent<RTLTextMeshPro>("Panel/Titile");
             // _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
-            _answerProgressText = FindChildComponent<RTLTextMeshPro>("AnswerProgress");
-            _submitBtnText = FindChildComponent<RTLTextMeshPro>("Buttom/SubmitBtn/bg/m_text");
-            _submitButton = CreateWidget<XYButton>("Buttom/SubmitBtn");
-            _resultTipText = FindChildComponent<TMP_Text>("ResultTip");
-            _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Layout");
-            _propWidget = CreateWidget<CorePlayPropWidget>("Buttom/Props/TipProp");
+            _answerProgressText = FindChildComponent<RTLTextMeshPro>("Panel/AnswerProgress");
+            _submitBtnText = FindChildComponent<RTLTextMeshPro>("Panel/Buttom/SubmitBtn/bg/m_text");
+            _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
+            _resultTipText = FindChildComponent<TMP_Text>("Panel/ResultTip");
+            _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Panel/Layout");
+            _propWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/TipProp");
             _submitButton.OnAddListener(OnSubmit);
         }
         

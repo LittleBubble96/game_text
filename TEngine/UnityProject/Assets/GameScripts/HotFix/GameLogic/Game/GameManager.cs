@@ -1,9 +1,11 @@
 using System;
 using System.IO;
+using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
 using GameLogic.GamePlay.CorePlay.View;
+using GameLogic.View;
 using TEngine;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -36,16 +38,13 @@ namespace GameLogic
         protected override void OnInit()
         {
             base.OnInit();
-            InitModules();
             CreateAppPauseBridge();
         }
-
-        /// <summary>
-        /// Active：在 Singleton.Instance 创建后调用，用于加载缓存使设置数据（语言等）即时可用。
-        /// </summary>
-        public override void Active()
+        
+        
+        public async UniTask InitMgr()
         {
-            base.Active();
+            await InitModules();
             _cacheManager?.Load();
 
             // 从缓存同步初始关卡ID到 gameplay（避免 _currentLevelId 长期为 -1）
@@ -96,16 +95,19 @@ namespace GameLogic
         
         // ================ 初始化 ================
 
-        private void InitModules()
+        private async UniTask InitModules()
         {
             _levelConfig = new LevelDataConfigParse();
-            _levelConfig.LoadAllLevels();
+            await _levelConfig.LoadAllLevels();
 
             _cacheManager = new GameCacheManager();
 
             _corePlayGamePlay = new CorePlayGamePlay();
             _corePlayGamePlay.Initialize(_levelConfig);
             CurrentGamePlay = _corePlayGamePlay;
+
+            // 预加载笔画材质模板（loading 阶段异步，避免运行时 Draw 卡帧 + shader 随资源进包）
+            await DrawCharacter.PreloadStrokeMaterialAsync();
 
             // 绑定全局通关事件 → 自动存档 + 弹出结算
             GameEvent.AddEventListener<int>(EventDefine.Event_LevelCompleted, OnLevelCompleted);
@@ -115,13 +117,12 @@ namespace GameLogic
 
         // ================ 启动玩法 ================
 
-        public void StartGame()
+        public async UniTask StartGame()
         {
-            GameModule.UI.CloseUI<UIHome>();
-            StartCorePlay();
+            await StartCorePlay();
         }
 
-        private void StartCorePlay()
+        private async UniTask StartCorePlay()
         {
             if (_levelConfig.LevelCount == 0)
             {
@@ -140,7 +141,7 @@ namespace GameLogic
             // 先初始化视图，再加载关卡（确保视图能响应 OnLevelLoaded）
             if (_corePlayView == null)
             {
-                _corePlayView = GenerateCorePlayView();
+                _corePlayView = await GenerateCorePlayViewAsync();
             }
             _corePlayView.Initialize(CurrentGamePlay, _levelConfig);
             _corePlayView.OnEnterGameAnim();
@@ -150,15 +151,16 @@ namespace GameLogic
 
             Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelId}");
             GameModule.UI.ShowUIAsync<UICorePlay>();
+            GameModule.UI.CloseUI<UIHome>();
         }
         
-        private CorePlayView GenerateCorePlayView()
+        private async UniTask<CorePlayView> GenerateCorePlayViewAsync()
         {
             GameObject viewGo = new GameObject("CorePlayView");
             viewGo.transform.position = Vector3.zero;
             viewGo.transform.localScale = Vector3.one;
             var view = viewGo.AddComponent<CorePlayView>();
-            view.OnCreate();
+            await view.OnCreateAsync();
             return view;
         }
 

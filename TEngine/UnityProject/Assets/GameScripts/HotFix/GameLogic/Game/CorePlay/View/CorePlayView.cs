@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.View;
@@ -39,20 +40,30 @@ namespace GameLogic.GamePlay.CorePlay.View
         private GameViewRoot _gameViewRoot;
         private GameSlotView _gameSlotView;
 
+        // ================ Character 缩放（按 UI 可用区域限制 CharacterRoot） ================
+        /// <summary>UI 传来的可用世界宽度（Content Left→Right），<=0 表示尚未收到布局</summary>
+        private float _availableWidth = -1f;
+        /// <summary>UI 传来的可用世界高度（Content Bottom→Top），<=0 表示尚未收到布局</summary>
+        private float _availableHeight = -1f;
+        /// <summary>可用区域中心（世界坐标，由 Left/Right/Top/Bottom 取中点），未收到布局前为 false</summary>
+        private Vector3 _layoutCenter = Vector3.zero;
+        private bool _hasLayoutCenter = false;
+
         // ================ 属性 ================
 
 
         // ================ 动态初始化 ================
 
-        public void OnCreate()
+        public async UniTask OnCreateAsync()
         {
-             GameObject gameViewRoot = GameModule.Resource.LoadGameObject("GameViewRoot" , transform);
-             if (gameViewRoot)
-             {
-                 _gameViewRoot = gameViewRoot.GetComponent<GameViewRoot>();
-                 _gameViewRoot?.Init();
-             }
-             CreateSlotView();
+            // 异步加载 GameViewRoot：上层调用方必须 await 本方法，确保 _gameViewRoot 就绪后再 Initialize
+            GameObject gameViewRoot = await GameModule.Resource.LoadGameObjectAsync("GameViewRoot", transform, gameObject.GetCancellationTokenOnDestroy());
+            if (gameViewRoot)
+            {
+                _gameViewRoot = gameViewRoot.GetComponent<GameViewRoot>();
+                _gameViewRoot?.Init();
+            }
+            CreateSlotView();
         }
 
         private void CreateSlotView()
@@ -100,12 +111,15 @@ namespace GameLogic.GamePlay.CorePlay.View
             GameEvent.AddEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
             GameEvent.AddEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
 
+            // 绑定 Character 渲染区布局事件（UI 可用宽高 → CharacterRoot 缩放）
+            GameEvent.AddEventListener<ContentViewLayoutData>(EventDefine.Event_CharacterLayoutUpdate, OnCharacterLayoutUpdate);
+
             _isInitialized = true;
 
-            // 如果当前已有关卡数据，立刻渲染
+            // 如果当前已有关卡数据，立刻渲染（异步，fire-and-forget 保持 Initialize 同步签名）
             if (_gamePlay is CorePlayGamePlay cp && cp.CurrentLevelData != null)
             {
-                RenderLevel(cp.CurrentLevelData);
+                RenderLevelAsync(cp.CurrentLevelData).Forget();
             }
             Debug.Log("[CorePlayView] 初始化完成 (DrawCharacter + StrokeInputHandler 动态创建)");
         }
@@ -161,19 +175,71 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             GameEvent.RemoveEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
             GameEvent.RemoveEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
+            GameEvent.RemoveEventListener<ContentViewLayoutData>(EventDefine.Event_CharacterLayoutUpdate, OnCharacterLayoutUpdate);
+        }
+
+        // ================ Character 缩放 ================
+
+        /// <summary>UI 可用区域变更回调：缓存可用宽高与中心，并立即应用缩放与居中定位</summary>
+        private void OnCharacterLayoutUpdate(ContentViewLayoutData layout)
+        {
+            _availableWidth = layout.AvailableWidth;
+            _availableHeight = layout.AvailableHeight;
+
+            // 由上下左右四个点取可用区域中心（矩形对角线交点）
+            _layoutCenter = new Vector3(
+                (layout.Left.x + layout.Right.x) * 0.5f,
+                (layout.Bottom.y + layout.Top.y) * 0.5f,
+                0f);
+            _hasLayoutCenter = true;
+
+            ApplyCharacterScale();
+        }
+
+        /// <summary>
+        /// 按 UI 可用区域与 ViewDefine.CharacterWidth/Height 取最小缩放，设给 CharacterRoot；
+        /// 同时把 CharacterRoot 平移到可用区域中心，使字符在可用区内居中。
+        /// 时序兜底：可用尺寸未到(<0)或基字尺寸为 0 时跳过，待另一方就绪后再调本方法。
+        /// </summary>
+        private void ApplyCharacterScale()
+        {
+            if (_gameViewRoot == null || _gameViewRoot.CharacterRoot == null) return;
+
+            float charW = ViewDefine.CharacterWidth;
+            float charH = ViewDefine.CharacterHeight;
+            if (charW <= 0f || charH <= 0f) return;
+            if (_availableWidth < 0f || _availableHeight < 0f) return;
+
+            // 可用 / 基字，取最小保证完整可见；钳制 1 不放大（仅缩放收边）
+            float scaleW = _availableWidth / charW;
+            float scaleH = _availableHeight / charH;
+            float scale = Mathf.Min(scaleW, scaleH, 1f);
+
+            _gameViewRoot.CharacterIkRoot.localScale = new Vector3(scale, scale, 1f);
+
+            // 居中定位：缩放围绕 CharacterRoot 锚点，故直接把 CharacterRoot 平移到可用区中心
+            if (_hasLayoutCenter)
+            {
+                _gameViewRoot.CharacterIkRoot.position = _layoutCenter;
+            }
         }
 
         // ================ 关卡渲染 ================
 
-        private void OnLevelLoaded(TextLevelData levelData)
+        // OnLevelLoaded 是 Action<TextLevelData> 事件回调，无法改为返回 UniTask；
+        // slot 分配已异步化，这里用 async void 串行 await，保证「分配完成 → 恢复答案」的顺序。
+        private async void OnLevelLoaded(TextLevelData levelData)
         {
-            RenderLevel(levelData);
+            await RenderLevelAsync(levelData);
 
             // 初始化 slot 视图（答案数量）
             int requiredCount = (_gamePlay as CorePlayGamePlay)?.GetRequiredAnswerCount() ?? levelData.answers.Count;
-            _gameSlotView?.InitSlotView(requiredCount);
+            if (_gameSlotView != null)
+            {
+                await _gameSlotView.InitSlotViewAsync(requiredCount);
+            }
 
-            // 恢复已找到的答案
+            // 恢复已找到的答案（须等 slot 分配完成）
             if (_gamePlay is CorePlayGamePlay corePlay)
             {
                 var foundAnswers = corePlay.GetFoundAnswerCharacters();
@@ -185,7 +251,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         }
 
         /// <summary>渲染关卡：解析数据并绘制笔画</summary>
-        public void RenderLevel(TextLevelData levelData)
+        public async UniTask RenderLevelAsync(TextLevelData levelData)
         {
             if (_drawCharacter == null)
             {
@@ -200,13 +266,16 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
 
             _drawCharacter.PositionOffset = levelData.positionOffset;
-            _drawCharacter.Draw(graphicData, showStrokeIndices: false);
+            await _drawCharacter.DrawAsync(graphicData, showStrokeIndices: false);
 
             // 更新 StrokeInputHandler 引用（Draw 会重建子物体）
             if (_strokeInputHandler != null)
             {
                 _strokeInputHandler.Initialize(_drawCharacter, Camera.main, OnStrokeClicked);
             }
+
+            // 绘制完成后应用一次缩放（处理 UI 布局事件先于绘制到达的情况，此时用缓存可用尺寸）
+            ApplyCharacterScale();
 
             Debug.Log($"[CorePlayView] 渲染关卡: 『{levelData.baseCharacter}』, {graphicData.strokes.Count} 笔画");
         }

@@ -74,7 +74,7 @@ namespace GameLogic
                 _btnNextGo.SetActive(_hasNextLevel);
             }
 
-            // 加载奖励数据
+            // 加载奖励数据（内部异步加载奖励图标，fire-and-forget）
             LoadRewardData();
 
             RefreshText();
@@ -118,12 +118,12 @@ namespace GameLogic
 
             _rewardMap = new Dictionary<int, int>(confReward.Rewards);
 
-            // 初始化奖励Widget
-            RefreshRewardWidgets();
+            // 初始化奖励Widget（异步加载图标）
+            RefreshRewardWidgetsAsync().Forget();
         }
 
-        /// <summary>刷新奖励Widget显示</summary>
-        private void RefreshRewardWidgets()
+        /// <summary>刷新奖励Widget显示（异步加载奖励图标）</summary>
+        private async UniTaskVoid RefreshRewardWidgetsAsync()
         {
             var tbItem = ConfigSystem.Instance.Tables.TbItem;
 
@@ -134,7 +134,7 @@ namespace GameLogic
                 if (itemCfg != null && _rewardItemCoinWidget != null)
                 {
                     _rewardItemCoinWidget.Visible = true;
-                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : GameModule.Resource.LoadAsset<Sprite>(itemCfg.ResIcon);
+                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : await GameModule.Resource.LoadAssetAsync<Sprite>(itemCfg.ResIcon);
                     _rewardItemCoinWidget.SetReward(sprite, coinCount);
                 }
             }
@@ -150,7 +150,7 @@ namespace GameLogic
                 if (itemCfg != null && _rewardItemTipPropWidget != null)
                 {
                     _rewardItemTipPropWidget.Visible = true;
-                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : GameModule.Resource.LoadAsset<Sprite>(itemCfg.ResIcon);
+                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : await GameModule.Resource.LoadAssetAsync<Sprite>(itemCfg.ResIcon);
                     _rewardItemTipPropWidget.SetReward(sprite, tipCount);
                 }
             }

@@ -14,7 +14,7 @@ namespace GameLogic
             base.OnInit();
             detector = new CircleGestureDetector();
 #if UNITY_EDITOR
-            GameModule.UI.ShowUI<UIShowGM>();
+            GameModule.UI.ShowUIAsync<UIShowGM>();
 #endif
         }
         
@@ -25,14 +25,14 @@ namespace GameLogic
                 if (GameModule.UI.HasWindow<UIGM>())
                     GameModule.UI.HideUI<UIGM>();
                 else
-                    GameModule.UI.ShowUI<UIGM>();
+                    GameModule.UI.ShowUIAsync<UIGM>();
             }
 
             bool isCircle = detector.Update();
             bool isOn = GameModule.UI.HasWindow<UIShowGM>();
             if (isCircle && !isOn)
             {
-                GameModule.UI.ShowUI<UIShowGM>();
+                GameModule.UI.ShowUIAsync<UIShowGM>();
                 detector.Reset();
             }
 

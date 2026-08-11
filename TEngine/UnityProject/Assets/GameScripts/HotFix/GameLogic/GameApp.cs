@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Reflection;
+using Cysharp.Threading.Tasks;
 using GameLogic;
 using GameLogic.Localization;
 #if ENABLE_OBFUZ
@@ -31,19 +32,35 @@ public partial class GameApp
         Log.Warning("======= Entrance GameApp =======");
         Utility.Unity.AddDestroyListener(Release);
         Log.Warning("======= StartGameLogic =======");
-        StartGameLogic();
-        GMSingle.Instance.Activate();
+        StartGameLogic().Forget();
     }
     
-    private static void StartGameLogic()
+    private static async UniTask StartGameLogic()
     {
+        Log.Warning("======= StartGameLogic Init =======");
+        await InitConfig();
+        Log.Warning("======= InitConfig Complete =======");
         // GameEvent.Get<ILoginUI>().ShowLoginUI();
-        GameManager.Instance.Active();
+        await GameManager.Instance.InitMgr();
+        Log.Warning("======= GameManager.Instance.InitMgr Complete =======");
         // 加载设置（语言等），初始化多语言管理器
         GameLocalizationManager.Instance.Active();
+        Log.Warning("======= GameLocalizationManager.Instance.Active Complete =======");
         // 初始化 UI
-        GameModule.UI.ShowUIAsync<UITop>();
+        await GameModule.UI.ShowUIAsyncAwait<UITop>();
+        Log.Warning("======= UITop Active Complete =======");
         GameModule.UI.ShowUIAsync<UIHome>();
+        GMSingle.Instance.Activate();
+        Log.Warning("======= StartGameLogic Complete =======");
+    }
+    
+    private static async UniTask InitConfig()
+    {
+        await ConfigSystem.Instance.Tables.TbLevelAsync();
+        await ConfigSystem.Instance.Tables.TbItemAsync();
+        await ConfigSystem.Instance.Tables.TbLanguageAsync();
+        await ConfigSystem.Instance.Tables.TbRewardAsync();
+
     }
     
     private static void Release()
