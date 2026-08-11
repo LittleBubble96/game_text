@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using WeChatWASM;
 using YooAsset;
 using YooAsset.Editor;
 using BuildResult = UnityEditor.Build.Reporting.BuildResult;
@@ -71,6 +72,27 @@ namespace TEngine
             var config = BuildConfig.CreateDefault();
             config.BuildHotFixDll = true;
             BuildWithConfig(config, buildPlayer: false);
+
+            // 将 StreamingAssets 拷贝到指定目录（清空原目录后拷贝，不拷贝 .meta）
+            CopyStreamingAssetsToDirectory("../../output/webgl/StreamingAssets/package");
+        }
+        
+        [MenuItem("TEngine/Build/一键打包Webgl", false, 30)]
+        public static void AutomationBuildWebgl()
+        {
+            var config = BuildConfig.CreateDefault();
+            config.BuildTarget = BuildTarget.WebGL;
+            config.OutputRoot = Application.dataPath + "/../Builds/WebGL";
+            config.BuildPlayer = false;
+            BuildWithConfig(config, buildPlayer: false);
+            if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+            {
+                Debug.Log("[Build] WebGL 转换为微信小游戏成功");
+            }
+            else
+            {
+                Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
+            }
         }
 
         [MenuItem("TEngine/Build/一键打包Window", false, 30)]
@@ -147,7 +169,7 @@ namespace TEngine
             // 5. 刷新资源
             AssetDatabase.Refresh();
 
-            // 7. [可选] 构建 Player
+            // 6. [可选] 构建 Player
             if (buildPlayer || config.BuildPlayer)
             {
                 BuildImp(
@@ -399,6 +421,83 @@ namespace TEngine
                     Directory.Delete(dir);
                 }
             }
+        }
+
+        #endregion
+
+        #region StreamingAssets 拷贝
+
+        /// <summary>
+        /// 将 StreamingAssets 目录下的所有文件递归拷贝到指定目录，不拷贝 .meta 文件。
+        /// </summary>
+        private static void CopyStreamingAssetsToDirectory(string targetDir)
+        {
+            if (string.IsNullOrWhiteSpace(targetDir))
+            {
+                Debug.LogError("[StreamingAssets拷贝] 目标目录为空，跳过拷贝");
+                return;
+            }
+
+            string sourceRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot();
+            if (!Directory.Exists(sourceRoot))
+            {
+                Debug.LogError($"[StreamingAssets拷贝] 源目录不存在: {sourceRoot}，跳过拷贝");
+                return;
+            }
+
+            string targetRoot = targetDir;
+            if (!Path.IsPathRooted(targetRoot))
+            {
+                targetRoot = Path.Combine(Application.dataPath + "/../", targetRoot);
+                targetRoot = Path.GetFullPath(targetRoot).Replace('\\', '/');
+            }
+
+            // 清空原目录后再拷贝
+            try
+            {
+                if (Directory.Exists(targetRoot))
+                {
+                    Directory.Delete(targetRoot, true);
+                    Debug.Log($"[StreamingAssets拷贝] 已清空目标目录: {targetRoot}");
+                }
+                Directory.CreateDirectory(targetRoot);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[StreamingAssets拷贝] 目标目录清空失败: {targetRoot}，{e.Message}");
+                return;
+            }
+
+            int copiedCount = 0;
+            int skippedMetaCount = 0;
+
+            // 拷贝所有文件（递归），跳过 .meta
+            string[] files = Directory.GetFiles(sourceRoot, "*", SearchOption.AllDirectories);
+            foreach (string sourceFile in files)
+            {
+                string fileName = Path.GetFileName(sourceFile);
+                if (fileName.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
+                {
+                    skippedMetaCount++;
+                    continue;
+                }
+
+                string relative = sourceFile.Substring(sourceRoot.Length)
+                    .TrimStart('/', '\\')
+                    .Replace('\\', '/');
+                string targetFile = Path.Combine(targetRoot, relative);
+
+                string targetFileDir = Path.GetDirectoryName(targetFile);
+                if (!string.IsNullOrEmpty(targetFileDir) && !Directory.Exists(targetFileDir))
+                {
+                    Directory.CreateDirectory(targetFileDir);
+                }
+
+                File.Copy(sourceFile, targetFile, true);
+                copiedCount++;
+            }
+
+            Debug.Log($"[StreamingAssets拷贝] 完成: {sourceRoot} -> {targetRoot}（拷贝 {copiedCount} 个文件，跳过 {skippedMetaCount} 个 .meta）");
         }
 
         #endregion
