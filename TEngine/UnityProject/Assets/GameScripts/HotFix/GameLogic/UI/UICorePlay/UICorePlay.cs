@@ -37,10 +37,10 @@ namespace GameLogic
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
-            _levelNameText = FindChildComponent<RTLTextMeshPro>("Panel/Titile");
+            _levelNameText = FindChildComponent<RTLTextMeshPro>("Panel/TitleRoot/Titile");
             // _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("Panel/AnswerProgress");
-            _submitBtnText = FindChildComponent<RTLTextMeshPro>("Panel/Buttom/SubmitBtn/bg/m_text");
+            _submitBtnText = FindChildComponent<RTLTextMeshPro>("Panel/Buttom/SubmitBtn/m_text");
             _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
             _resultTipText = FindChildComponent<TMP_Text>("Panel/ResultTip");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Panel/Layout");

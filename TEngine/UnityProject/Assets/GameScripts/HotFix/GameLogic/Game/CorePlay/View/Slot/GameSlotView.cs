@@ -34,8 +34,8 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private Transform _slotRoot;
 
-        private const float _spacing = 0.08f;
-        private const float _slotSize = 0.64f;
+        private const float _spacing = 0.06f;
+        private const float _slotSize = 0.55f;
 
         private SlotViewLayoutData _currentLayoutData;
         private bool _hasLayoutData;

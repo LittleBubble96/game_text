@@ -7,6 +7,8 @@ using GameLogic.Localization;
 using Obfuz;
 #endif
 using TEngine;
+using WeChatWASM;
+
 #pragma warning disable CS0436
 
 
@@ -37,6 +39,7 @@ public partial class GameApp
     
     private static async UniTask StartGameLogic()
     {
+        NetTimeSystem.Instance.Activate();
         Log.Warning("======= StartGameLogic Init =======");
         await InitConfig();
         Log.Warning("======= InitConfig Complete =======");
@@ -46,14 +49,27 @@ public partial class GameApp
         // 加载设置（语言等），初始化多语言管理器
         GameLocalizationManager.Instance.Active();
         Log.Warning("======= GameLocalizationManager.Instance.Active Complete =======");
+        GameSystem.Instance.Activate();
         // 初始化 UI
         await GameModule.UI.ShowUIAsyncAwait<UITop>();
         Log.Warning("======= UITop Active Complete =======");
         GameModule.UI.ShowUIAsync<UIHome>();
         GMSingle.Instance.Activate();
+        InitSetting();
+        AudioSystem.Instance.PlayBgm(AudioDefine.game_Bgm ,0.4f);
         Log.Warning("======= StartGameLogic Complete =======");
     }
-    
+
+    private static void InitSetting()
+    {
+        var cacheData = GameManager.Instance?.CacheManager?.CacheData?.gameSettingsData;
+        if (cacheData != null)
+        {
+            AudioSystem.Instance.SetMusicVolume(cacheData.MusicVolume);
+            AudioSystem.Instance.SetSoundVolume(cacheData.SoundVolume);
+        }
+    }
+
     private static async UniTask InitConfig()
     {
         await ConfigSystem.Instance.Tables.TbLevelAsync();

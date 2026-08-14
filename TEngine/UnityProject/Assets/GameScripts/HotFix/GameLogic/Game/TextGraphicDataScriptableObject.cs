@@ -30,6 +30,18 @@ namespace GameLogic.Data
             Debug.Log($"TextGraphicDataScriptableObject 已创建: {AssetPath}");
         }
 
+        public bool CheckHasCharacter(string input)
+        {
+            foreach (var t in TextGraphicDataList)
+            {
+                if (t != null && t.character == input)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static void EnsureDirectoryExists()
         {
             if (!UnityEditor.AssetDatabase.IsValidFolder(AssetDir))

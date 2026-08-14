@@ -60,6 +60,20 @@ namespace GameLogic.GamePlay.CorePlay
             }
         }
 
+        /// <summary>
+        /// 通关推进：推进存档到指定关卡，并清空答案进度与关卡数据快照。
+        /// 用于关卡完成后将存档推进到下一关，避免重进游戏时因“已全部答对”
+        /// 再次触发 CompleteLevel，导致重复发送通关事件与奖励。
+        /// </summary>
+        public void AdvanceToNextLevel(int nextLevelId)
+        {
+            if (SaveData == null) InitOrResetData();
+            SaveData.currentLevelId = nextLevelId;
+            SaveData.foundAnswerIndices = new List<int>();
+            // 必须清空旧关卡快照，否则下一关会复用上一关的缓存数据
+            SaveData.cachedLevelData = null;
+        }
+
         /// <summary>获取当前关卡已找到的答案索引</summary>
         public List<int> GetFoundAnswers()
         {

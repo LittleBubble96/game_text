@@ -20,6 +20,7 @@ namespace GameLogic
         {
             _button.onClick.AddListener(() =>
             {
+                AudioSystem.Instance.PlayAudio(AudioDefine.btnClick_SFX , 1f);
                 UIWindow parentWindow = GetParentWindow();
                 if (parentWindow != null && parentWindow.IsAnimating)
                 {

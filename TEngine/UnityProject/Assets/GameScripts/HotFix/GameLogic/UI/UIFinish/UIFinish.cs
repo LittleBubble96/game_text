@@ -14,6 +14,9 @@ namespace GameLogic
     {
         private RTLTextMeshPro _nextBtnText;
         private RTLTextMeshPro _homeBtnText;
+        private RTLTextMeshPro _titleText;
+        private RTLTextMeshPro _desText;
+        
         private XYButton _btnNext;
         private XYButton _btnHome;
         private GameObject _btnNextGo;
@@ -48,6 +51,8 @@ namespace GameLogic
             _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonBack");
             _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonNext/Text");
             _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonBack/Text");
+            _titleText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/Title");
+            _desText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/m_des");
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
@@ -61,7 +66,8 @@ namespace GameLogic
         {
             base.OnRefresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
-            GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
+            // 不在此处同步金币数：通关时已加金币到数据层，但顶部金币栏保持旧值，
+            // 待玩家点击结算按钮时由 Event_UITopCoinAddAnim 从旧值滚动到新值。
 
             if (_userDatas != null && _userDatas.Length > 0 && _userDatas[0] is int levelId)
             {
@@ -181,7 +187,7 @@ namespace GameLogic
             }
         }
 
-        /// <summary>领取奖励：发道具 + 播放飞行动画</summary>
+        /// <summary>领取奖励：仅播放奖励飞行动画表现（数据已在通关时由 GameManager 发放）</summary>
         private void ClaimReward(System.Action onComplete)
         {
             if (_hasClaimedReward || _rewardMap == null || _rewardMap.Count == 0)
@@ -196,11 +202,7 @@ namespace GameLogic
             int coinCount = _rewardMap.TryGetValue(ItemId.Coin, out int c) ? c : 0;
             int tipCount = _rewardMap.TryGetValue(ItemId.TipProp, out int t) ? t : 0;
 
-            // 先发道具到数据层
-            if (coinCount > 0) PropDefine.AddCoin(coinCount);
-            if (tipCount > 0) PropDefine.AddTip(tipCount);
-
-            // 播放特效流程
+            // 奖励数据已在通关时发放，此处只播特效表现
             DoClaimAnimations(coinCount, tipCount, onComplete).Forget();
         }
 
@@ -295,6 +297,8 @@ namespace GameLogic
         {
             _nextBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.next_level_btn);
             _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
+            _titleText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_title);
+            _desText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_des);
         }
     }
 }

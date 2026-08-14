@@ -11,7 +11,9 @@ SpriteAtlasAsset:
   m_MasterAtlas: {fileID: 0}
   m_ImporterData:
     packables:
-    - {fileID: 21300000, guid: eff5a7a79ce2af446a110e8d44c17a8a, type: 3}
+    - {fileID: 21300000, guid: 7508bb7a679082a4481e8e26036685fb, type: 3}
+    - {fileID: 21300000, guid: ad30ae62d45561447b81bd4fadb1c089, type: 3}
+    - {fileID: 21300000, guid: cd1d1a5b8eb42434e8a2aca66e32ed3d, type: 3}
     - {fileID: 21300000, guid: 2e3cf56ad99604c4187d7b2f2264bf67, type: 3}
     - {fileID: 21300000, guid: e18b78ae43d0b804083c8eb41bfc677c, type: 3}
     - {fileID: 21300000, guid: 815b5cccd211d644ba402a087bbb9576, type: 3}
@@ -19,13 +21,13 @@ SpriteAtlasAsset:
     - {fileID: 21300000, guid: bef5646fb83a6a54f9b2720dc36259f3, type: 3}
     - {fileID: 21300000, guid: a20e06f4b30a3f448afb0794a454fa63, type: 3}
     - {fileID: 21300000, guid: a0d9bda1d5844834587fbb911788c9fb, type: 3}
+    - {fileID: 21300000, guid: 48cb3b7467fb28e4091b2f63380144b5, type: 3}
     - {fileID: 21300000, guid: 4d8d93f47bb640b40a60ad1f1605895d, type: 3}
     - {fileID: 21300000, guid: bfbe99492ea69024bb5f61bb64761aa8, type: 3}
-    - {fileID: 21300000, guid: 4f6a847b3880da4419e0f12ec9c900da, type: 3}
     - {fileID: 21300000, guid: a891f7de53040ad4b9fd4d06aa5d0edf, type: 3}
     - {fileID: 21300000, guid: dfd17e7c9e5cc734392e3e28fd91c85c, type: 3}
     - {fileID: 21300000, guid: 2cd1e7842f2d29e42ab58a84c4e32fc7, type: 3}
-    - {fileID: 21300000, guid: 396d80a5e7b0dac44ad13ec2e2d56f44, type: 3}
+    - {fileID: 21300000, guid: 5c028b7bf1b83934b97282ed999cd278, type: 3}
     - {fileID: 21300000, guid: d6348bcffdbd7e745b59a3b48a168b60, type: 3}
     - {fileID: 21300000, guid: fe920d524f1600b4191b8d8445541c61, type: 3}
     - {fileID: 21300000, guid: a981629dcff4abd4b8f8f37e70668e57, type: 3}
@@ -34,4 +36,5 @@ SpriteAtlasAsset:
     - {fileID: 21300000, guid: 55c94b8661265a24a8f5f68d5cba24ca, type: 3}
     - {fileID: 21300000, guid: 099aedae9fa8a684899326e620b4aa89, type: 3}
     - {fileID: 21300000, guid: 4881c5401c0b6ac4d8a0a4463bf35cd9, type: 3}
+    - {fileID: 21300000, guid: 7f8a7373a6f25444e9ca35dd3cd9b18f, type: 3}
   m_IsVariant: 0

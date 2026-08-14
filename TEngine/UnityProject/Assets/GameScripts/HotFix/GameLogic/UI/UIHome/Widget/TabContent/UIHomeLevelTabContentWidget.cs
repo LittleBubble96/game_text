@@ -2,6 +2,7 @@
 using GameLogic.Localization;
 using RTLTMPro;
 using TMPro;
+using TEngine;
 using UnityEngine;
 
 namespace GameLogic.UI
@@ -47,6 +48,13 @@ namespace GameLogic.UI
 
         private void OnStartLevel()
         {
+            // 已通关所有关卡：弹全通关提示，不再进入游戏
+            if (GameManager.Instance.IsAllLevelCompleted)
+            {
+                GameModule.UI.ShowUIAsync<UIFinishCompleteAllLevel>();
+                return;
+            }
+
             EnableBtn(false);
             GameManager.Instance.StartGame().Forget();
         }

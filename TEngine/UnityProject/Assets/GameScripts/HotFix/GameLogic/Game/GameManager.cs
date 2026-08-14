@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Cysharp.Threading.Tasks;
+using GameConfig;
 using GameLogic.Data;
 using GameLogic.GamePlay;
 using GameLogic.GamePlay.CorePlay;
@@ -167,10 +169,60 @@ namespace GameLogic
         // ================ 通关处理 ================
         private void OnLevelCompleted(int levelId)
         {
-            SaveGameProgress();
+            // 关卡通关的唯一推进点：把存档推进到下一关（清空答案进度与关卡快照），
+            // 之后无论玩家点“下一关”回到游戏，还是强退重进，都会从下一关开始。
+            // 这一步集中处理，避免各处分散打补丁；gameplay 层无需感知“推进”。
+            AdvanceSaveToNextLevel(levelId);
+
+            // 通关即发放奖励数据（金币/提示道具），强退也不丢、不重复领；
+            // 结算界面点击按钮只播奖励飞行动画表现，不再改数据。
+            GrantLevelReward(levelId);
+
             Debug.Log($"[GameManager] 游戏通关! 关卡: {levelId}");
-            // 弹出结算界面
+            // 弹出结算界面（奖励仍按已通关的 levelId 查配置，用于展示数量）
             GameModule.UI.ShowUIAsync<UIFinish>(levelId);
+        }
+
+        /// <summary>
+        /// 按 levelId 查关卡奖励配置并发放到数据层（金币/提示道具）。
+        /// 仅在通关时调用一次，与推进存档一起完成；结算界面只读配置用于展示。
+        /// </summary>
+        private void GrantLevelReward(int levelId)
+        {
+            var rewardMap = GetLevelRewardMap(levelId);
+            if (rewardMap == null || rewardMap.Count == 0) return;
+
+            if (rewardMap.TryGetValue(ItemId.Coin, out int coinCount) && coinCount > 0)
+                PropDefine.AddCoin(coinCount);
+            if (rewardMap.TryGetValue(ItemId.TipProp, out int tipCount) && tipCount > 0)
+                PropDefine.AddTip(tipCount);
+        }
+
+        /// <summary>查询关卡奖励映射（itemId -> 数量），无奖励返回 null</summary>
+        private static Dictionary<int, int> GetLevelRewardMap(int levelId)
+        {
+            var tbLevel = ConfigSystem.Instance.Tables.TbLevel;
+            if (tbLevel == null || !tbLevel.DataMap.TryGetValue(levelId, out var confLevel))
+                return null;
+
+            int rewardId = confLevel.RewardId;
+            if (rewardId <= 0) return null;
+
+            var confReward = ConfigSystem.Instance.Tables.TbReward?.GetOrDefault(rewardId);
+            if (confReward?.Rewards == null || confReward.Rewards.Count == 0) return null;
+
+            return new Dictionary<int, int>(confReward.Rewards);
+        }
+
+        /// <summary>
+        /// 将存档推进到 levelId 的下一关并落盘。
+        /// 在 OnLevelCompleted 调用一次即可，强退/回主页时的 SaveGameProgress
+        /// 不会重复推进（存档已是下一关，gameplay 进度对存档不可逆覆盖）。
+        /// 通关最后一关时存档推进到 MaxLevelId+1（超过最大关），用于判断全通关。
+        /// </summary>
+        private void AdvanceSaveToNextLevel(int completedLevelId)
+        {
+            _cacheManager?.AdvanceToNextLevel(completedLevelId);
         }
 
         /// <summary>加载下一关</summary>
@@ -224,6 +276,19 @@ namespace GameLogic
 
         public LevelDataConfigParse LevelConfig => _levelConfig;
         public GameCacheManager CacheManager => _cacheManager;
-        
+
+        /// <summary>
+        /// 是否已通关所有关卡：存档 currentLevelId 超过最大关卡ID（通关最后一关后推进到 MaxLevelId+1）。
+        /// 实时计算、不持久化通关标志——后续更新新增关卡后 MaxLevelId 增大，判断自动失效，可直接继续游戏。
+        /// </summary>
+        public bool IsAllLevelCompleted
+        {
+            get
+            {
+                int cur = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelId ?? 1;
+                int max = _levelConfig?.MaxLevelId ?? 0;
+                return max > 0 && cur > max;
+            }
+        }
     }
 }

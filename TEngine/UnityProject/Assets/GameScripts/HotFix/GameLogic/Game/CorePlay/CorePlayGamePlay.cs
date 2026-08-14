@@ -310,6 +310,10 @@ namespace GameLogic.GamePlay.CorePlay
         {
             if (_currentLevelId < 1) return;
             if (_currentLevelData == null) return;
+            // 通关后 _isGameRunning 为 false：进度已由 GameManager.AdvanceSaveToNextLevel
+            // 推进到下一关并落盘，此处不再覆盖，避免把存档回退到“当前关 + 全部答案”
+            // 导致重进游戏时再次触发通关。
+            if (!_isGameRunning) return;
             restore.SaveCurrentProgress(_currentLevelId, _foundAnswerIndices.ToList(), _currentLevelData);
         }
 

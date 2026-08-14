@@ -18,7 +18,6 @@ namespace GameLogic
         private XYButton _propButton;
         private TMP_Text _countText;
         private Image _iconImage;
-        private GameObject _disabledMask;
 
         private CorePlayGamePlay _corePlayGamePlay;
 
@@ -26,9 +25,8 @@ namespace GameLogic
         {
             base.OnCreate();
             _propButton = CreateWidget<XYButton>("");
-            _countText = FindChildComponent<TMP_Text>("Count");
-            _iconImage = FindChildComponent<Image>("Icon");
-            _disabledMask = FindChild("DisabledMask")?.gameObject;
+            _countText = FindChildComponent<TMP_Text>("CountBg/Count");
+            _iconImage = FindChildComponent<Image>("bg");
 
             _propButton.OnAddListener(OnPropClicked);
         }
@@ -115,17 +113,12 @@ namespace GameLogic
 
             if (_propType == PropType.Tip)
             {
-                canUse = PropDefine.IsTipAvailable && _corePlayGamePlay != null && _corePlayGamePlay.HasUnfoundAnswers();
+                canUse = PropDefine.IsTipAvailable;
             }
 
-            if (_propButton != null)
+            if (_iconImage != null)
             {
-                _propButton.gameObject.SetActive(canUse);
-            }
-
-            if (_disabledMask != null)
-            {
-                _disabledMask.SetActive(!canUse);
+                _iconImage.color = canUse ? Color.white : Color.gray;
             }
         }
 

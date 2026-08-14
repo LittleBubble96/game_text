@@ -20,6 +20,11 @@ namespace LevelEditor
             _inputText = GUILayout.TextField(_inputText);
             if (GUILayout.Button("生成"))
             {
+                if (data.CheckHasCharacter(_inputText))
+                {
+                    EditorUtility.DisplayDialog("提示", "该字符已存在！", "确定");
+                    return;
+                }
                 string error = data.Generate(_inputText);
                 if (!string.IsNullOrEmpty(error))
                 {

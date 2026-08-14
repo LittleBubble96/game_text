@@ -1,3 +1,4 @@
-select_language_ch中文中文select_language_enEnglishEnglishback_btn返回Back
+select_language_ch中文中文select_language_enEnglishEnglishback_btn返回Back
 submit_btn提交Submitstart_game_btn开始游戏Startnext_level_btn	下一关
-Next Levellevel_title第{0}关 - {1}Level {0} - {1}setting_title设置SETTINGsetting_music音乐MUSICsetting_sfx音效SFXsetting_notify通知NOTIFICATIONsetting_language语言LANGUAGE
+Next Levellevel_title第{0}关 - {1}Level {0} - {1}setting_title设置SETTINGsetting_music音乐MUSICsetting_sfx音效SFXsetting_notify通知NOTIFICATIONsetting_language语言LANGUAGEfinish_title胜利Victoryfinish_completeAllTitle抱歉Sorry
+finish_des'恭喜！你已经通关了这一关！,Congratulations! You’ve beaten this stage!finish_completeDesK你很厉害，完成了所有关系，请等我们后续更新新的挑战lYou're awesome, you've completed all the relationships. Please wait for our next update with new challenges.btn_confirm确认Confirm

@@ -28,6 +28,9 @@ namespace GameLogic.Data
 
         // ===== 道具缓存 =====
         public GamePropData gamePropData;
+        
+        // ===== 公共数据 =====
+        public GameCommonData commonData;
 
         /// <summary>初始化所有子缓存（首次使用时调用）</summary>
         public void InitAll()
@@ -40,6 +43,11 @@ namespace GameLogic.Data
 
             if (gamePropData == null)
                 gamePropData = new GamePropData { tipCount = 3, coinCount = 0 };
+
+            if (commonData == null)
+            {
+                commonData = new GameCommonData();
+            }
         }
     }
 }

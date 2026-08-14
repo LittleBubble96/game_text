@@ -2247,7 +2247,7 @@ GameObject:
   - component: {fileID: 2575701745794516675}
   - component: {fileID: 2575701745794516684}
   m_Layer: 5
-  m_Name: Sfx Slider
+  m_Name: SfxSlider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

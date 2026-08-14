@@ -17,6 +17,9 @@ namespace GameLogic.UI
         private RTLTextMeshPro _settingNotificationTmp;
         private RTLTextMeshPro _settingLanguageTmp;
 
+        private Slider _musicVolume;
+        private Slider _soundVolume;
+
         private TMP_Dropdown _dropdown;
         private bool _hasInitDropdown;
         private bool _isRefreshingDropdown;
@@ -30,11 +33,35 @@ namespace GameLogic.UI
             _settingNotificationTmp = FindChildComponent<RTLTextMeshPro>("Panel/Notification Txt");
             _settingLanguageTmp = FindChildComponent<RTLTextMeshPro>("Panel/Language Txt");
             _dropdown = FindChildComponent<TMP_Dropdown>("Panel/Dropdown");
+            
+            _musicVolume =FindChildComponent<Slider>("Panel/MusicSlider");
+            _soundVolume = FindChildComponent<Slider>("Panel/SfxSlider");
+            
+            _musicVolume.onValueChanged.AddListener(OnMusicVolumeChanged);
+            _soundVolume.onValueChanged.AddListener(OnSfxVolumeChanged);
+        }
+        
+        private void OnMusicVolumeChanged(float value)
+        {
+            GameManager.Instance.CacheManager.CacheData.gameSettingsData.SetMusicVolume(value);
+            AudioSystem.Instance.SetMusicVolume(value);
+        }
+
+        private void OnSfxVolumeChanged(float value)
+        {
+            GameManager.Instance.CacheManager.CacheData.gameSettingsData.SetSoundVolume(value);
+            AudioSystem.Instance.SetSoundVolume(value);
         }
 
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            var cacheData = GameManager.Instance?.CacheManager?.CacheData?.gameSettingsData;
+            if (cacheData != null)
+            {
+                _musicVolume.value = cacheData.MusicVolume;
+                _soundVolume.value = cacheData.SoundVolume;
+            }
             RefreshText();
             RefreshLanguageDropdown();
         }

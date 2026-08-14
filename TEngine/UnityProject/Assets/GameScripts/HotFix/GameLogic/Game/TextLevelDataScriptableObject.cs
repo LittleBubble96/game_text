@@ -107,6 +107,9 @@ public class TextLevelEditorWindow : EditorWindow
     private int _editingAnswerIndex = -1;
     private int _editingSetIndex = -1;
 
+    // 替换关卡：当前选中关卡要与之交换的目标关卡索引
+    private int _swapTargetIndex = -1;
+
     private List<string> _availableCharacters = new List<string>();
     private Dictionary<string, int> _characterStrokeCount = new Dictionary<string, int>();
 
@@ -189,15 +192,27 @@ public class TextLevelEditorWindow : EditorWindow
     {
         GUILayout.Label("关卡列表", EditorStyles.boldLabel);
 
+        EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("+ 新建关卡"))
         {
             TextLevelData newLevel = new TextLevelData();
-            newLevel.levelName = "Level_" + System.Guid.NewGuid().ToString().Substring(0, 8);
+            // 根据现有 Level_N 的最大序号 +1 命名（无合法项时从 1 开始）
+            newLevel.levelName = GenerateNextLevelName();
             _levelDataAsset.levelDataList.Add(newLevel);
             _selectedLevelIndex = _levelDataAsset.levelDataList.Count - 1;
             ResetEditState();
             EditorUtility.SetDirty(_levelDataAsset);
         }
+        if (GUILayout.Button("重排关卡"))
+        {
+            if (EditorUtility.DisplayDialog("确认重排",
+                "将按关卡名称（Level_序号）重新排序当前关卡列表，确认继续？",
+                "重排", "取消"))
+            {
+                SortLevels();
+            }
+        }
+        EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.Space();
 
@@ -237,10 +252,23 @@ public class TextLevelEditorWindow : EditorWindow
 
         GUILayout.Label($"关卡 {level.levelName} 详情", EditorStyles.boldLabel);
 
-        // 关卡名称
+        // 关卡名称（改名后校验重名，不自动排序；重名则回退原名并提示）
         EditorGUI.BeginChangeCheck();
-        level.levelName = EditorGUILayout.TextField("关卡名称", level.levelName);
-        if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
+        string newName = EditorGUILayout.TextField("关卡名称", level.levelName);
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (IsLevelNameDuplicated(newName, _selectedLevelIndex))
+            {
+                EditorUtility.DisplayDialog("关卡名称重复",
+                    $"已存在名为『{newName}』的关卡，请使用其他名称。\n（如需调整顺序，请点击「重排关卡」）",
+                    "确定");
+            }
+            else
+            {
+                level.levelName = newName;
+                EditorUtility.SetDirty(_levelDataAsset);
+            }
+        }
 
         // 基字选择
         EditorGUI.BeginChangeCheck();
@@ -355,11 +383,25 @@ public class TextLevelEditorWindow : EditorWindow
 
         if (GUILayout.Button("+ 添加", GUILayout.Width(60)))
         {
-            AddStrokeSet(level);
+            if (AddStrokeSet(level))
+            {
+                strokeInput = "";
+            }
         }
         EditorGUILayout.EndHorizontal();
 
         ParseStrokeInput(strokeInput);
+
+        // 笔画索引按钮选择（布局同高亮区）：点击即选中/取消，选中按钮高亮并同步场景高亮；
+        // 与上方文本框共用 _newStrokeIndices，点击「+ 添加」后自动清空。
+        if (!string.IsNullOrEmpty(level.baseCharacter)
+            && _characterStrokeCount.TryGetValue(level.baseCharacter, out int selectStrokeCount)
+            && selectStrokeCount > 0)
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("点击选择笔画（选中高亮，再次点击取消）", EditorStyles.miniLabel);
+            DrawNewStrokeSelectButtons(selectStrokeCount);
+        }
 
         EditorGUILayout.HelpBox("笔画索引用逗号或英文句号分隔（支持中/英文逗号、空格、英文句号）。如目标字已有答案，将追加为新组合；否则新建答案。", MessageType.None);
 
@@ -409,7 +451,81 @@ public class TextLevelEditorWindow : EditorWindow
         }
         EditorGUILayout.EndHorizontal();
 
+        // 替换关卡：与列表中另一关卡交换顺序与名称
+        DrawSwapLevelRow();
+
         EditorGUILayout.EndScrollView();
+    }
+
+    /// <summary>
+    /// 替换关卡行：选择目标关卡后点击「替换关卡」，
+    /// 将当前选中关卡与目标关卡在列表中互换位置并互换名称（内容随对象移动）。
+    /// </summary>
+    private void DrawSwapLevelRow()
+    {
+        var list = _levelDataAsset.levelDataList;
+        if (list == null || list.Count < 2) return;
+
+        // 构造候选（排除当前选中关卡自身），并维护下拉索引到实际列表索引的映射
+        var candidateIndices = new List<int>();
+        var candidateLabels = new List<string>();
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (i == _selectedLevelIndex) continue;
+            var lv = list[i];
+            if (lv == null) continue;
+            candidateIndices.Add(i);
+            candidateLabels.Add(string.IsNullOrEmpty(lv.baseCharacter)
+                ? $"{lv.levelName} (未设置)"
+                : $"{lv.levelName}: {lv.baseCharacter}");
+        }
+        if (candidateIndices.Count == 0) return;
+
+        // 修正越界的选中索引（关卡被删/重排后可能失效）
+        if (_swapTargetIndex < 0 || _swapTargetIndex >= candidateIndices.Count)
+            _swapTargetIndex = 0;
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("替换关卡（与目标关卡交换位置与名称）", EditorStyles.miniBoldLabel);
+        EditorGUILayout.BeginHorizontal();
+        _swapTargetIndex = EditorGUILayout.Popup(_swapTargetIndex, candidateLabels.ToArray());
+        GUI.backgroundColor = new Color(0.3f, 0.7f, 1f);
+        if (GUILayout.Button("替换关卡", GUILayout.Width(100)))
+        {
+            int targetListIndex = candidateIndices[_swapTargetIndex];
+            SwapLevels(_selectedLevelIndex, targetListIndex);
+        }
+        GUI.backgroundColor = Color.white;
+        EditorGUILayout.EndHorizontal();
+    }
+
+    /// <summary>
+    /// 调换两个关卡的顺序与名称：交换二者在列表中的位置，并互换 levelName。
+    /// 结果：原 indexA 处保留原名，内容换成原 indexB 的对象；原 indexB 处保留原名，
+    /// 内容换成原 indexA 的对象。选中跟随当前关卡对象移动到的新位置。
+    /// </summary>
+    private void SwapLevels(int indexA, int indexB)
+    {
+        if (indexA == indexB) return;
+        var list = _levelDataAsset.levelDataList;
+        if (indexA < 0 || indexA >= list.Count || indexB < 0 || indexB >= list.Count) return;
+
+        var a = list[indexA];
+        var b = list[indexB];
+
+        // 名称互换（留在原位置，与对象的位置交换配合，实现“名称与内容同步调换”）
+        (a.levelName, b.levelName) = (b.levelName, a.levelName);
+
+        // 列表位置交换
+        list[indexA] = b;
+        list[indexB] = a;
+
+        // 选中跟随当前关卡对象移动到的新位置
+        _selectedLevelIndex = indexB;
+        ResetEditState();
+        EditorUtility.SetDirty(_levelDataAsset);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"已交换关卡顺序与名称：{a.levelName} ↔ {b.levelName}");
     }
 
     private void DrawAnswerItem(TextLevelData level, int ansIdx, LevelAnswer answer)
@@ -550,7 +666,7 @@ public class TextLevelEditorWindow : EditorWindow
 
     // ==================== 辅助方法 ====================
 
-    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" };
+    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" , "人"};
 
     private string[] GetCommonAnswerOptions()
     {
@@ -586,17 +702,104 @@ public class TextLevelEditorWindow : EditorWindow
         }
     }
 
-    private void AddStrokeSet(TextLevelData level)
+    // ==================== 关卡命名 / 排序 / 重名校验 ====================
+
+    /// <summary>Level_ 名称前缀</summary>
+    private const string LevelNamePrefix = "Level_";
+
+    /// <summary>
+    /// 解析关卡名称序号：Level_29 -> 29；非 Level_ 数字格式返回 -1。
+    /// </summary>
+    private int ParseLevelIndex(string levelName)
+    {
+        if (string.IsNullOrEmpty(levelName) || !levelName.StartsWith(LevelNamePrefix))
+            return -1;
+        string numPart = levelName.Substring(LevelNamePrefix.Length);
+        if (int.TryParse(numPart, out int idx) && idx >= 0)
+            return idx;
+        return -1;
+    }
+
+    /// <summary>
+    /// 生成下一个关卡名称：取现有 Level_N 中的最大 N +1；无合法项时返回 Level_1。
+    /// </summary>
+    private string GenerateNextLevelName()
+    {
+        int maxIndex = 0;
+        if (_levelDataAsset != null && _levelDataAsset.levelDataList != null)
+        {
+            foreach (var lv in _levelDataAsset.levelDataList)
+            {
+                if (lv == null) continue;
+                int idx = ParseLevelIndex(lv.levelName);
+                if (idx > maxIndex) maxIndex = idx;
+            }
+        }
+        return LevelNamePrefix + (maxIndex + 1);
+    }
+
+    /// <summary>
+    /// 校验关卡名称是否重复（排除当前正在编辑的关卡自身）。
+    /// </summary>
+    private bool IsLevelNameDuplicated(string name, int excludeIndex)
+    {
+        if (string.IsNullOrEmpty(name) || _levelDataAsset == null || _levelDataAsset.levelDataList == null)
+            return false;
+        for (int i = 0; i < _levelDataAsset.levelDataList.Count; i++)
+        {
+            if (i == excludeIndex) continue;
+            var lv = _levelDataAsset.levelDataList[i];
+            if (lv != null && lv.levelName == name)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 按关卡名称中的序号升序重排（Level_1, Level_2, ... Level_29, Level_100）；
+    /// 解析不出序号的项按字符串序排在最后，保持相对稳定（使用稳定排序避免乱序）。
+    /// </summary>
+    private void SortLevels()
+    {
+        if (_levelDataAsset == null || _levelDataAsset.levelDataList == null)
+            return;
+
+        // 记录当前选中的关卡，排序后恢复选中
+        TextLevelData selected = (_selectedLevelIndex >= 0 && _selectedLevelIndex < _levelDataAsset.levelDataList.Count)
+            ? _levelDataAsset.levelDataList[_selectedLevelIndex]
+            : null;
+
+        // OrderBy 稳定排序：先按是否可解析序号分组，再按序号 / 名称排序
+        var sorted = _levelDataAsset.levelDataList
+            .Select(lv => new { lv, idx = lv != null ? ParseLevelIndex(lv.levelName) : -1 })
+            .OrderBy(x => x.idx >= 0 ? 0 : 1)   // 可解析序号的排前
+            .ThenBy(x => x.idx)                 // 按序号升序
+            .ThenBy(x => x.lv != null ? x.lv.levelName : "") // 同序号或无序号按名称兜底
+            .Select(x => x.lv)
+            .ToList();
+
+        _levelDataAsset.levelDataList = sorted;
+
+        // 恢复选中
+        if (selected != null)
+            _selectedLevelIndex = _levelDataAsset.levelDataList.IndexOf(selected);
+
+        EditorUtility.SetDirty(_levelDataAsset);
+        AssetDatabase.SaveAssets();
+        Debug.Log($"关卡已重排，共 {_levelDataAsset.levelDataList.Count} 个");
+    }
+
+    private bool AddStrokeSet(TextLevelData level)
     {
         if (string.IsNullOrEmpty(_newAnswerCharacter))
         {
             EditorUtility.DisplayDialog("提示", "请输入目标字字符", "确定");
-            return;
+            return false;
         }
         if (_newStrokeIndices.Count == 0)
         {
             EditorUtility.DisplayDialog("提示", "请输入至少一个笔画索引", "确定");
-            return;
+            return false;
         }
 
         // 查找是否已有相同目标字的答案
@@ -627,7 +830,42 @@ public class TextLevelEditorWindow : EditorWindow
         _newStrokeIndices.Clear();
         _selectedExistingAnswerIndex = 0;
         _selectedCommonAnswerIndex = 0;
+        // 添加后清除选中与场景高亮（与按钮选择区的选中态联动）
+        ResetStrokeHighlight();
         EditorUtility.SetDirty(_levelDataAsset);
+        return true;
+    }
+
+    /// <summary>
+    /// 添加笔画组合区的笔画索引按钮（布局同 DrawStrokeHighlightButtons）：
+    /// 点击即选中/取消（写入 _newStrokeIndices），选中按钮高亮，并同步场景高亮。
+    /// </summary>
+    private void DrawNewStrokeSelectButtons(int strokeCount)
+    {
+        // 每行最多显示按钮数
+        const int maxPerRow = 8;
+        for (int rowStart = 0; rowStart < strokeCount; rowStart += maxPerRow)
+        {
+            EditorGUILayout.BeginHorizontal();
+            int rowEnd = Math.Min(rowStart + maxPerRow, strokeCount);
+            for (int i = rowStart; i < rowEnd; i++)
+            {
+                bool isSelected = _newStrokeIndices.Contains(i);
+                GUI.backgroundColor = isSelected ? Color.yellow : Color.white;
+                if (GUILayout.Button(i.ToString(), GUILayout.Width(35), GUILayout.Height(25)))
+                {
+                    if (isSelected)
+                        _newStrokeIndices.Remove(i);
+                    else
+                        _newStrokeIndices.Add(i);
+                    // 同步场景高亮：选中的笔画在场景中变黄，与高亮区视觉一致
+                    _highlightedStrokeIndices = new List<int>(_newStrokeIndices);
+                    ApplyHighlightToScene();
+                }
+                GUI.backgroundColor = Color.white;
+            }
+            EditorGUILayout.EndHorizontal();
+        }
     }
 
     private void DrawStrokeHighlightButtons(int strokeCount)

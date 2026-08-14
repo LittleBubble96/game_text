@@ -122,12 +122,17 @@ namespace GameLogic.View
         {
             if (_strokeMaterialTemplate != null) return;
 
+#if UNITY_EDITOR
+            _strokeMaterialTemplate = new Material(Shader.Find("Unlit/Color"));
+            await UniTask.Yield();
+#else 
             _strokeMaterialTemplate = await GameModule.Resource.LoadAssetAsync<Material>(StrokeMaterialPath);
             if (_strokeMaterialTemplate == null)
             {
                 Debug.LogError($"[DrawCharacter] 笔画材质模板预加载失败: {StrokeMaterialPath}，回退到内置 Unlit/Color");
                 _strokeMaterialTemplate = new Material(Shader.Find("Unlit/Color"));
             }
+#endif
         }
 
         /// <summary>

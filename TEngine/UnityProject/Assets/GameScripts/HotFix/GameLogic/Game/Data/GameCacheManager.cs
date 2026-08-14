@@ -1,6 +1,7 @@
 using System.IO;
 using GameLogic.GamePlay.CorePlay;
 using UnityEngine;
+using WeChatWASM;
 
 namespace GameLogic.Data
 {
@@ -18,28 +19,29 @@ namespace GameLogic.Data
     /// </summary>
     public class GameCacheManager
     {
-        private const string SaveFileName = "game_cache.json";
-
         /// <summary>缓存数据容器</summary>
         public GameCacheData CacheData { get; private set; }
 
         /// <summary>关卡缓存操作</summary>
         public CorePlayRestore CorePlayRestore { get; private set; }
-
-        /// <summary>设置缓存（直接访问字段）</summary>
-        public GameSettingsData GameSettings => CacheData?.gameSettingsData;
+        
+        private IReadCacheFileSystem _readCacheFileSystem;
 
         public GameCacheManager()
         {
             CacheData = new GameCacheData();
             CorePlayRestore = new CorePlayRestore();
+            _readCacheFileSystem = GenerateFileSystem();
         }
 
-        /// <summary>获取存档文件路径</summary>
-        private string GetSaveFilePath()
+        private IReadCacheFileSystem GenerateFileSystem()
         {
-            return Path.Combine(Application.persistentDataPath, SaveFileName);
+#if UNITY_EDITOR
+            return new WindowReadCacheFileSystem();
+#endif
+            return new WeChatReadCacheFileSystem();
         }
+        
 
         /// <summary>
         /// 保存全部缓存到本地 JSON 文件。
@@ -53,9 +55,7 @@ namespace GameLogic.Data
             try
             {
                 string json = JsonUtility.ToJson(CacheData, true);
-                string filePath = GetSaveFilePath();
-                File.WriteAllText(filePath, json);
-                Debug.Log($"[GameCache] 缓存已保存: {filePath}");
+                _readCacheFileSystem?.WriteCache(json);
             }
             catch (System.Exception e)
             {
@@ -69,18 +69,17 @@ namespace GameLogic.Data
         /// </summary>
         public void Load()
         {
-            string filePath = GetSaveFilePath();
-            if (!File.Exists(filePath))
+            string cacheJson = _readCacheFileSystem?.ReadCache();
+            if (string.IsNullOrEmpty(cacheJson))
             {
-                Debug.Log($"[GameCache] 未找到缓存文件，初始化新数据: {filePath}");
+                Debug.Log("[GameCache] 未找到缓存文件，初始化新数据");
                 InitAll();
                 return;
             }
-
+            
             try
             {
-                string json = File.ReadAllText(filePath);
-                GameCacheData data = JsonUtility.FromJson<GameCacheData>(json);
+                GameCacheData data = JsonUtility.FromJson<GameCacheData>(cacheJson);
                 if (data != null)
                 {
                     CacheData = data;
@@ -108,13 +107,20 @@ namespace GameLogic.Data
         /// <summary>删除缓存文件并重置所有数据</summary>
         public void DeleteAll()
         {
-            string filePath = GetSaveFilePath();
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                Debug.Log("[GameCache] 缓存文件已删除");
-            }
+            _readCacheFileSystem?.DeleteAll();
             InitAll();
+        }
+
+        /// <summary>
+        /// 通关推进：将存档推进到 completedLevelId+1（清空答案进度与关卡快照）并落盘。
+        /// 仅在关卡通关时调用一次，集中处理“推进存档”，避免各处分散打补丁。
+        /// 通关最后一关时存档会推进到 MaxLevelId+1（超过最大关），进入游戏时
+        /// 据此判断“已全通关”弹提示；不持久化通关标志，后续更新新增关卡后可继续。
+        /// </summary>
+        public void AdvanceToNextLevel(int completedLevelId)
+        {
+            CorePlayRestore.AdvanceToNextLevel(completedLevelId + 1);
+            Save();
         }
 
         /// <summary>初始化所有子缓存</summary>

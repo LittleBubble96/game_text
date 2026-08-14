@@ -55,12 +55,26 @@ namespace GameLogic.GamePlay.CorePlay.View
         }
 
         /// <summary>
-        /// 2D 圆形范围检测：以点击点为圆心、<see cref="_detectRadius"/> 为半径，
-        /// 取圆内所有笔画 Collider，命中多个时优先选择离点击点最近的。
+        /// 2D 笔画检测：先点检测，命中即返回；未命中再圆形兜底取最近的笔画。
         /// </summary>
+        /// <remarks>
+        /// 笔画使用 PolygonCollider2D，其 bounds（AABB）对细长笔画会明显偏大，
+        /// 用 AABB 最近点做就近度量会误判（点未落在某笔画上，却因 AABB 更近而被选中）。
+        /// 故分两步：
+        /// 1) 点检测：<see cref="Physics2D.OverlapPoint"/> 直接命中笔画多边形即返回，精确无歧义；
+        /// 2) 圆形兜底：未命中时在 <see cref="_detectRadius"/> 内取候选，用
+        ///    <see cref="Collider2D.Distance"/> 的真实最近距离选最近，规避 AABB 误差。
+        /// </remarks>
         private int? RaycastStroke2D(Vector3 screenPos)
         {
             Vector2 worldPos = _rayCamera.ScreenToWorldPoint(screenPos);
+
+            // 1) 点检测：点击点直接落在某笔画多边形内，立即返回
+            Collider2D pointHit = Physics2D.OverlapPoint(worldPos, _strokeLayerMask);
+            int? directIndex = GetStrokeIndex(pointHit);
+            if (directIndex.HasValue) return directIndex;
+
+            // 2) 圆形兜底：取半径内所有候选，按真实最近距离选最近的
             Collider2D[] hits = Physics2D.OverlapCircleAll(worldPos, _detectRadius, _strokeLayerMask);
             if (hits == null || hits.Length == 0) return null;
 
@@ -69,29 +83,33 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             foreach (Collider2D hit in hits)
             {
-                if (hit == null) continue;
+                int? index = GetStrokeIndex(hit);
+                if (!index.HasValue) continue;
 
-                // 笔画名为 "Stroke_0", "Stroke_1" ...
-                string name = hit.gameObject.name;
-                if (!name.StartsWith("Stroke_")) continue;
-                if (!int.TryParse(name.Substring(7), out int index)) continue;
-
-                // 用 AABB 最近点到点击点的距离作为"就近"度量。
-                // 手算 Clamp（不依赖 Bounds.ClosestPoint），全平台/IL2CPP 安全
-                Bounds b = hit.bounds;
-                float closestX = Mathf.Clamp(worldPos.x, b.min.x, b.max.x);
-                float closestY = Mathf.Clamp(worldPos.y, b.min.y, b.max.y);
-                float dx = closestX - worldPos.x;
-                float dy = closestY - worldPos.y;
-                float sqr = dx * dx + dy * dy;
+                // 用 Collider2D.ClosestPoint 取多边形表面最近点，再算到点击点的距离。
+                // 比 AABB（hit.bounds）最近点更贴合细长笔画的实际形状，避免大包围盒误判。
+                Vector2 closest = hit.ClosestPoint(worldPos);
+                float sqr = (closest - worldPos).sqrMagnitude;
                 if (sqr < bestSqrDist)
                 {
                     bestSqrDist = sqr;
-                    bestIndex = index;
+                    bestIndex = index.Value;
                 }
             }
 
             return bestIndex >= 0 ? bestIndex : (int?)null;
+        }
+
+        /// <summary>
+        /// 从 Collider 解析笔画索引。笔画物体名为 "Stroke_0", "Stroke_1" ...，
+        /// 非笔画或解析失败返回 null。
+        /// </summary>
+        private static int? GetStrokeIndex(Collider2D hit)
+        {
+            if (hit == null) return null;
+            string name = hit.gameObject.name;
+            if (!name.StartsWith("Stroke_")) return null;
+            return int.TryParse(name.Substring(7), out int index) ? index : (int?)null;
         }
 
         // 编辑器可视化检测范围，便于调参

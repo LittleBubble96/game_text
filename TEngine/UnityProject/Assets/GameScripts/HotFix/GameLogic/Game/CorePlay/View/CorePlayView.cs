@@ -286,6 +286,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         {
             if (!_isInitialized || _gamePlay == null) return;
             _gamePlay.ToggleStroke(strokeIndex);
+            AudioSystem.Instance.PlayAudio(AudioDefine.clickCharacter_SFX);
         }
 
         // ================ 数据层事件响应 ================
