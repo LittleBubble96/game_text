@@ -6,7 +6,8 @@
       "Bash(openspec status:*)",
       "Bash(openspec instructions:*)",
       "Bash(msbuild:*)",
-      "Bash(openspec:*)"
+      "Bash(openspec:*)",
+      "Bash(awk '/m_Name: ResetProp/,0' \"Assets/AssetRaw/UI/UICorePlay/UICorePlay.prefab\")"
     ]
   }
 }

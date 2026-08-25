@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using TEngine;
 using UnityEngine;
 
 namespace GameLogic
@@ -21,7 +22,7 @@ namespace GameLogic
         {
             string filePath = GetSaveFilePath();
             File.WriteAllText(filePath, cacheJson);
-            Debug.Log($"[GameCache] 缓存已保存: {filePath}");
+            Log.Info($"[GameCache] 缓存已保存: {filePath}");
         }
 
         public void DeleteAll()
@@ -30,7 +31,7 @@ namespace GameLogic
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
-                Debug.Log("[GameCache] 缓存文件已删除");
+                Log.Info("[GameCache] 缓存文件已删除");
             }
         }
 

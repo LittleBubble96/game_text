@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using TEngine.Editor;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -70,6 +71,7 @@ namespace TEngine
         public static void BuildCurrentPlatformAB()
         {
             var config = BuildConfig.CreateDefault();
+            BuildConfig.LoadPersistedDefines(config);
             config.BuildHotFixDll = true;
             BuildWithConfig(config, buildPlayer: false);
 
@@ -77,13 +79,30 @@ namespace TEngine
             CopyStreamingAssetsToDirectory("../../output/webgl/StreamingAssets/package");
         }
         
-        [MenuItem("TEngine/Build/一键打包Webgl", false, 30)]
-        public static void AutomationBuildWebgl()
+        [MenuItem("TEngine/Build/一键打包Webgl(Release)", false, 30)]
+        public static void AutomationBuildWebglRelease()
+        {
+            AutomationBuildWebglInternal(EBuildMode.Release);
+        }
+
+        [MenuItem("TEngine/Build/一键打包Webgl(Develop)", false, 31)]
+        public static void AutomationBuildWebglDevelop()
+        {
+            AutomationBuildWebglInternal(EBuildMode.Develop);
+        }
+
+        /// <summary>
+        /// WebGL 一键打包内部实现：按指定构建模式设置 TE_RELEASE / TE_DEVELOP 宏后构建 AB，再转换为微信小游戏。
+        /// </summary>
+        private static void AutomationBuildWebglInternal(EBuildMode mode)
         {
             var config = BuildConfig.CreateDefault();
+            // 读窗口里持久化配置的宏集合，而非字段默认值；BuildMode 以菜单项指定为准
+            BuildConfig.LoadPersistedDefines(config);
             config.BuildTarget = BuildTarget.WebGL;
             config.OutputRoot = Application.dataPath + "/../Builds/WebGL";
             config.BuildPlayer = false;
+            config.BuildMode = mode;
             BuildWithConfig(config, buildPlayer: false);
             if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
             {
@@ -99,6 +118,7 @@ namespace TEngine
         public static void AutomationBuild()
         {
             var config = BuildConfig.CreateDefault();
+            BuildConfig.LoadPersistedDefines(config);
             config.BuildTarget = BuildTarget.StandaloneWindows64;
             config.OutputRoot = Application.dataPath + "/../Builds/Windows";
             config.BuildPlayer = true;
@@ -111,6 +131,7 @@ namespace TEngine
         public static void AutomationBuildAndroid()
         {
             var config = BuildConfig.CreateDefault();
+            BuildConfig.LoadPersistedDefines(config);
             config.BuildTarget = BuildTarget.Android;
             config.OutputRoot = Application.dataPath + "/../Bundles";
             config.BuildPlayer = true;
@@ -123,6 +144,7 @@ namespace TEngine
         public static void AutomationBuildIOS()
         {
             var config = BuildConfig.CreateDefault();
+            BuildConfig.LoadPersistedDefines(config);
             config.BuildTarget = BuildTarget.iOS;
             config.OutputRoot = Application.dataPath + "/../Bundles";
             config.BuildPlayer = true;
@@ -136,47 +158,71 @@ namespace TEngine
         #region 参数化构建入口
 
         /// <summary>
-        /// 通过 BuildConfig 执行完整构建流程
+        /// 通过 BuildConfig 执行完整构建流程。
+        /// <remarks>打包前用 BuildMode 对应的宏集合覆盖所有平台宏，打完包后在 finally 中恢复原值。</remarks>
         /// </summary>
         public static void BuildWithConfig(BuildConfig config, bool buildPlayer)
         {
-            // 1. [可选] 编译热更DLL
-            if (config.BuildHotFixDll)
+            // 0. 备份当前所有平台宏 -> 覆盖为构建模式宏集合 -> 打包 -> finally 恢复
+            var modeDefines = config.GetBuildModeDefines();
+            Debug.Log($"[BuildWithConfig] 构建模式: {config.BuildMode} (宏: {string.Join(";", modeDefines)})");
+
+            Dictionary<BuildTargetGroup, string[]> backup = null;
+            try
             {
-                Debug.Log("[BuildWithConfig] 编译热更DLL...");
-                BuildDLLCommand.BuildAndCopyDlls();
+                // 0.1 备份原始宏，覆盖为模式宏集合（确保热更 DLL 编译与 Player 构建均使用模式宏）
+                backup = ScriptingDefineSymbols.BackupAllPlatformDefines();
+                ScriptingDefineSymbols.OverrideAllPlatformDefines(modeDefines);
+                AssetDatabase.Refresh();
+
+                // 1. [可选] 编译热更DLL
+                if (config.BuildHotFixDll)
+                {
+                    Debug.Log("[BuildWithConfig] 编译热更DLL...");
+                    BuildDLLCommand.BuildAndCopyDlls();
+                }
+
+                // 2. 刷新资源
+                AssetDatabase.Refresh();
+
+                // 3. 构建 AssetBundle
+                var buildResult = BuildInternalWithConfig(config);
+                if (!buildResult.Success)
+                {
+                    Debug.LogError($"[BuildWithConfig] AssetBundle构建失败: {buildResult.ErrorInfo}");
+                    return;
+                }
+
+                Debug.Log($"[BuildWithConfig] AssetBundle构建成功: {buildResult.OutputPackageDirectory}");
+
+                // 4. [最小包] 删除 StreamingAssets 中的 .bundle 文件
+                if (config.MinimalPackage)
+                {
+                    ProcessMinimalPackage(config.PackageVersion, config.RetainTags, buildResult.OutputPackageDirectory);
+                }
+
+                // 5. 刷新资源
+                AssetDatabase.Refresh();
+
+                // 6. [可选] 构建 Player
+                if (buildPlayer || config.BuildPlayer)
+                {
+                    BuildImp(
+                        BuildConfig.GetBuildTargetGroup(config.PlayerPlatform),
+                        config.PlayerPlatform,
+                        config.PlayerOutputPath
+                    );
+                }
             }
-
-            // 2. 刷新资源
-            AssetDatabase.Refresh();
-
-            // 3. 构建 AssetBundle
-            var buildResult = BuildInternalWithConfig(config);
-            if (!buildResult.Success)
+            finally
             {
-                Debug.LogError($"[BuildWithConfig] AssetBundle构建失败: {buildResult.ErrorInfo}");
-                return;
-            }
-
-            Debug.Log($"[BuildWithConfig] AssetBundle构建成功: {buildResult.OutputPackageDirectory}");
-
-            // 4. [最小包] 删除 StreamingAssets 中的 .bundle 文件
-            if (config.MinimalPackage)
-            {
-                ProcessMinimalPackage(config.PackageVersion, config.RetainTags, buildResult.OutputPackageDirectory);
-            }
-
-            // 5. 刷新资源
-            AssetDatabase.Refresh();
-
-            // 6. [可选] 构建 Player
-            if (buildPlayer || config.BuildPlayer)
-            {
-                BuildImp(
-                    BuildConfig.GetBuildTargetGroup(config.PlayerPlatform),
-                    config.PlayerPlatform,
-                    config.PlayerOutputPath
-                );
+                // 7. 恢复打包前的原始宏
+                if (backup != null)
+                {
+                    ScriptingDefineSymbols.RestoreAllPlatformDefines(backup);
+                    AssetDatabase.Refresh();
+                    Debug.Log("[BuildWithConfig] 已恢复打包前的原始宏定义");
+                }
             }
         }
 

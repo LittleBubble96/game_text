@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace GameLogic
+namespace TEngine
 {
     /// <summary>
     /// MonoBehaviour 泛型单例基类。

@@ -107,8 +107,16 @@ namespace Launcher
         {
             foreach (var ui in m_uiMapDict.Values)
             {
-                ui?.Hide();
-                Object.Destroy(ui?.gameObject);
+                float delay = 0;
+                if (ui is LoadUpdateUI) //防止异步黑屏
+                {
+                    delay = 1f;
+                }
+                else
+                {
+                    ui?.Hide();
+                }
+                Object.Destroy(ui?.gameObject, delay);
             }
             m_uiMapDict.Clear();
         }

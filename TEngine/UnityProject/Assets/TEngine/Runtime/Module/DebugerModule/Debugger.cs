@@ -213,7 +213,9 @@ namespace TEngine
             RegisterDebuggerWindow("Profiler/Object Pool", _objectPoolInformationWindow);;
             RegisterDebuggerWindow("Profiler/Reference Pool", _memoryPoolPoolInformationWindow);
             RegisterDebuggerWindow("Other/Settings", _settingsWindow);
-
+#if TE_RELEASE
+             ActiveWindow = false;
+#else
             switch (activeWindow)
             {
                 case DebuggerActiveWindowType.AlwaysOpen:
@@ -232,6 +234,8 @@ namespace TEngine
                     ActiveWindow = false;
                     break;
             }
+#endif
+            
         }
 
         private void Update()

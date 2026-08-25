@@ -55,7 +55,7 @@ namespace GameLogic.Localization
             var langTable = ConfigSystem.Instance.Tables.TbLanguage;
             if (langTable == null || langTable.DataMap.Count == 0)
             {
-                Debug.LogError("[GameLocalization] TbLanguage 表为空，多语言功能不可用。");
+                Log.Error("[GameLocalization] TbLanguage 表为空，多语言功能不可用。");
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace GameLogic.Localization
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning($"[GameLocalization] 从 PlayerPrefs 恢复语言失败: {e.Message}");
+                    Log.Warning($"[GameLocalization] 从 PlayerPrefs 恢复语言失败: {e.Message}");
                 }
             }
         }
@@ -118,20 +118,20 @@ namespace GameLogic.Localization
             var contentTable = ConfigSystem.Instance.Tables.TbLanguageContent;
             if (contentTable == null)
             {
-                Debug.LogWarning($"[GameLocalization] TbLanguageContent 表不可用。");
+                Log.Warning($"[GameLocalization] TbLanguageContent 表不可用。");
                 return key;
             }
 
             var entry = contentTable.GetOrDefault(key);
             if (entry == null || entry.Value == null)
             {
-                Debug.LogWarning($"[GameLocalization] 未找到多语言 Key: {key}");
+                Log.Warning($"[GameLocalization] 未找到多语言 Key: {key}");
                 return key;
             }
 
             if (CurrentLanguageIndex < 0 || CurrentLanguageIndex >= entry.Value.Length)
             {
-                Debug.LogWarning($"[GameLocalization] 语言索引 {CurrentLanguageIndex} 超出 {key} 的值数组范围。");
+                Log.Warning($"[GameLocalization] 语言索引 {CurrentLanguageIndex} 超出 {key} 的值数组范围。");
                 return key;
             }
 
@@ -156,7 +156,7 @@ namespace GameLogic.Localization
             // 尝试解析 LanguageCode 枚举
             if (!Enum.TryParse<LanguageCode>(languageCode, true, out var langEnum))
             {
-                Debug.LogWarning($"[GameLocalization] 未知语言代码: {languageCode}");
+                Log.Warning($"[GameLocalization] 未知语言代码: {languageCode}");
                 return false;
             }
 
@@ -171,7 +171,7 @@ namespace GameLogic.Localization
             int index = (int)code - 1;
             if (index < 0)
             {
-                Debug.LogWarning($"[GameLocalization] 无效的 LanguageCode: {code}");
+                Log.Warning($"[GameLocalization] 无效的 LanguageCode: {code}");
                 return false;
             }
 
@@ -183,7 +183,7 @@ namespace GameLogic.Localization
                 SaveLanguageToCache();
             }
 
-            Debug.Log($"[GameLocalization] 语言切换为: {CurrentLanguageCode} (索引={CurrentLanguageIndex})");
+            Log.Info($"[GameLocalization] 语言切换为: {CurrentLanguageCode} (索引={CurrentLanguageIndex})");
 
             // 同步框架层语言并触发全局事件（LocalizationManager.Language setter 内部发送 Event_LanguageChanged）
             if (LanguageCodeToTEngineMap.TryGetValue(code, out var tengineLang))
@@ -201,7 +201,7 @@ namespace GameLogic.Localization
         {
             if (index < 0 || index >= AvailableLanguages.Count)
             {
-                Debug.LogWarning($"[GameLocalization] 无效的语言索引: {index}");
+                Log.Warning($"[GameLocalization] 无效的语言索引: {index}");
                 return false;
             }
 

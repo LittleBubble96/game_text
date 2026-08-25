@@ -28,11 +28,11 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void Init()
         {
-            bg.color = new Color(1, 1, 1, 0);
         }
 
         public void OnEnterGameAnim()
         {
+            bg.color = new Color(1, 1, 1, 0);
             _rootSeq?.Kill();
             _rootSeq = DOTween.Sequence();
             _rootSeq.Append(bg.DOFade(1, 0.5f));

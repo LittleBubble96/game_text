@@ -116,13 +116,13 @@ namespace GameLogic
                 {
                     GameManager.Instance.ResetProgress();
                     GameManager.Instance.CurrentGamePlay?.LoadLevel(id);
-                    Debug.Log($"[GM] 跳转至关卡 {id}");
+                    Log.Info($"[GM] 跳转至关卡 {id}");
                 }
             });
             await CreateBtnAsync("下一关", () =>
             {
                 GameManager.Instance.LoadNextCorePlayLevel();
-                Debug.Log("[GM] 加载下一关");
+                Log.Info("[GM] 加载下一关");
             });
             await CreateBtnAsync("直接通关", () =>
             {
@@ -132,13 +132,13 @@ namespace GameLogic
                     int levelId = gameplay.CurrentLevelId;
                     gameplay.EndGame();
                     GameEvent.Send(EventDefine.Event_LevelCompleted, levelId);
-                    Debug.Log($"[GM] 直接通关 关卡 {levelId}");
+                    Log.Info($"[GM] 直接通关 关卡 {levelId}");
                 }
             });
             await CreateBtnAsync("重置进度", () =>
             {
                 GameManager.Instance.ResetProgress();
-                Debug.Log("[GM] 进度已重置");
+                Log.Info("[GM] 进度已重置");
             });
 
             await CreateGmGroupAsync("道具");
@@ -147,22 +147,32 @@ namespace GameLogic
             {
                 if (int.TryParse(num, out int count))
                 {
-                    PropDefine.InitPropCounts(count, PropDefine.CoinCount);
-                    Debug.Log($"[GM] 提示道具设为 {count}");
+                    PropDefine.InitPropCounts(count, PropDefine.CoinCount, PropDefine.ResetCount);
+                    Log.Info($"[GM] 提示道具设为 {count}");
                 }
             });
+            
+            await CreateBtnAndInputAsync("设置重置数量", (num) =>
+            {
+                if (int.TryParse(num, out int count))
+                {
+                    PropDefine.InitPropCounts(PropDefine.TipCount, PropDefine.CoinCount, count);
+                    Log.Info($"[GM] 重置道具设为 {count}");
+                }
+            });
+            
             await CreateBtnAndInputAsync("设置金币数量", (num) =>
             {
                 if (int.TryParse(num, out int count))
                 {
-                    PropDefine.InitPropCounts(PropDefine.TipCount, count);
-                    Debug.Log($"[GM] 金币设为 {count}");
+                    PropDefine.InitPropCounts(PropDefine.TipCount, count, PropDefine.ResetCount);
+                    Log.Info($"[GM] 金币设为 {count}");
                 }
             });
             await CreateBtnAsync("道具设为999", () =>
             {
-                PropDefine.InitPropCounts(999, 999);
-                Debug.Log("[GM] 道具均设为 999");
+                PropDefine.InitPropCounts(999, 999, 999);
+                Log.Info("[GM] 道具均设为 999");
             });
 
             await CreateGmGroupAsync("状态");
@@ -170,15 +180,15 @@ namespace GameLogic
             {
                 var gm = GameManager.Instance;
                 var gp = gm.CurrentGamePlay as CorePlayGamePlay;
-                Debug.Log($"[GM] === 游戏状态 ===");
-                Debug.Log($"[GM] 当前关卡ID: {gp?.CurrentLevelId ?? -1}");
-                Debug.Log($"[GM] 关卡总数: {gp?.TotalLevelCount ?? 0}");
-                Debug.Log($"[GM] 游戏运行中: {gp?.IsGameRunning ?? false}");
-                Debug.Log($"[GM] 提示道具: {PropDefine.TipCount}");
-                Debug.Log($"[GM] 金币: {PropDefine.CoinCount}");
-                Debug.Log($"[GM] 基字: {gp?.GetBaseCharacter() ?? "无"}");
-                Debug.Log($"[GM] 已找到答案: {gp?.FoundAnswerIndices?.Count ?? 0}");
-                Debug.Log($"[GM] ================");
+                Log.Info($"[GM] === 游戏状态 ===");
+                Log.Info($"[GM] 当前关卡ID: {gp?.CurrentLevelId ?? -1}");
+                Log.Info($"[GM] 关卡总数: {gp?.TotalLevelCount ?? 0}");
+                Log.Info($"[GM] 游戏运行中: {gp?.IsGameRunning ?? false}");
+                Log.Info($"[GM] 提示道具: {PropDefine.TipCount}");
+                Log.Info($"[GM] 金币: {PropDefine.CoinCount}");
+                Log.Info($"[GM] 基字: {gp?.GetBaseCharacter() ?? "无"}");
+                Log.Info($"[GM] 已找到答案: {gp?.FoundAnswerIndices?.Count ?? 0}");
+                Log.Info($"[GM] ================");
             });
 
             #endregion
@@ -190,7 +200,7 @@ namespace GameLogic
             await CreateBtnAsync("打开活动弹窗", () =>
             {
                 // TODO: 接入活动弹窗
-                Debug.Log("[GM] 活动弹窗（待实现）");
+                Log.Info("[GM] 活动弹窗（待实现）");
             });
 
             #endregion
@@ -202,12 +212,12 @@ namespace GameLogic
             await CreateBtnAsync("返回主界面", () =>
             {
                 GameManager.Instance.ReturnToHome();
-                Debug.Log("[GM] 返回主界面");
+                Log.Info("[GM] 返回主界面");
             });
             await CreateBtnAsync("关闭GM面板", () =>
             {
                 GameModule.UI.CloseUI<UIGM>();
-                Debug.Log("[GM] GM面板已关闭");
+                Log.Info("[GM] GM面板已关闭");
             });
 
             #endregion

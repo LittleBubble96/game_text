@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using GameLogic.GamePlay.CorePlay;
+using TEngine;
 using UnityEngine;
 
 namespace GameLogic.Data
@@ -35,11 +36,11 @@ namespace GameLogic.Data
                 string json = JsonUtility.ToJson(CorePlayRestoreData.SaveData, true);
                 string filePath = GetSaveFilePath();
                 File.WriteAllText(filePath, json);
-                Debug.Log($"[RestoreDataManager] 存档已保存: {filePath}");
+                Log.Info($"[RestoreDataManager] 存档已保存: {filePath}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[RestoreDataManager] 保存失败: {e.Message}");
+                Log.Error($"[RestoreDataManager] 保存失败: {e.Message}");
             }
         }
 
@@ -49,7 +50,7 @@ namespace GameLogic.Data
             string filePath = GetSaveFilePath();
             if (!File.Exists(filePath))
             {
-                Debug.Log($"[RestoreDataManager] 未找到存档文件，使用新数据: {filePath}");
+                Log.Info($"[RestoreDataManager] 未找到存档文件，使用新数据: {filePath}");
                 CorePlayRestoreData.InitOrResetData();
                 return;
             }
@@ -59,11 +60,11 @@ namespace GameLogic.Data
                 string json = File.ReadAllText(filePath);
                 CorePlaySaveData data = JsonUtility.FromJson<CorePlaySaveData>(json);
                 CorePlayRestoreData.LoadFromData(data);
-                Debug.Log($"[RestoreDataManager] 存档已加载: 当前关卡ID {data?.currentLevelId}");
+                Log.Info($"[RestoreDataManager] 存档已加载: 当前关卡ID {data?.currentLevelId}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[RestoreDataManager] 加载失败: {e.Message}");
+                Log.Error($"[RestoreDataManager] 加载失败: {e.Message}");
                 CorePlayRestoreData.InitOrResetData();
             }
         }
@@ -75,7 +76,7 @@ namespace GameLogic.Data
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
-                Debug.Log("[RestoreDataManager] 存档已删除");
+                Log.Info("[RestoreDataManager] 存档已删除");
             }
             CorePlayRestoreData.InitOrResetData();
         }

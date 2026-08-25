@@ -4,7 +4,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using TEngine;
 
-namespace GameLogic
+namespace TEngine
 {
     public partial class NetTimeSystem
     {

@@ -234,10 +234,8 @@ namespace Builder
                     string levelDir = Path.Combine(OutputFontDir, LevelSubDir);
                     EnsureDirectory(levelDir);
 
-                    // 关卡文字使用主游戏字体，优先匹配 AaFengKuangYuanShiRen
-                    string levelFont = fontGroups.ContainsKey("AaFengKuangYuanShiRen")
-                        ? "AaFengKuangYuanShiRen"
-                        : fontGroups.First().Key;
+                    // 关卡文字使用主游戏字体，优先匹配 AlibabaPuHuiTi-3-95-ExtraBold
+                    string levelFont = "AlibabaPuHuiTi-3-95-ExtraBold";
 
                     BuildFontAsset(levelFont, levelChars, levelDir, LevelSuffix);
                 }
@@ -393,6 +391,12 @@ namespace Builder
             foreach (var writeChar in GenerateTMPDefine.WhiteList)
             {
                 chars.Add(writeChar);
+            }
+
+            //添加韵母
+            foreach (var intonation in GenerateTMPDefine.LevelIntonation)
+            {
+                chars.Add(intonation);
             }
             return chars;
         }

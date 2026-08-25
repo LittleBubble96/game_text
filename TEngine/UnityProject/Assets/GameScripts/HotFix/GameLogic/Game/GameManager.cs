@@ -114,7 +114,7 @@ namespace GameLogic
             // 绑定全局通关事件 → 自动存档 + 弹出结算
             GameEvent.AddEventListener<int>(EventDefine.Event_LevelCompleted, OnLevelCompleted);
 
-            Debug.Log("[GameManager] 所有模块初始化完成");
+            Log.Info("[GameManager] 所有模块初始化完成");
         }
 
         // ================ 启动玩法 ================
@@ -128,7 +128,7 @@ namespace GameLogic
         {
             if (_levelConfig.LevelCount == 0)
             {
-                Debug.LogError("[GameManager] 没有可用的关卡数据");
+                Log.Error("[GameManager] 没有可用的关卡数据");
                 return;
             }
 
@@ -151,7 +151,7 @@ namespace GameLogic
             _corePlayGamePlay.LoadLevel(startLevelId, restoredAnswers, cachedLevelData);
             CurrentGamePlay.StartGame();
 
-            Debug.Log($"[GameManager] CorePlay 启动，当前关卡: {startLevelId}");
+            Log.Info($"[GameManager] CorePlay 启动，当前关卡: {startLevelId}");
             GameModule.UI.ShowUIAsync<UICorePlay>();
             GameModule.UI.CloseUI<UIHome>();
         }
@@ -178,7 +178,7 @@ namespace GameLogic
             // 结算界面点击按钮只播奖励飞行动画表现，不再改数据。
             GrantLevelReward(levelId);
 
-            Debug.Log($"[GameManager] 游戏通关! 关卡: {levelId}");
+            Log.Info($"[GameManager] 游戏通关! 关卡: {levelId}");
             // 弹出结算界面（奖励仍按已通关的 levelId 查配置，用于展示数量）
             GameModule.UI.ShowUIAsync<UIFinish>(levelId);
         }
@@ -231,7 +231,7 @@ namespace GameLogic
             int nextLevelId = CurrentGamePlay.CurrentLevelId + 1;
             if (_levelConfig.GetLevelNameByLevelId(nextLevelId) == null)
             {
-                Debug.Log("[GameManager] 已通过所有关卡!");
+                Log.Info("[GameManager] 已通过所有关卡!");
                 return;
             }
 
@@ -252,7 +252,7 @@ namespace GameLogic
             GameModule.UI.CloseUI<UIFinish>();
             GameModule.UI.ShowUIAsync<UIHome>();
             
-            Debug.Log("[GameManager] 返回主界面");
+            Log.Info("[GameManager] 返回主界面");
         }
 
         // ================ 存档管理 ================

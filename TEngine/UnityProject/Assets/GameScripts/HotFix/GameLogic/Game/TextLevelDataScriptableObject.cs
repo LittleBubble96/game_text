@@ -7,6 +7,7 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using Cysharp.Threading.Tasks;
+using hyjiacan.py4n;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
@@ -66,11 +67,26 @@ namespace GameLogic.Data
         }
     }
 
+    [Serializable]
+    public struct TextToneData
+    {
+        public string character;
+        public string tone;
+
+        public TextToneData(string c, string t)
+        {
+            character = c;
+            tone = t;
+        }
+    }
+
 // ==================== ScriptableObject ====================
 
     public class TextLevelDataScriptableObject : ScriptableObject
     {
         public List<TextLevelData> levelDataList = new List<TextLevelData>();
+
+        public List<TextToneData> characterToTone = new List<TextToneData>();
 
 #if UNITY_EDITOR
         [MenuItem("Assets/Create/TextLevelDataScriptableObject")]
@@ -111,6 +127,7 @@ public class TextLevelEditorWindow : EditorWindow
     private int _swapTargetIndex = -1;
 
     private List<string> _availableCharacters = new List<string>();
+    private HashSet<string> _levelCharacters = new HashSet<string>();
     private Dictionary<string, int> _characterStrokeCount = new Dictionary<string, int>();
 
     // 笔画高亮状态
@@ -136,14 +153,29 @@ public class TextLevelEditorWindow : EditorWindow
         _graphicDataAsset = AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(
             "Assets/AssetRaw/Configs/LevelConfigs/TextGraphicDataScriptableObject.asset");
 
+        _levelCharacters.Clear();
         _availableCharacters.Clear();
         _characterStrokeCount.Clear();
+        if (_levelDataAsset != null && _levelDataAsset.levelDataList != null)
+        {
+            foreach (var levelData in _levelDataAsset.levelDataList)
+            {
+                _levelCharacters.Add(levelData.baseCharacter);
+            }
+        }
         if (_graphicDataAsset != null && _graphicDataAsset.TextGraphicDataList != null)
         {
             foreach (var gd in _graphicDataAsset.TextGraphicDataList)
             {
                 if (gd == null || string.IsNullOrEmpty(gd.character)) continue;
-                _availableCharacters.Add(gd.character);
+                if (_levelCharacters.Contains(gd.character))
+                {
+                    _availableCharacters.Add(gd.character);
+                }
+                else
+                {
+                    _availableCharacters.Insert(0 , gd.character);
+                }
                 _characterStrokeCount[gd.character] = gd.strokes.Count;
             }
         }
@@ -211,6 +243,10 @@ public class TextLevelEditorWindow : EditorWindow
             {
                 SortLevels();
             }
+        }
+        if (GUILayout.Button("刷新音调"))
+        {
+            RefreshTones();
         }
         EditorGUILayout.EndHorizontal();
 
@@ -579,7 +615,7 @@ public class TextLevelEditorWindow : EditorWindow
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.Space();
-            _newAnswerCharacter = EditorGUILayout.TextField("新字符:", _newAnswerCharacter, GUILayout.Width(130));
+            _newAnswerCharacter = EditorGUILayout.TextField("新字符:", _newAnswerCharacter, GUILayout.Width(200));
             if (GUILayout.Button("确认", GUILayout.Width(50)))
             {
                 answer.answerCharacter = _newAnswerCharacter;
@@ -666,7 +702,7 @@ public class TextLevelEditorWindow : EditorWindow
 
     // ==================== 辅助方法 ====================
 
-    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" , "人"};
+    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" , "人", "八", "丨"};
 
     private string[] GetCommonAnswerOptions()
     {
@@ -753,6 +789,40 @@ public class TextLevelEditorWindow : EditorWindow
                 return true;
         }
         return false;
+    }
+
+    private static readonly Dictionary<string, string> _customTones = new Dictionary<string, string>()
+    {
+        { "丨", "gǔn" },
+    };
+
+
+    /// <summary>
+    /// 刷新音调数据
+    /// </summary>
+    private void RefreshTones()
+    {
+        _levelDataAsset.characterToTone.Clear();
+        HashSet<string> answerHashSet = new HashSet<string>();
+        foreach (var levelData in _levelDataAsset.levelDataList)
+        {
+            foreach (var answer in levelData.answers)
+            {
+                if (answer == null || string.IsNullOrEmpty(answer.answerCharacter) || answerHashSet.Contains(answer.answerCharacter))
+                {
+                    continue;
+                }
+
+                if (!_customTones.TryGetValue(answer.answerCharacter , out var tone))
+                {
+                    tone = Pinyin4Net.GetPinyin(answer.answerCharacter, PinyinFormat.WITH_TONE_MARK);
+                }
+                _levelDataAsset.characterToTone.Add(new TextToneData(answer.answerCharacter , tone));
+                answerHashSet.Add(answer.answerCharacter);
+            }
+        }
+        EditorUtility.SetDirty(_levelDataAsset);
+        AssetDatabase.SaveAssets();
     }
 
     /// <summary>

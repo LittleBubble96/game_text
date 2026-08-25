@@ -31,7 +31,9 @@ namespace GameLogic
         
         private CorePlayLayoutWidget _layoutWidget;
         
-        private CorePlayPropWidget _propWidget;
+        private CorePlayPropWidget _tipsPropWidget;
+
+        private CorePlayPropWidget _resetPropWidget;
         
 
         protected override void ScriptGenerator()
@@ -44,7 +46,10 @@ namespace GameLogic
             _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
             _resultTipText = FindChildComponent<TMP_Text>("Panel/ResultTip");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Panel/Layout");
-            _propWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/TipProp");
+            _tipsPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/TipProp");
+            _tipsPropWidget.OnInit(PropType.Tip);
+            _resetPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/ResetProp");
+            _resetPropWidget.OnInit(PropType.Reset);
             _submitButton.OnAddListener(OnSubmit);
         }
         
@@ -59,11 +64,14 @@ namespace GameLogic
         {
             base.RegisterEvent();
             AddUIEvent<bool, string, string>(EventDefine.Event_AnswerSubmitted, OnAnswerSubmitted);
+            AddUIEvent(EventDefine.Event_PropResetDone, OnPropResetDone);
         }
         
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            _tipsPropWidget.Refresh();
+            _resetPropWidget.Refresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: true));
             GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
             if (_resultTipText != null)
@@ -105,6 +113,15 @@ namespace GameLogic
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
         {
             ShowSubmitResult(success, answerCharacter, message);
+        }
+
+        /// <summary>重置道具使用完成：刷新进度文字（答案已清空 → 0/N）</summary>
+        private void OnPropResetDone()
+        {
+            if (GameManager.Instance?.CurrentGamePlay is CorePlayGamePlay corePlay)
+            {
+                RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
+            }
         }
 
         private void SetLevelName()

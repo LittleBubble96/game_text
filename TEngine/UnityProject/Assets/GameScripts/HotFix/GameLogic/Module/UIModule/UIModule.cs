@@ -66,31 +66,31 @@ namespace GameLogic
 
             _instanceRoot.gameObject.layer = LayerMask.NameToLayer("UI");
 
-            if (Debugger.Instance != null)
-            {
-                switch (Debugger.Instance.ActiveWindowType)
-                {
-                    case DebuggerActiveWindowType.AlwaysOpen:
-                        _enableErrorLog = true;
-                        break;
-
-                    case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
-                        _enableErrorLog = Debug.isDebugBuild;
-                        break;
-
-                    case DebuggerActiveWindowType.OnlyOpenInEditor:
-                        _enableErrorLog = Application.isEditor;
-                        break;
-
-                    default:
-                        _enableErrorLog = false;
-                        break;
-                }
-                if (_enableErrorLog)
-                {
-                    _errorLogger = new ErrorLogger(this);
-                }   
-            }
+        //     if (Debugger.Instance != null)
+        //     {
+        //         switch (Debugger.Instance.ActiveWindowType)
+        //         {
+        //             case DebuggerActiveWindowType.AlwaysOpen:
+        //                 _enableErrorLog = true;
+        //                 break;
+        //
+        //             case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
+        //                 _enableErrorLog = Debug.isDebugBuild;
+        //                 break;
+        //
+        //             case DebuggerActiveWindowType.OnlyOpenInEditor:
+        //                 _enableErrorLog = Application.isEditor;
+        //                 break;
+        //
+        //             default:
+        //                 _enableErrorLog = false;
+        //                 break;
+        //         }
+        //         if (_enableErrorLog)
+        //         {
+        //             _errorLogger = new ErrorLogger(this);
+        //         }   
+        //     }
         }
 
         /// <summary>

@@ -11,7 +11,8 @@ namespace Launcher
         #region 脚本工具生成的代码
 
         private Image m_imgBg;
-        private Scrollbar m_scrollBarProgress;
+        private RectTransform m_fill;
+        private RectTransform m_bar;
         private Text m_textUpdateDesc;
         private Text m_textVersion;
         private Text m_textLabelAppid;
@@ -19,7 +20,8 @@ namespace Launcher
         protected override void ScriptGenerator()
         {
             m_imgBg = FindChildComponent<Image>("m_imgBg");
-            m_scrollBarProgress = FindChildComponent<Scrollbar>("m_scrollBarProgress");
+            m_bar = FindChildComponent<RectTransform>("m_scrollBarProgress");
+            m_fill = FindChildComponent<RectTransform>("m_scrollBarProgress/m_fill");
             m_textUpdateDesc = FindChildComponent<Text>("m_scrollBarProgress/m_textUpdateDesc");
             m_textVersion = FindChildComponent<Text>("m_textVersion");
             m_textLabelAppid = FindChildComponent<Text>("m_textLabelAppid");
@@ -38,8 +40,8 @@ namespace Launcher
 
         internal void RefreshProgress(float progress)
         {
-            m_scrollBarProgress.gameObject.SetActive(true);
-            m_scrollBarProgress.size = progress;
+            m_bar.gameObject.SetActive(true);
+            m_fill.sizeDelta = new Vector2(986 * progress , m_fill.sizeDelta.y);
         }
 
         internal void RefreshVersion(string version)

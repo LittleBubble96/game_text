@@ -87,7 +87,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             if (_gamePlay == null)
             {
-                Debug.LogError("[CorePlayView] gamePlay 为 null");
+                Log.Error("[CorePlayView] gamePlay 为 null");
                 return;
             }
 
@@ -111,6 +111,9 @@ namespace GameLogic.GamePlay.CorePlay.View
             GameEvent.AddEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
             GameEvent.AddEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
 
+            // 绑定重置道具事件（清空答案 → 清高亮 + 清空 slot）
+            GameEvent.AddEventListener(EventDefine.Event_PropResetDone, OnPropResetDone);
+
             // 绑定 Character 渲染区布局事件（UI 可用宽高 → CharacterRoot 缩放）
             GameEvent.AddEventListener<ContentViewLayoutData>(EventDefine.Event_CharacterLayoutUpdate, OnCharacterLayoutUpdate);
 
@@ -121,7 +124,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             {
                 RenderLevelAsync(cp.CurrentLevelData).Forget();
             }
-            Debug.Log("[CorePlayView] 初始化完成 (DrawCharacter + StrokeInputHandler 动态创建)");
+            Log.Info("[CorePlayView] 初始化完成 (DrawCharacter + StrokeInputHandler 动态创建)");
         }
 
         private void CreateDrawCharacter()
@@ -142,7 +145,7 @@ namespace GameLogic.GamePlay.CorePlay.View
                 cam = Camera.main;
                 if (cam == null)
                 {
-                    Debug.LogError("[CorePlayView] 未找到 Camera，笔画点击将不生效");
+                    Log.Error("[CorePlayView] 未找到 Camera，笔画点击将不生效");
                     return;
                 }
             }
@@ -175,6 +178,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             GameEvent.RemoveEventListener<List<int>>(EventDefine.Event_PropTipHighlight, OnPropTipHighlight);
             GameEvent.RemoveEventListener(EventDefine.Event_PropTipClearHighlight, OnPropTipClearHighlight);
+            GameEvent.RemoveEventListener(EventDefine.Event_PropResetDone, OnPropResetDone);
             GameEvent.RemoveEventListener<ContentViewLayoutData>(EventDefine.Event_CharacterLayoutUpdate, OnCharacterLayoutUpdate);
         }
 
@@ -261,7 +265,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             TextGraphicData graphicData = _levelConfig?.GetGraphicData(levelData.baseCharacter);
             if (graphicData == null)
             {
-                Debug.LogError($"[CorePlayView] 未找到『{levelData.baseCharacter}』的字形数据");
+                Log.Error($"[CorePlayView] 未找到『{levelData.baseCharacter}』的字形数据");
                 return;
             }
 
@@ -277,7 +281,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             // 绘制完成后应用一次缩放（处理 UI 布局事件先于绘制到达的情况，此时用缓存可用尺寸）
             ApplyCharacterScale();
 
-            Debug.Log($"[CorePlayView] 渲染关卡: 『{levelData.baseCharacter}』, {graphicData.strokes.Count} 笔画");
+            Log.Info($"[CorePlayView] 渲染关卡: 『{levelData.baseCharacter}』, {graphicData.strokes.Count} 笔画");
         }
 
         // ================ 笔画点击（来自 StrokeInputHandler 的射线检测） ================
@@ -405,6 +409,13 @@ namespace GameLogic.GamePlay.CorePlay.View
         private void OnPropTipClearHighlight()
         {
             ClearTipBlink();
+        }
+
+        /// <summary>重置道具使用完成：清空所有笔画高亮 + 清空已填 slot（不重绘 DrawCharacter）</summary>
+        private void OnPropResetDone()
+        {
+            ClearAllHighlights();
+            _gameSlotView?.ClearAllSlots();
         }
 
         private void ClearTipBlink()

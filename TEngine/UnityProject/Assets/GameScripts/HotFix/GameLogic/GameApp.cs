@@ -39,6 +39,7 @@ public partial class GameApp
     
     private static async UniTask StartGameLogic()
     {
+        SDK.InitSdk();
         NetTimeSystem.Instance.Activate();
         Log.Warning("======= StartGameLogic Init =======");
         await InitConfig();

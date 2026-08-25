@@ -2,8 +2,9 @@
 // using Log;
 // using Logic.Message;
 using UnityEngine;
+using WeChatWASM;
 
-namespace GameLogic
+namespace TEngine
 {
     public partial class NetTimeSystem
     {
@@ -111,8 +112,14 @@ namespace GameLogic
         public void RefreshNetTime()
         {
             _requestTime = 0;
+#if UNITY_EDITOR
             GenerateNetTimeByHttps();
             GenerateNetTimeByNtp();
+#elif UNITY_WEBGL
+            GenerateNetTimeByWebgl();
+#endif
+            
+            
         }
 
         public void GetNetTimeAsync(Action<DateTime> action)

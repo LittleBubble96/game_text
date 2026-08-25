@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameLogic.Data;
+using TEngine;
 using UnityEngine;
 
 namespace GameLogic.GamePlay.CorePlay
@@ -28,6 +29,10 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>字形数据映射（字符 -> 图形数据）</summary>
         public Dictionary<string, TextGraphicData> GraphicDataMap { get; private set; }
 
+        /// <summary>音调数据映射（字符 -> 音调）</summary>
+        public Dictionary<string, string> CharacterToToneMap { get; private set; }
+
+
         /// <summary>加载所有关卡配置</summary>
         public async UniTask LoadAllLevels()
         {
@@ -37,6 +42,11 @@ namespace GameLogic.GamePlay.CorePlay
             // 构建 LevelName -> TextLevelData 映射
             AllLevels = new List<TextLevelData>();
             LevelNameMap = new Dictionary<string, TextLevelData>();
+            CharacterToToneMap = new Dictionary<string, string>();
+            foreach (var textToneData in _levelDataAsset.characterToTone)
+            {
+                CharacterToToneMap.Add(textToneData.character,textToneData.tone);
+            }
             if (_levelDataAsset != null && _levelDataAsset.levelDataList != null)
             {
                 foreach (var level in _levelDataAsset.levelDataList)
@@ -47,11 +57,11 @@ namespace GameLogic.GamePlay.CorePlay
                         LevelNameMap[level.levelName] = level;
                     }
                 }
-                Debug.Log($"加载了 {AllLevels.Count} 个关卡数据");
+                Log.Info($"加载了 {AllLevels.Count} 个关卡数据");
             }
             else
             {
-                Debug.LogError($"未找到关卡数据: Resources/{LevelDataResPath}");
+                Log.Error($"未找到关卡数据: Resources/{LevelDataResPath}");
             }
 
             // 构建 LevelId -> LevelName 映射（使用 ConfigSystem 的 TbLevel 表）
@@ -68,11 +78,11 @@ namespace GameLogic.GamePlay.CorePlay
                         LevelIdToNameMap[levelId] = levelName;
                     }
                 }
-                Debug.Log($"从 TbLevel 加载了 {LevelIdToNameMap.Count} 个关卡表条目");
+                Log.Info($"从 TbLevel 加载了 {LevelIdToNameMap.Count} 个关卡表条目");
             }
             else
             {
-                Debug.LogWarning("TbLevel 表为空或不可用");
+                Log.Warning("TbLevel 表为空或不可用");
             }
 
             BuildGraphicDataMap();
@@ -90,7 +100,7 @@ namespace GameLogic.GamePlay.CorePlay
                     GraphicDataMap[gd.character] = gd;
                 }
             }
-            Debug.Log($"加载了 {GraphicDataMap.Count} 个字形数据");
+            Log.Info($"加载了 {GraphicDataMap.Count} 个字形数据");
         }
 
         /// <summary>根据关卡名称获取关卡数据</summary>
@@ -145,5 +155,6 @@ namespace GameLogic.GamePlay.CorePlay
                 return max;
             }
         }
+        
     }
 }

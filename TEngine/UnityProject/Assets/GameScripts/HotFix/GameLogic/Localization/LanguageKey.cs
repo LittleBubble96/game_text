@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 17 个 Key）。
+    /// 多语言 Key 常量类（共 26 个 Key）。
     /// </summary>
     public static class LanguageKey
     {
@@ -29,5 +29,14 @@ namespace GameLogic.Localization
         public const string finish_des = "finish_des";
         public const string finish_completeDes = "finish_completeDes";
         public const string btn_confirm = "btn_confirm";
+        public const string getCoin_Title = "getCoin_Title";
+        public const string getCoin_Body_unClaim = "getCoin_Body_unClaim";
+        public const string getCoin_Body_claim = "getCoin_Body_claim";
+        public const string getCoin_Btn_unClaim = "getCoin_Btn_unClaim";
+        public const string getCoin_Btn_claim = "getCoin_Btn_claim";
+        public const string getCoin_Share_Body_unClaim = "getCoin_Share_Body_unClaim";
+        public const string getCoin_Share_Body_claim = "getCoin_Share_Body_claim";
+        public const string getCoin_Share_Btn_unClaim = "getCoin_Share_Btn_unClaim";
+        public const string getCoin_Share_Btn_claim = "getCoin_Share_Btn_claim";
     }
 }

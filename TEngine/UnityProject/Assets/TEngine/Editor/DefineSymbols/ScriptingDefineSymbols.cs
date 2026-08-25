@@ -112,6 +112,49 @@ namespace TEngine.Editor
         }
 
         /// <summary>
+        /// 备份所有受管平台的脚本宏定义，返回平台到宏数组的映射（用于打包后恢复）。
+        /// </summary>
+        public static Dictionary<BuildTargetGroup, string[]> BackupAllPlatformDefines()
+        {
+            var backup = new Dictionary<BuildTargetGroup, string[]>();
+            foreach (BuildTargetGroup buildTargetGroup in BuildTargetGroups)
+            {
+                backup[buildTargetGroup] = GetScriptingDefineSymbols(buildTargetGroup);
+            }
+            return backup;
+        }
+
+        /// <summary>
+        /// 用指定宏集合覆盖所有受管平台的脚本宏定义（打包前调用）。
+        /// </summary>
+        /// <param name="defines">要覆盖的宏集合。</param>
+        public static void OverrideAllPlatformDefines(string[] defines)
+        {
+            foreach (BuildTargetGroup buildTargetGroup in BuildTargetGroups)
+            {
+                SetScriptingDefineSymbols(buildTargetGroup, defines ?? System.Array.Empty<string>());
+            }
+        }
+
+        /// <summary>
+        /// 用备份的平台宏映射恢复脚本宏定义（打包后调用）。
+        /// </summary>
+        /// <param name="backup">BackupAllPlatformDefines 返回的备份。</param>
+        public static void RestoreAllPlatformDefines(Dictionary<BuildTargetGroup, string[]> backup)
+        {
+            if (backup == null)
+            {
+                return;
+            }
+
+            foreach (BuildTargetGroup buildTargetGroup in BuildTargetGroups)
+            {
+                backup.TryGetValue(buildTargetGroup, out string[] defines);
+                SetScriptingDefineSymbols(buildTargetGroup, defines ?? System.Array.Empty<string>());
+            }
+        }
+
+        /// <summary>
         /// 为所有平台移除指定的脚本宏定义。
         /// </summary>
         /// <param name="scriptingDefineSymbol">要移除的脚本宏定义。</param>

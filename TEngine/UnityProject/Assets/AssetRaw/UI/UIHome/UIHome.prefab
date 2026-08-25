@@ -788,6 +788,8 @@ GameObject:
   - component: {fileID: 7590624233116553182}
   - component: {fileID: 7590624233116553181}
   - component: {fileID: 7590624233116553180}
+  - component: {fileID: 8483024828075823289}
+  - component: {fileID: 209612252879005501}
   m_Layer: 5
   m_Name: UIHome
   m_TagString: Untagged
@@ -893,6 +895,34 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!111 &8483024828075823289
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7590624233116553168}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 0}
+  m_Animations:
+  - {fileID: 7400000, guid: f433db84fd9ac454bb2328d9435c5cbf, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
+--- !u!225 &209612252879005501
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7590624233116553168}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7644931287729090127
 GameObject:
   m_ObjectHideFlags: 0

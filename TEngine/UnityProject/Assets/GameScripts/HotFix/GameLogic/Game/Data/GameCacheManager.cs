@@ -1,5 +1,6 @@
 using System.IO;
 using GameLogic.GamePlay.CorePlay;
+using TEngine;
 using UnityEngine;
 using WeChatWASM;
 
@@ -59,7 +60,7 @@ namespace GameLogic.Data
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[GameCache] 保存失败: {e.Message}");
+                Log.Error($"[GameCache] 保存失败: {e.Message}");
             }
         }
 
@@ -72,7 +73,7 @@ namespace GameLogic.Data
             string cacheJson = _readCacheFileSystem?.ReadCache();
             if (string.IsNullOrEmpty(cacheJson))
             {
-                Debug.Log("[GameCache] 未找到缓存文件，初始化新数据");
+                Log.Info("[GameCache] 未找到缓存文件，初始化新数据");
                 InitAll();
                 return;
             }
@@ -95,11 +96,11 @@ namespace GameLogic.Data
 
                 // 将关卡数据同步到 CorePlayRestore
                 CorePlayRestore.LoadFromData(CacheData.corePlaySaveData);
-                Debug.Log($"[GameCache] 缓存已加载: 关卡ID={CacheData.corePlaySaveData?.currentLevelId}");
+                Log.Info($"[GameCache] 缓存已加载: 关卡ID={CacheData.corePlaySaveData?.currentLevelId}");
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"[GameCache] 加载失败: {e.Message}");
+                Log.Error($"[GameCache] 加载失败: {e.Message}");
                 InitAll();
             }
         }
@@ -141,7 +142,7 @@ namespace GameLogic.Data
             var cached = CacheData?.corePlaySaveData?.cachedLevelData;
             if (cached != null && !cached.IsValid())
             {
-                Debug.LogWarning("[GameCache] 检测到无效的缓存关卡数据，已重置为 null。");
+                Log.Warning("[GameCache] 检测到无效的缓存关卡数据，已重置为 null。");
                 CacheData.corePlaySaveData.cachedLevelData = null;
             }
         }

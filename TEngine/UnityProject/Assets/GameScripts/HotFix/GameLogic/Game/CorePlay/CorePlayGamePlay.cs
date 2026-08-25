@@ -386,18 +386,35 @@ namespace GameLogic.GamePlay.CorePlay
             return _foundAnswerIndices.Count < _currentLevelData.answers.Count;
         }
 
+        // ================ 道具重置 ================
+
+        /// <summary>
+        /// 清空当前关已找到的答案与已选中笔画（不重载关卡、不重绘 DrawCharacter）。
+        /// 清选中笔画会逐个回调 OnStrokeSelectionChanged=false（View 据此复位笔画高亮）；
+        /// 视图层 slot 清空与进度文字刷新由 Event_PropResetDone 事件驱动。
+        /// </summary>
+        /// <returns>是否清空成功（关卡未加载时返回 false）</returns>
+        public bool ClearAnswers()
+        {
+            if (_currentLevelData == null || _currentLevelId < 1) return false;
+
+            ClearSelection();             // 清选中笔画，逐个回调 OnStrokeSelectionChanged=false
+            _foundAnswerIndices.Clear();  // 清已找到答案
+            return true;
+        }
+
         // ================ 工具 ================
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         private void DebugLog(string msg)
         {
-            UnityEngine.Debug.Log($"[CorePlayGamePlay] {msg}");
+            Log.Info($"[CorePlayGamePlay] {msg}");
         }
 
         [System.Diagnostics.Conditional("UNITY_EDITOR")]
         private void DebugLogError(string msg)
         {
-            UnityEngine.Debug.LogError($"[CorePlayGamePlay] {msg}");
+            Log.Error($"[CorePlayGamePlay] {msg}");
         }
     }
 }

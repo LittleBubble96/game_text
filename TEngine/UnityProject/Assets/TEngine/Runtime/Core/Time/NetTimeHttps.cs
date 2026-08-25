@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 
 
-namespace GameLogic
+namespace TEngine
 {
     public partial class NetTimeSystem : MonoSingleton<NetTimeSystem>
     {

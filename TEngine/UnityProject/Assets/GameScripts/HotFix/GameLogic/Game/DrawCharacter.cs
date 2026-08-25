@@ -129,7 +129,7 @@ namespace GameLogic.View
             _strokeMaterialTemplate = await GameModule.Resource.LoadAssetAsync<Material>(StrokeMaterialPath);
             if (_strokeMaterialTemplate == null)
             {
-                Debug.LogError($"[DrawCharacter] 笔画材质模板预加载失败: {StrokeMaterialPath}，回退到内置 Unlit/Color");
+                Log.Error($"[DrawCharacter] 笔画材质模板预加载失败: {StrokeMaterialPath}，回退到内置 Unlit/Color");
                 _strokeMaterialTemplate = new Material(Shader.Find("Unlit/Color"));
             }
 #endif
@@ -144,7 +144,7 @@ namespace GameLogic.View
             await UniTask.Yield();
             if (_strokeMaterialTemplate == null)
             {
-                Debug.LogError($"[DrawCharacter] 笔画材质模板未预加载: {StrokeMaterialPath}，请确认 loading 阶段调用了 PreloadStrokeMaterialAsync");
+                Log.Error($"[DrawCharacter] 笔画材质模板未预加载: {StrokeMaterialPath}，请确认 loading 阶段调用了 PreloadStrokeMaterialAsync");
             }
             return _strokeMaterialTemplate;
         }

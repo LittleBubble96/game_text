@@ -15,6 +15,7 @@ namespace GameLogic
         private CanvasGroup _backCanvasGroup;
         private TMP_Text _coinCountText;
         private XYButton _backBtn;
+        private XYButton _coinBtn;
 
         /// <summary>当前数据缓存，用于动画状态对比</summary>
         private UITopData _currentData;
@@ -58,6 +59,12 @@ namespace GameLogic
                 _backBtn?.OnAddListener(OnBackClick);
             }
 
+            if (_coinTf != null)
+            {
+                _coinBtn = CreateWidget<XYButton>(_coinTf.gameObject);
+                _coinBtn?.OnAddListener(OnCoinClick);
+            }
+
             // 初始状态：全部隐藏
             _prevCoinVisible = false;
             _prevBackVisible = false;
@@ -66,6 +73,7 @@ namespace GameLogic
             SetImmediateHidden(_coinTf, _coinCanvasGroup);
             SetImmediateHidden(_backTf, _backCanvasGroup);
         }
+        
 
         protected override void RegisterEvent()
         {
@@ -86,6 +94,11 @@ namespace GameLogic
         }
 
         #region 事件处理
+        
+        private void OnCoinClick()
+        {
+            GameModule.UI.ShowUIAsync<UIGetCoin>();
+        }
 
         private void OnBackClick()
         {

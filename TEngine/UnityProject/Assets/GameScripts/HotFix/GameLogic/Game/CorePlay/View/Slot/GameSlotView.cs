@@ -79,6 +79,7 @@ namespace GameLogic.GamePlay.CorePlay.View
                     GameSlotViewItem.ResPath, _slotRoot);
                 viewItem.ShowEmptyState();
                 _slotItems.Add(viewItem);
+                viewItem.PlayEnterAnim();
             }
 
             if (_hasLayoutData)
@@ -118,6 +119,15 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
         }
 
+        /// <summary>清空所有 slot（重置道具使用：已填答案归零，回到空状态，无动画）</summary>
+        public void ClearAllSlots()
+        {
+            foreach (var item in _slotItems)
+            {
+                if (item != null) item.ShowEmptyState();
+            }
+        }
+
         private void RecycleSlotView()
         {
             foreach (var slotItem in _slotItems)
@@ -126,6 +136,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
             _slotItems.Clear();
         }
+        
 
         /// <summary>
         /// 布局所有 slot。

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TEngine.Editor;
 using UnityEditor;
 using UnityEngine;
 using YooAsset;
@@ -65,8 +66,20 @@ namespace TEngine
             "BundleName_HashName (资源包名称 + 哈希值名称)",
         };
 
+        private static readonly string[] BuildModeNames = new string[]
+        {
+            "Release (发布模式)",
+            "Develop (开发模式)",
+        };
+
         // 配置状态
         private BuildConfig _config;
+
+        // 宏集合列表式编辑缓存（与当前 BuildMode 对应，切模式时重新加载）
+        private List<string> _definesList = new List<string>();
+        private EBuildMode _definesListMode = (EBuildMode)(-1);
+        // 列表是否有未 Apply 的改动（点 Apply 才同步回字符串字段）
+        private bool _definesListDirty;
 
         // UI 状态
         private Vector2 _scrollPosition;
@@ -148,6 +161,7 @@ namespace TEngine
             if (GUILayout.Button("重置默认", GUILayout.Width(80), GUILayout.Height(22)))
             {
                 _config = BuildConfig.CreateDefault();
+                _definesListMode = (EBuildMode)(-1); // 强制重新加载宏列表
                 SaveSettings();
                 AddLog("已重置为默认配置");
             }
@@ -172,6 +186,17 @@ namespace TEngine
                     // 目标平台
                     _platformIndex = EditorGUILayout.Popup("目标平台", _platformIndex, PlatformNames);
                     _config.BuildTarget = PlatformTargets[_platformIndex];
+
+                    EditorGUILayout.Space(3);
+
+                    // 构建模式（Release/Develop 互斥，打包前用对应宏集合覆盖，打完包恢复原值）
+                    int buildModeIndex = (int)_config.BuildMode;
+                    buildModeIndex = EditorGUILayout.Popup("构建模式", buildModeIndex, BuildModeNames);
+                    _config.BuildMode = (EBuildMode)buildModeIndex;
+
+                    EditorGUILayout.Space(2);
+                    // 当前选中模式的宏集合（一行一个宏，可增删）
+                    DrawDefinesList();
 
                     EditorGUILayout.Space(3);
 
@@ -222,6 +247,101 @@ namespace TEngine
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
             GUILayout.Space(5);
+        }
+
+        /// <summary>
+        /// 列表式编辑当前构建模式的宏集合：一行一个宏，支持增删改。点 Apply 才同步回字符串字段。
+        /// </summary>
+        private void DrawDefinesList()
+        {
+            // 切换模式时：若有未 Apply 的改动先写回当前模式，再从新模式字符串字段重新解析加载
+            if (_definesListMode != _config.BuildMode)
+            {
+                if (_definesListDirty)
+                {
+                    ApplyDefinesList();
+                }
+                _definesListMode = _config.BuildMode;
+                _definesList = new List<string>(BuildConfig.ParseDefines(
+                    _config.BuildMode == EBuildMode.Release ? _config.ReleaseDefines : _config.DevelopDefines));
+                _definesListDirty = false;
+            }
+
+            EditorGUILayout.LabelField(
+                new GUIContent($"{_config.BuildMode} 宏集合", "一行一个宏。编辑后点 Apply 同步，打包前覆盖所有平台宏，打完包恢复原值"));
+
+            // 逐行编辑（只动内存列表，标记脏）
+            for (int i = 0; i < _definesList.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                string newVal = EditorGUILayout.TextField(_definesList[i]);
+                if (newVal != _definesList[i])
+                {
+                    _definesList[i] = newVal;
+                    _definesListDirty = true;
+                }
+                GUI.enabled = _definesList.Count > 1;
+                if (GUILayout.Button("删除", GUILayout.Width(50)))
+                {
+                    _definesList.RemoveAt(i);
+                    _definesListDirty = true;
+                    GUIUtility.ExitGUI(); // 跳出当前 GUI 绘制，避免越界
+                }
+                GUI.enabled = true;
+                EditorGUILayout.EndHorizontal();
+            }
+
+            // 添加 / 清空
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("+ 添加宏", GUILayout.Width(80)))
+            {
+                _definesList.Add("");
+                _definesListDirty = true;
+            }
+            if (_definesList.Count > 0 && GUILayout.Button("清空", GUILayout.Width(60)))
+            {
+                _definesList.Clear();
+                _definesList.Add("");
+                _definesListDirty = true;
+                GUIUtility.ExitGUI();
+            }
+            EditorGUILayout.EndHorizontal();
+
+            // Apply 按钮：仅当有未同步改动时可点，点击后写回字符串字段并持久化
+            EditorGUILayout.BeginHorizontal();
+            GUI.enabled = _definesListDirty;
+            if (GUILayout.Button("Apply", GUILayout.Width(80)))
+            {
+                ApplyDefinesList();
+                SaveSettings();
+                GUIUtility.ExitGUI();
+            }
+            GUI.enabled = true;
+            EditorGUILayout.EndHorizontal();
+
+            // 显示当前已同步的宏数量（读字符串字段，反映 Apply 后的真实状态）
+            string stored = _config.BuildMode == EBuildMode.Release ? _config.ReleaseDefines : _config.DevelopDefines;
+            EditorGUILayout.HelpBox(
+                $"打包前将用上述集合覆盖所有平台宏，打完包自动恢复原值。\n" +
+                $"当前已 Apply {BuildConfig.ParseDefines(stored).Length} 个宏{(_definesListDirty ? "（有未保存改动）" : "")}。",
+                MessageType.Info);
+        }
+
+        /// <summary>
+        /// 将内存列表同步回当前构建模式对应的字符串字段，并清除脏标记。
+        /// </summary>
+        private void ApplyDefinesList()
+        {
+            string joined = string.Join(";", _definesList.FindAll(s => !string.IsNullOrWhiteSpace(s)));
+            if (_config.BuildMode == EBuildMode.Release)
+            {
+                _config.ReleaseDefines = joined;
+            }
+            else
+            {
+                _config.DevelopDefines = joined;
+            }
+            _definesListDirty = false;
         }
 
         #endregion
@@ -467,6 +587,13 @@ namespace TEngine
 
         private void ExecuteBuild(bool buildPlayer)
         {
+            // 打包前若有未 Apply 的宏改动，先同步
+            if (_definesListDirty)
+            {
+                ApplyDefinesList();
+                SaveSettings();
+            }
+
             _buildLogs.Clear();
             AddLog($"========== 开始构建 ==========");
             AddLog($"平台: {_config.BuildTarget} | 管线: {_config.BuildPipeline} | 最小包: {_config.MinimalPackage}");
@@ -513,13 +640,29 @@ namespace TEngine
 
         private void ExecuteBuildPlayerOnly()
         {
+            // 打包前若有未 Apply 的宏改动，先同步
+            if (_definesListDirty)
+            {
+                ApplyDefinesList();
+                SaveSettings();
+            }
+
             _buildLogs.Clear();
             AddLog($"========== 仅构建 Player ==========");
             AddLog($"平台: {_config.PlayerPlatform} | 输出: {_config.PlayerOutputPath}");
+            AddLog($"构建模式: {_config.BuildMode} (宏: {string.Join(";", _config.GetBuildModeDefines())})");
 
+            // 仅构建 Player 路径不经过 BuildWithConfig，需自行 备份 -> 覆盖 -> 构建 -> 恢复
+            var modeDefines = _config.GetBuildModeDefines();
+            Dictionary<BuildTargetGroup, string[]> backup = null;
             try
             {
                 Application.logMessageReceived += OnBuildLogReceived;
+
+                backup = ScriptingDefineSymbols.BackupAllPlatformDefines();
+                ScriptingDefineSymbols.OverrideAllPlatformDefines(modeDefines);
+                AssetDatabase.Refresh();
+
                 ReleaseTools.BuildImp(
                     BuildConfig.GetBuildTargetGroup(_config.PlayerPlatform),
                     _config.PlayerPlatform,
@@ -535,6 +678,14 @@ namespace TEngine
             finally
             {
                 Application.logMessageReceived -= OnBuildLogReceived;
+
+                // 恢复打包前的原始宏
+                if (backup != null)
+                {
+                    ScriptingDefineSymbols.RestoreAllPlatformDefines(backup);
+                    AssetDatabase.Refresh();
+                    AddLog("已恢复打包前的原始宏定义");
+                }
             }
 
             _showBuildLog = true;
@@ -571,6 +722,11 @@ namespace TEngine
         private void LoadSettings()
         {
             _config = new BuildConfig();
+            _definesListMode = (EBuildMode)(-1); // 重置缓存，强制下次 DrawDefinesList 从字符串字段重新加载
+
+            _config.BuildMode = (EBuildMode)EditorPrefs.GetInt(BuildConfig.PrefKey_BuildMode, (int)EBuildMode.Develop);
+            _config.ReleaseDefines = EditorPrefs.GetString(BuildConfig.PrefKey_ReleaseDefines, "TE_RELEASE");
+            _config.DevelopDefines = EditorPrefs.GetString(BuildConfig.PrefKey_DevelopDefines, "TE_DEVELOP;ENABLE_LOG");
 
             _platformIndex = EditorPrefs.GetInt("TEngine_BP_BuildTarget", -1);
             if (_platformIndex < 0 || _platformIndex >= PlatformTargets.Length)
@@ -615,6 +771,9 @@ namespace TEngine
 
         private void SaveSettings()
         {
+            EditorPrefs.SetInt(BuildConfig.PrefKey_BuildMode, (int)_config.BuildMode);
+            EditorPrefs.SetString(BuildConfig.PrefKey_ReleaseDefines, _config.ReleaseDefines);
+            EditorPrefs.SetString(BuildConfig.PrefKey_DevelopDefines, _config.DevelopDefines);
             EditorPrefs.SetInt("TEngine_BP_BuildTarget", _platformIndex);
             EditorPrefs.SetInt("TEngine_BP_BuildPipeline", _config.BuildPipeline == EBuildPipeline.BuiltinBuildPipeline ? 1 : 0);
             EditorPrefs.SetInt("TEngine_BP_CompressOption", (int)_config.CompressOption);
@@ -668,6 +827,9 @@ namespace TEngine
         {
             return new BuildConfig
             {
+                BuildMode = source.BuildMode,
+                ReleaseDefines = source.ReleaseDefines,
+                DevelopDefines = source.DevelopDefines,
                 BuildTarget = source.BuildTarget,
                 BuildPipeline = source.BuildPipeline,
                 CompressOption = source.CompressOption,
