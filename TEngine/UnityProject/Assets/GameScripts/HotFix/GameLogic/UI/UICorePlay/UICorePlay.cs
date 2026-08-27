@@ -22,10 +22,11 @@ namespace GameLogic
 
         private XYButton _submitButton;
         
-        private TMP_Text _resultTipText;
 
-        private float _resultTipDuration = 2f;
+        private float _resultTipDuration = 1f;
 
+        private Transform _toastRoot;
+        private RTLTextMeshPro _toastTmp;
         private float _resultTipTimer;
         private bool _isShowingTip;
         
@@ -44,7 +45,8 @@ namespace GameLogic
             _answerProgressText = FindChildComponent<RTLTextMeshPro>("Panel/AnswerProgress");
             _submitBtnText = FindChildComponent<RTLTextMeshPro>("Panel/Buttom/SubmitBtn/m_text");
             _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
-            _resultTipText = FindChildComponent<TMP_Text>("Panel/ResultTip");
+            _toastRoot = FindChildComponent<Transform>("Panel/Toast");
+            _toastTmp = FindChildComponent<RTLTextMeshPro>("Panel/Toast/UIToastEffect/bg/m_text");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Panel/Layout");
             _tipsPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/TipProp");
             _tipsPropWidget.OnInit(PropType.Tip);
@@ -72,10 +74,10 @@ namespace GameLogic
             base.OnRefresh();
             _tipsPropWidget.Refresh();
             _resetPropWidget.Refresh();
+            _toastRoot.gameObject.SetActive(false);
+
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: true));
             GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
-            if (_resultTipText != null)
-                _resultTipText.gameObject.SetActive(false);
             // 更新 UI
             if (GameManager.Instance.CurrentGamePlay is CorePlayGamePlay corePlay)
             {
@@ -159,11 +161,10 @@ namespace GameLogic
 
         private void ShowResultTip(bool success, string message)
         {
-            if (_resultTipText == null) return;
-
-            _resultTipText.gameObject.SetActive(true);
-            _resultTipText.text = message;
-            _resultTipText.color = success ? new Color(0.3f, 1f, 0.3f) : new Color(1f, 0.5f, 0.3f);
+            if (_toastRoot == null || success) return;
+            _toastRoot.gameObject.SetActive(false);
+            _toastRoot.gameObject.SetActive(true);
+            _toastTmp.text = message;
             _resultTipTimer = _resultTipDuration;
             _isShowingTip = true;
         }
@@ -171,8 +172,7 @@ namespace GameLogic
         private void HideResultTip()
         {
             _isShowingTip = false;
-            if (_resultTipText != null)
-                _resultTipText.gameObject.SetActive(false);
+            _toastRoot.gameObject.SetActive(false);
         }
 
         private void RefreshFromGamePlay()

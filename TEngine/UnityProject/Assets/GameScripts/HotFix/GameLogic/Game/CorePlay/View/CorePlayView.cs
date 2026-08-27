@@ -119,16 +119,25 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             _isInitialized = true;
 
-            // 如果当前已有关卡数据，立刻渲染（异步，fire-and-forget 保持 Initialize 同步签名）
-            if (_gamePlay is CorePlayGamePlay cp && cp.CurrentLevelData != null)
-            {
-                RenderLevelAsync(cp.CurrentLevelData).Forget();
-            }
+            // 注意：此处不再“立刻渲染当前关卡”。
+            // Initialize 的唯一调用方 StartCorePlay 紧跟 LoadLevel，渲染统一由
+            // LoadLevel → OnLevelLoaded → RenderLevelAsync 触发（首次与复用同一路径）。
+            // 旧逻辑在结算返回重进时（CurrentLevelData 仍残留上一关）会先渲染上一关，
+            // 紧接 LoadLevel 又渲染下一关，两次 fire-and-forget 异步并发导致笔画重叠。
             Log.Info("[CorePlayView] 初始化完成 (DrawCharacter + StrokeInputHandler 动态创建)");
         }
 
         private void CreateDrawCharacter()
         {
+            // 复用幂等：新建前若仍持有上一局 DrawCharacter，即时销毁旧的并置 null，
+            // 避免延迟 Destroy 未落帧时新旧并存。不清空整个 CharacterRoot，防止并发渲染
+            // 互相清掉对方刚建的 DrawCharacter。
+            if (_drawCharacter != null)
+            {
+                DestroyImmediate(_drawCharacter.gameObject);
+                _drawCharacter = null;
+            }
+
             var dcGo = new GameObject("DrawCharacter");
             dcGo.transform.SetParent(_gameViewRoot.CharacterRoot);
             _drawCharacter = dcGo.AddComponent<DrawCharacter>();
@@ -307,8 +316,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
         {
             GameEvent.Send(EventDefine.Event_AnswerSubmitted, success, answerCharacter, message);
-            if (success)
-                ClearAllHighlights();
+            ClearAllHighlights();
         }
 
         private void OnLevelCompleted(int levelId)
@@ -446,9 +454,10 @@ namespace GameLogic.GamePlay.CorePlay.View
         public void OnEndGameAnim()
         {
             _gameViewRoot?.OnEndGameAnim();
+            // 即时销毁，避免延迟 Destroy 与后续 CreateDrawCharacter 同帧新建产生竞态，导致笔画叠加
             if (_drawCharacter != null)
             {
-                Destroy(_drawCharacter.gameObject);
+                DestroyImmediate(_drawCharacter.gameObject);
                 _drawCharacter = null;
             }
         }

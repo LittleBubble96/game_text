@@ -390,6 +390,23 @@ public class TextLevelEditorWindow : EditorWindow
         // ===== 新增笔画组合区域 =====
         GUILayout.Label("添加笔画组合", EditorStyles.boldLabel);
 
+        // 快捷：将基字本身作为答案（使用基字全部笔画）
+        if (!string.IsNullOrEmpty(level.baseCharacter)
+            && _characterStrokeCount.TryGetValue(level.baseCharacter, out int baseStrokeCount)
+            && baseStrokeCount > 0)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = new Color(0.4f, 0.8f, 0.4f);
+            if (GUILayout.Button($"添加基字『{level.baseCharacter}』为答案", GUILayout.Width(220)))
+            {
+                AddBaseCharacterAsAnswer(level);
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.LabelField("（使用基字全部笔画）", EditorStyles.miniLabel);
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
+        }
+
         // 目标字输入（第一行：常用答案 + 已有答案下拉 + 手动输入）
         string[] existingAnswerOptions = GetExistingAnswerOptions(level);
         string[] commonAnswerOptions = GetCommonAnswerOptions();
@@ -904,6 +921,65 @@ public class TextLevelEditorWindow : EditorWindow
         ResetStrokeHighlight();
         EditorUtility.SetDirty(_levelDataAsset);
         return true;
+    }
+
+    /// <summary>
+    /// 将当前关卡的基字本身作为一个答案添加：目标字 = 基字，
+    /// 笔画组合为基字的全部笔画索引 [0 .. N-1]。
+    /// 若该基字已是答案，则校验/补齐「全部笔画」这一组合，避免重复。
+    /// </summary>
+    private void AddBaseCharacterAsAnswer(TextLevelData level)
+    {
+        if (level == null || string.IsNullOrEmpty(level.baseCharacter))
+        {
+            EditorUtility.DisplayDialog("提示", "当前关卡未设置基字", "确定");
+            return;
+        }
+
+        if (!_characterStrokeCount.TryGetValue(level.baseCharacter, out int strokeCount) || strokeCount <= 0)
+        {
+            EditorUtility.DisplayDialog("提示", $"未获取到基字『{level.baseCharacter}』的笔画数，请先刷新数据。", "确定");
+            return;
+        }
+
+        // 基字答案组合 = 全部笔画索引
+        var fullIndices = new List<int>();
+        for (int i = 0; i < strokeCount; i++)
+            fullIndices.Add(i);
+
+        LevelAnswer existing = level.answers.Find(a => a.answerCharacter == level.baseCharacter);
+        if (existing != null)
+        {
+            // 已存在基字答案：检查是否已有「全部笔画」组合，避免重复添加
+            bool hasFullSet = existing.strokeSets.Exists(set =>
+                set.strokeIndices.Count == fullIndices.Count
+                && !set.strokeIndices.Except(fullIndices).Any());
+
+            if (hasFullSet)
+            {
+                EditorUtility.DisplayDialog("提示",
+                    $"基字『{level.baseCharacter}』已作为答案存在，且已包含全部笔画的组合，无需重复添加。",
+                    "确定");
+                return;
+            }
+
+            existing.strokeSets.Add(new StrokeSet { strokeIndices = fullIndices });
+            EditorUtility.SetDirty(_levelDataAsset);
+            Debug.Log($"已为基字『{level.baseCharacter}』补充『全部笔画』组合");
+            return;
+        }
+
+        // 新建基字答案
+        level.answers.Add(new LevelAnswer
+        {
+            answerCharacter = level.baseCharacter,
+            strokeSets = new List<StrokeSet>
+            {
+                new StrokeSet { strokeIndices = fullIndices }
+            }
+        });
+        EditorUtility.SetDirty(_levelDataAsset);
+        Debug.Log($"已将基字『{level.baseCharacter}』添加为答案（全部 {strokeCount} 笔画）");
     }
 
     /// <summary>

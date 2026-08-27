@@ -201,7 +201,7 @@ namespace GameLogic.GamePlay.CorePlay
 
             // 将选中的笔画索引排序以便比较
             List<int> selectedSorted = _selectedStrokeIndices.OrderBy(i => i).ToList();
-
+            _selectedStrokeIndices.Clear();
             // 遍历所有答案，检查是否匹配
             for (int ansIdx = 0; ansIdx < _currentLevelData.answers.Count; ansIdx++)
             {
@@ -247,7 +247,6 @@ namespace GameLogic.GamePlay.CorePlay
         private void OnAnswerFound(int answerIndex, string answerCharacter)
         {
             _foundAnswerIndices.Add(answerIndex);
-            _selectedStrokeIndices.Clear();
 
             // 清除所有笔画高亮
             OnAnswerSubmitted?.Invoke(true, answerCharacter,

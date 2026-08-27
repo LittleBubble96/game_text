@@ -30,7 +30,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 02000000
-    requiredAnswerCount: 4
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    requiredAnswerCount: 5
   - levelName: Level_2
     baseCharacter: "\u738B"
     positionOffset: {x: -2, y: -1}
@@ -63,7 +66,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 02000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u738B"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000
+    requiredAnswerCount: 9
   - levelName: Level_3
     baseCharacter: "\u672C"
     positionOffset: {x: -2, y: -1}
@@ -85,7 +91,13 @@ MonoBehaviour:
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0200000003000000
-    requiredAnswerCount: 5
+    - answerCharacter: "\u672C"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000004000000
+    requiredAnswerCount: 7
   - levelName: Level_4
     baseCharacter: "\u5409"
     positionOffset: {x: -2, y: -1}
@@ -98,6 +110,8 @@ MonoBehaviour:
     - answerCharacter: "\u4E8C"
       strokeSets:
       - strokeIndices: 0200000005000000
+      - strokeIndices: 0000000002000000
+      - strokeIndices: 0000000005000000
     - answerCharacter: "\u4E09"
       strokeSets:
       - strokeIndices: 000000000200000005000000
@@ -113,7 +127,11 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 01000000
-    requiredAnswerCount: 7
+      - strokeIndices: 03000000
+    - answerCharacter: "\u5409"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    requiredAnswerCount: 8
   - levelName: Level_5
     baseCharacter: "\u5446"
     positionOffset: {x: -2, y: -1}
@@ -140,10 +158,14 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 04000000
+      - strokeIndices: 00000000
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0500000006000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u5446"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000
+    requiredAnswerCount: 9
   - levelName: Level_6
     baseCharacter: "\u7C73"
     positionOffset: {x: -2, y: -1}
@@ -163,7 +185,10 @@ MonoBehaviour:
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0400000005000000
-    requiredAnswerCount: 5
+    - answerCharacter: "\u7C73"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    requiredAnswerCount: 6
   - levelName: Level_7
     baseCharacter: "\u97F3"
     positionOffset: {x: -2, y: -1}
@@ -187,7 +212,10 @@ MonoBehaviour:
     - answerCharacter: "\u7ACB"
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000
-    requiredAnswerCount: 5
+    - answerCharacter: "\u97F3"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 6
   - levelName: Level_8
     baseCharacter: "\u76F8"
     positionOffset: {x: -2, y: -1}
@@ -229,7 +257,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 01000000
       - strokeIndices: 04000000
-    requiredAnswerCount: 10
+    - answerCharacter: "\u76F8"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 11
   - levelName: Level_9
     baseCharacter: "\u8349"
     positionOffset: {x: -2, y: -1}
@@ -271,7 +302,10 @@ MonoBehaviour:
       - strokeIndices: 08000000
       - strokeIndices: 01000000
       - strokeIndices: 02000000
-    requiredAnswerCount: 10
+    - answerCharacter: "\u8349"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 11
   - levelName: Level_10
     baseCharacter: "\u623F"
     positionOffset: {x: -2, y: -1}
@@ -295,7 +329,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E07"
       strokeSets:
       - strokeIndices: 050000000600000007000000
-    requiredAnswerCount: 6
+    - answerCharacter: "\u623F"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
+    requiredAnswerCount: 7
   - levelName: Level_11
     baseCharacter: "\u8BF4"
     positionOffset: {x: -2, y: -1}
@@ -315,7 +352,10 @@ MonoBehaviour:
     - answerCharacter: "\u5151"
       strokeSets:
       - strokeIndices: 02000000030000000400000005000000060000000700000008000000
-    requiredAnswerCount: 5
+    - answerCharacter: "\u8BF4"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 6
   - levelName: Level_12
     baseCharacter: "\u68A8"
     positionOffset: {x: -2, y: -1}
@@ -350,7 +390,10 @@ MonoBehaviour:
     - answerCharacter: "\u5DDD"
       strokeSets:
       - strokeIndices: 050000000600000002000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u68A8"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
+    requiredAnswerCount: 9
   - levelName: Level_13
     baseCharacter: "\u60F3"
     positionOffset: {x: -2, y: -1}
@@ -395,7 +438,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 01000000
       - strokeIndices: 04000000
-    requiredAnswerCount: 11
+    - answerCharacter: "\u60F3"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    requiredAnswerCount: 12
   - levelName: Level_14
     baseCharacter: "\u6811"
     positionOffset: {x: -2, y: -1}
@@ -431,7 +477,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 01000000
-    requiredAnswerCount: 10
+    - answerCharacter: "\u6811"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 11
   - levelName: Level_15
     baseCharacter: "\u7AE0"
     positionOffset: {x: -2, y: -1}
@@ -479,7 +528,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 0a000000
-    requiredAnswerCount: 12
+    - answerCharacter: "\u7AE0"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
+    requiredAnswerCount: 13
   - levelName: Level_16
     baseCharacter: "\u6069"
     positionOffset: {x: -2, y: -1}
@@ -512,7 +564,10 @@ MonoBehaviour:
     - answerCharacter: "\u5FC3"
       strokeSets:
       - strokeIndices: 06000000070000000800000009000000
-    requiredAnswerCount: 9
+    - answerCharacter: "\u6069"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000070000000800000009000000
+    requiredAnswerCount: 10
   - levelName: Level_17
     baseCharacter: "\u6E56"
     positionOffset: {x: -2, y: -1}
@@ -550,7 +605,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 04000000
-    requiredAnswerCount: 10
+    - answerCharacter: "\u6E56"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    requiredAnswerCount: 11
   - levelName: Level_18
     baseCharacter: "\u5CD9"
     positionOffset: {x: -2, y: -1}
@@ -587,7 +645,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 04000000
       - strokeIndices: 00000000
-    requiredAnswerCount: 9
+    - answerCharacter: "\u5CD9"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 10
   - levelName: Level_19
     baseCharacter: "\u683D"
     positionOffset: {x: -2, y: -1}
@@ -616,7 +677,10 @@ MonoBehaviour:
     - answerCharacter: "\u6208"
       strokeSets:
       - strokeIndices: 02000000090000000700000008000000
-    requiredAnswerCount: 7
+    - answerCharacter: "\u683D"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000070000000800000009000000
+    requiredAnswerCount: 8
   - levelName: Level_20
     baseCharacter: "\u8336"
     positionOffset: {x: -2, y: -1}
@@ -641,7 +705,10 @@ MonoBehaviour:
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0700000008000000
-    requiredAnswerCount: 6
+    - answerCharacter: "\u8336"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 7
   - levelName: Level_21
     baseCharacter: "\u67B6"
     positionOffset: {x: -2, y: -1}
@@ -668,7 +735,10 @@ MonoBehaviour:
     - answerCharacter: "\u52A0"
       strokeSets:
       - strokeIndices: 0100000000000000020000000300000004000000
-    requiredAnswerCount: 7
+    - answerCharacter: "\u67B6"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 8
   - levelName: Level_22
     baseCharacter: "\u8239"
     positionOffset: {x: -2, y: -1}
@@ -688,7 +758,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E39"
       strokeSets:
       - strokeIndices: 03000000040000000200000001000000
-    requiredAnswerCount: 5
+    - answerCharacter: "\u8239"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
+    requiredAnswerCount: 6
   - levelName: Level_23
     baseCharacter: "\u65B0"
     positionOffset: {x: -2, y: -1}
@@ -725,7 +798,10 @@ MonoBehaviour:
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0700000008000000
-    requiredAnswerCount: 9
+    - answerCharacter: "\u65B0"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    requiredAnswerCount: 10
   - levelName: Level_24
     baseCharacter: "\u64CD"
     positionOffset: {x: -2, y: -1}
@@ -759,7 +835,10 @@ MonoBehaviour:
       - strokeIndices: 050000000c000000
       - strokeIndices: 080000000c000000
       - strokeIndices: 0b0000000c000000
-    requiredAnswerCount: 6
+    - answerCharacter: "\u64CD"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000
+    requiredAnswerCount: 8
   - levelName: Level_25
     baseCharacter: "\u539F"
     positionOffset: {x: -2, y: -1}
@@ -804,7 +883,10 @@ MonoBehaviour:
     - answerCharacter: "\u53EA"
       strokeSets:
       - strokeIndices: 0300000004000000060000000800000009000000
-    requiredAnswerCount: 12
+    - answerCharacter: "\u539F"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000070000000800000009000000
+    requiredAnswerCount: 13
   - levelName: Level_26
     baseCharacter: "\u6848"
     positionOffset: {x: -2, y: -1}
@@ -834,7 +916,10 @@ MonoBehaviour:
     - answerCharacter: "\u5B8B"
       strokeSets:
       - strokeIndices: 00000000010000000200000006000000070000000800000009000000
-    requiredAnswerCount: 7
+    - answerCharacter: "\u6848"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000070000000800000009000000
+    requiredAnswerCount: 9
   - levelName: Level_27
     baseCharacter: "\u89E3"
     positionOffset: {x: -2, y: -1}
@@ -870,7 +955,10 @@ MonoBehaviour:
     - answerCharacter: "\u6708"
       strokeSets:
       - strokeIndices: 02000000030000000400000005000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u89E3"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    requiredAnswerCount: 9
   - levelName: Level_28
     baseCharacter: "\u7426"
     positionOffset: {x: -2, y: -1}
@@ -922,7 +1010,10 @@ MonoBehaviour:
     - answerCharacter: "\u73C2"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000700000008000000090000000a0000000b000000
-    requiredAnswerCount: 11
+    - answerCharacter: "\u7426"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    requiredAnswerCount: 13
   - levelName: Level_29
     baseCharacter: "\u559D"
     positionOffset: {x: -2, y: -1}
@@ -954,7 +1045,10 @@ MonoBehaviour:
     - answerCharacter: "\u5303"
       strokeSets:
       - strokeIndices: 0700000008000000090000000a0000000b000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u559D"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    requiredAnswerCount: 9
   - levelName: Level_30
     baseCharacter: "\u7586"
     positionOffset: {x: -2, y: -1}
@@ -1017,7 +1111,10 @@ MonoBehaviour:
     - answerCharacter: "\u660C"
       strokeSets:
       - strokeIndices: 0700000008000000090000000b0000000d0000000e0000000f00000011000000
-    requiredAnswerCount: 14
+    - answerCharacter: "\u7586"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000
+    requiredAnswerCount: 15
   - levelName: Level_31
     baseCharacter: "\u9616"
     positionOffset: {x: -2, y: -1}
@@ -1048,7 +1145,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E09"
       strokeSets:
       - strokeIndices: 03000000050000000c000000
-    requiredAnswerCount: 8
+    - answerCharacter: "\u9616"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    requiredAnswerCount: 9
   - levelName: Level_32
     baseCharacter: "\u91CD"
     positionOffset: {x: -2, y: -1}
@@ -1133,7 +1233,10 @@ MonoBehaviour:
       - strokeIndices: 01000000080000000400000005000000
       - strokeIndices: 01000000040000000700000008000000
       - strokeIndices: 04000000050000000800000007000000
-    requiredAnswerCount: 14
+    - answerCharacter: "\u91CD"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    requiredAnswerCount: 16
   - levelName: Level_33
     baseCharacter: "\u9E93"
     positionOffset: {x: -2, y: -1}
@@ -1175,7 +1278,10 @@ MonoBehaviour:
     - answerCharacter: "\u5382"
       strokeSets:
       - strokeIndices: 090000000a000000
-    requiredAnswerCount: 10
+    - answerCharacter: "\u9E93"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000
+    requiredAnswerCount: 11
   - levelName: Level_34
     baseCharacter: "\u58C1"
     positionOffset: {x: -2, y: -1}
@@ -1221,7 +1327,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E09"
       strokeSets:
       - strokeIndices: 070000000a0000000b000000
-    requiredAnswerCount: 11
+    - answerCharacter: "\u58C1"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000
+    requiredAnswerCount: 12
   - levelName: Level_35
     baseCharacter: "\u7FB8"
     positionOffset: {x: -2, y: -1}
@@ -1273,7 +1382,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E28"
       strokeSets:
       - strokeIndices: 0f000000
-    requiredAnswerCount: 12
+    - answerCharacter: "\u7FB8"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000
+    requiredAnswerCount: 13
   - levelName: Level_36
     baseCharacter: "\u88F9"
     positionOffset: {x: -2, y: -1}
@@ -1335,7 +1447,10 @@ MonoBehaviour:
     - answerCharacter: "\u54C0"
       strokeSets:
       - strokeIndices: 00000000010000000300000002000000050000000a0000000b0000000c0000000d000000
-    requiredAnswerCount: 15
+    - answerCharacter: "\u88F9"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d000000
+    requiredAnswerCount: 17
   - levelName: Level_37
     baseCharacter: "\u7A57"
     positionOffset: {x: -2, y: -1}
@@ -1404,7 +1519,10 @@ MonoBehaviour:
       - strokeIndices: 050000000a0000000b000000
       - strokeIndices: 0a0000000b00000008000000
       - strokeIndices: 090000000a0000000b000000
-    requiredAnswerCount: 18
+    - answerCharacter: "\u7A57"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f00000010000000
+    requiredAnswerCount: 19
   - levelName: Level_38
     baseCharacter: "\u9738"
     positionOffset: {x: -2, y: -1}
@@ -1457,7 +1575,10 @@ MonoBehaviour:
     - answerCharacter: "\u52D2"
       strokeSets:
       - strokeIndices: 08000000090000000a0000000b0000000c0000000d0000000e0000000f0000001000000011000000120000001300000014000000
-    requiredAnswerCount: 12
+    - answerCharacter: "\u9738"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f0000001000000011000000120000001300000014000000
+    requiredAnswerCount: 13
   - levelName: Level_39
     baseCharacter: "\u9AA4"
     positionOffset: {x: -2, y: -1}
@@ -1517,7 +1638,10 @@ MonoBehaviour:
     - answerCharacter: "\u4E96"
       strokeSets:
       - strokeIndices: 03000000060000000700000008000000
-    requiredAnswerCount: 14
+    - answerCharacter: "\u9AA4"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f00000010000000
+    requiredAnswerCount: 15
   - levelName: Level_40
     baseCharacter: "\u7228"
     positionOffset: {x: -2, y: -1}
@@ -1567,7 +1691,10 @@ MonoBehaviour:
       - strokeIndices: 1100000012000000
       - strokeIndices: 1500000016000000
       - strokeIndices: 1800000019000000
-    requiredAnswerCount: 11
+    - answerCharacter: "\u7228"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c0000001d000000
+    requiredAnswerCount: 12
   characterToTone:
   - character: "\u4E00"
     tone: "y\u012B"
