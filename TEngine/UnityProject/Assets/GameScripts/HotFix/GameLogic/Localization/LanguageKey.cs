@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 29 个 Key）。
+    /// 多语言 Key 常量类（共 30 个 Key）。
     /// </summary>
     public static class LanguageKey
     {
@@ -41,5 +41,6 @@ namespace GameLogic.Localization
         public const string toast_select = "toast_select";
         public const string toast_answerFinded = "toast_answerFinded";
         public const string toast_answerError = "toast_answerError";
+        public const string game_des = "game_des";
     }
 }

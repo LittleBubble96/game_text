@@ -199,5 +199,18 @@ namespace TEngine.Editor
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, string.Join(";", scriptingDefineSymbols));
 #endif
         }
+
+        /// <summary>
+        /// 仅对指定平台设置脚本宏定义（覆盖该平台原有宏）并刷新资源库。
+        /// <para>相比 <see cref="OverrideAllPlatformDefines"/> 只影响目标平台，不会改动其他平台；
+        /// 且不自动备份/恢复，调用方需自行决定是否在打包后恢复原值。</para>
+        /// </summary>
+        /// <param name="targetGroup">要设置脚本宏定义的目标平台。</param>
+        /// <param name="defines">要覆盖写入的宏集合。</param>
+        public static void SetDefines(BuildTargetGroup targetGroup, string[] defines)
+        {
+            SetScriptingDefineSymbols(targetGroup, defines ?? System.Array.Empty<string>());
+            AssetDatabase.Refresh();
+        }
     }
 }

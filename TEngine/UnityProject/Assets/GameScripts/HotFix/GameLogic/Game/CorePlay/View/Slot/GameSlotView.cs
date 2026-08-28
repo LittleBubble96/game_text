@@ -77,14 +77,20 @@ namespace GameLogic.GamePlay.CorePlay.View
             {
                 GameSlotViewItem viewItem = await GameDataPoolManager.Instance.AllocateComponentAsync<GameSlotViewItem>(
                     GameSlotViewItem.ResPath, _slotRoot);
+                viewItem.transform.localScale = Vector3.zero;
                 viewItem.ShowEmptyState();
                 _slotItems.Add(viewItem);
-                viewItem.PlayEnterAnim();
             }
 
             if (_hasLayoutData)
             {
                 LayoutSlots();
+            }
+
+            foreach (var slotItem in _slotItems)
+            {
+                slotItem.transform.localScale = Vector3.one;
+                slotItem.PlayEnterAnim();
             }
         }
 
@@ -141,10 +147,12 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>
         /// 布局所有 slot。
         /// 规则：
-        /// 1. slot 水平靠左排布，垂直居中
-        /// 2. 缩放最大为 1，超出边界则缩放
-        /// 3. 一排放不下时自动换 2 排、3 排
-        /// 4. 间距和大小随缩放变化
+        /// 1. 水平靠左、整体垂直居中
+        /// 2. 上方行“补满”：排到当前缩放下单行实际可容纳的最大数量，右边不留空
+        /// 3. 缩放上限为 1，超出边界则按宽高约束缩小
+        /// 4. 迭代收敛：按当前行数算缩放 → 用缩放后容量补满上方行 → 若补满后所需行数减少
+        ///    （例如两排补满后发现一排即可放下）则用更少行数重算，直到行数不再下降
+        /// 5. 间距与尺寸随缩放等比变化
         /// </summary>
         public void LayoutSlots()
         {
@@ -164,70 +172,64 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             int slotCount = _slotItems.Count;
 
-            // 先算每行最多能放几个（按 scale=1 算）
-            int maxColsPerRow = Mathf.FloorToInt((availableWidth + _spacing) / (_slotSize + _spacing));
-            if (maxColsPerRow < 1) maxColsPerRow = 1;
+            // scale=1 时单行最多容量，作为初始行数估计
+            int maxColsFullScale = Mathf.FloorToInt((availableWidth + _spacing) / (_slotSize + _spacing));
+            if (maxColsFullScale < 1) maxColsFullScale = 1;
 
-            // 遍历所有行数，取缩放最大的方案
-            // 排布规则：前 rows-1 行排满 maxColsPerRow 个，最后一行放剩余
-            float bestScale = 0f;
-            int bestRows = 1;
-            int bestMaxCols = maxColsPerRow;
+            int rows = Mathf.CeilToInt((float)slotCount / maxColsFullScale);
+            float scale = 0f;
+            int colsCap = maxColsFullScale; // 缩放后单行实际容量（上方行补满到此数量）
 
-            int minRows = Mathf.CeilToInt((float)slotCount / maxColsPerRow);
-            for (int rows = minRows; rows <= slotCount; rows++)
+            // 迭代：rows 每轮单调递减，最多 slotCount 轮内必收敛
+            for (int iter = 0; iter < slotCount; iter++)
             {
-                int fullRows = rows - 1;
-                int lastRowCount = slotCount - fullRows * maxColsPerRow;
-                if (lastRowCount <= 0) break; // 行数太多，不需要了
+                // 让 rows 行放下的最小每行数量
+                int cols = Mathf.CeilToInt((float)slotCount / rows);
+                scale = Mathf.Min(CalculateScale(cols, rows, availableWidth, availableHeight), 1f);
+                if (scale <= 0f) break;
 
-                float scale = CalculateScale(maxColsPerRow, rows, availableWidth, availableHeight);
-                scale = Mathf.Min(scale, 1f);
+                // 缩放后单行实际容量（上方行补满的目标数量）
+                float scaledSlotSize = _slotSize * scale;
+                float scaledSpacing = _spacing * scale;
+                colsCap = Mathf.FloorToInt((availableWidth + scaledSpacing) / (scaledSlotSize + scaledSpacing));
+                if (colsCap < 1) colsCap = 1;
 
-                if (scale > bestScale)
-                {
-                    bestScale = scale;
-                    bestRows = rows;
-                    bestMaxCols = maxColsPerRow;
-                }
-
-                if (Mathf.Approximately(scale, 1f))
-                {
-                    break; // 已经达到最大，无需继续
-                }
+                // 补满后若所需行数不再减少，收敛
+                int newRows = Mathf.CeilToInt((float)slotCount / colsCap);
+                if (newRows >= rows) break;
+                rows = newRows;
             }
 
-            if (bestScale <= 0f) return;
+            if (scale <= 0f || colsCap < 1) return;
 
-            // 计算缩放后的实际参数
-            float scaledSlotSize = _slotSize * bestScale;
-            float scaledSpacing = _spacing * bestScale;
+            // 最终排布参数
+            float finalSlotSize = _slotSize * scale;
+            float finalSpacing = _spacing * scale;
+            int finalRows = Mathf.CeilToInt((float)slotCount / colsCap);
 
-            // 计算所有行的总高度
-            float totalRowsHeight = bestRows * scaledSlotSize + (bestRows - 1) * scaledSpacing;
-            // 垂直居中
-            float startY = centerY + totalRowsHeight * 0.5f - scaledSlotSize * 0.5f;
-
-            // 水平靠左：起始 x 为 leftBound
+            // 整体垂直居中
+            float totalRowsHeight = finalRows * finalSlotSize + (finalRows - 1) * finalSpacing;
+            float startY = centerY + totalRowsHeight * 0.5f - finalSlotSize * 0.5f;
+            // 水平靠左
             float startX = leftBound;
 
             int placedCount = 0;
-            for (int row = 0; row < bestRows; row++)
+            for (int row = 0; row < finalRows; row++)
             {
-                // 前 bestRows-1 行排满，最后一行放剩余的
-                int colsInRow = (row < bestRows - 1) ? bestMaxCols : (slotCount - placedCount);
+                // 上方行补满 colsCap 个，最后一行靠左放剩余
+                int colsInRow = (row < finalRows - 1) ? colsCap : (slotCount - placedCount);
 
                 for (int col = 0; col < colsInRow; col++)
                 {
                     int i = placedCount + col;
-                    float x = startX + col * (scaledSlotSize + scaledSpacing) + scaledSlotSize * 0.5f;
-                    float y = startY - row * (scaledSlotSize + scaledSpacing);
+                    float x = startX + col * (finalSlotSize + finalSpacing) + finalSlotSize * 0.5f;
+                    float y = startY - row * (finalSlotSize + finalSpacing);
 
                     GameSlotViewItem item = _slotItems[i];
                     if (item != null)
                     {
                         item.transform.position = new Vector3(x, y, 0);
-                        item.transform.localScale = Vector3.one * bestScale;
+                        item.transform.localScale = Vector3.one * scale;
                     }
                 }
                 placedCount += colsInRow;

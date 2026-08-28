@@ -654,17 +654,17 @@ namespace TEngine
 
             // 仅构建 Player 路径不经过 BuildWithConfig，需自行 备份 -> 覆盖 -> 构建 -> 恢复
             var modeDefines = _config.GetBuildModeDefines();
-            Dictionary<BuildTargetGroup, string[]> backup = null;
+            BuildTargetGroup targetGroup = BuildConfig.GetBuildTargetGroup(_config.PlayerPlatform);
+            string[] backup = null;
             try
             {
                 Application.logMessageReceived += OnBuildLogReceived;
 
-                backup = ScriptingDefineSymbols.BackupAllPlatformDefines();
-                ScriptingDefineSymbols.OverrideAllPlatformDefines(modeDefines);
-                AssetDatabase.Refresh();
+                backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
+                ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
 
                 ReleaseTools.BuildImp(
-                    BuildConfig.GetBuildTargetGroup(_config.PlayerPlatform),
+                    targetGroup,
                     _config.PlayerPlatform,
                     _config.PlayerOutputPath
                 );
@@ -682,8 +682,7 @@ namespace TEngine
                 // 恢复打包前的原始宏
                 if (backup != null)
                 {
-                    ScriptingDefineSymbols.RestoreAllPlatformDefines(backup);
-                    AssetDatabase.Refresh();
+                    ScriptingDefineSymbols.SetDefines(targetGroup, backup);
                     AddLog("已恢复打包前的原始宏定义");
                 }
             }

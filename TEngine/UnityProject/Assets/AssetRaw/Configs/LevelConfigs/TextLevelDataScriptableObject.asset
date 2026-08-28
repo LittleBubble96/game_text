@@ -282,6 +282,8 @@ MonoBehaviour:
     - answerCharacter: "\u5341"
       strokeSets:
       - strokeIndices: 0700000008000000
+      - strokeIndices: 0100000000000000
+      - strokeIndices: 0200000000000000
     - answerCharacter: "\u53E3"
       strokeSets:
       - strokeIndices: 030000000400000006000000

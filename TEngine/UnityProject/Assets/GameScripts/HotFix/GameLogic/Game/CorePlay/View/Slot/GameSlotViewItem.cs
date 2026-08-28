@@ -82,6 +82,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void PlayEnterAnim()
         {
+            root.transform.localScale = Vector3.one * 0.5f;
             bg.color = new Color(bg.color.r, bg.color.g, bg.color.b, 0);
             content.color = new Color(content.color.r, content.color.g, content.color.b, 0);
             contentTone.color = new Color(content.color.r, content.color.g, content.color.b, 0);
@@ -92,6 +93,16 @@ namespace GameLogic.GamePlay.CorePlay.View
             _sequence.Join(contentTone.DOColor(new Color(content.color.r, content.color.g, content.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(contentBg.DOColor(new Color(contentBg.color.r, contentBg.color.g, contentBg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(bg.DOColor(new Color(bg.color.r, bg.color.g, bg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
+            _sequence.Join(bg.DOColor(new Color(bg.color.r, bg.color.g, bg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
+            _sequence.Join(root.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutCubic));
+            _sequence.OnKill(() =>
+            {
+                root.transform.localScale = Vector3.one;
+                bg.color = new Color(bg.color.r, bg.color.g, bg.color.b, 1);
+                content.color = new Color(content.color.r, content.color.g, content.color.b, 1);
+                contentTone.color = new Color(content.color.r, content.color.g, content.color.b, 1);
+                contentBg.color = new Color(contentBg.color.r, contentBg.color.g, contentBg.color.b, 1);
+            });
         }
 
         public void PlayExitAnim()

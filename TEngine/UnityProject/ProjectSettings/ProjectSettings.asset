@@ -811,12 +811,13 @@ PlayerSettings:
     Stadia: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
     Standalone: ENABLE_LOG;TextMeshPro;DOTWEEN
     VisionOS: TextMeshPro;DOTWEEN
-    WebGL: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG;DOTWEEN;ENABLE_HYBRIDCLR
+    WebGL: TE_RELEASE;UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN;ENABLE_HYBRIDCLR
     Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG;DOTWEEN
     XboxOne: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
     iPhone: ENABLE_LOG;TextMeshPro;DOTWEEN
     tvOS: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
-  additionalCompilerArguments: {}
+  additionalCompilerArguments:
+    WebGL: []
   platformArchitecture: {}
   scriptingBackend:
     Android: 1

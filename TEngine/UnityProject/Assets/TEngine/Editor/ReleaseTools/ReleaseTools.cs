@@ -93,6 +93,7 @@ namespace TEngine
 
         /// <summary>
         /// WebGL 一键打包内部实现：按指定构建模式设置 TE_RELEASE / TE_DEVELOP 宏后构建 AB，再转换为微信小游戏。
+        /// <remarks>DoExport 作为构建后回调执行，确保微信转换期间模式宏仍生效；回调结束后由 BuildWithConfig 恢复原宏。</remarks>
         /// </summary>
         private static void AutomationBuildWebglInternal(EBuildMode mode)
         {
@@ -103,15 +104,17 @@ namespace TEngine
             config.OutputRoot = Application.dataPath + "/../Builds/WebGL";
             config.BuildPlayer = false;
             config.BuildMode = mode;
-            BuildWithConfig(config, buildPlayer: false);
-            if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+            BuildWithConfig(config, buildPlayer: false, postBuildCallback: () =>
             {
-                Debug.Log("[Build] WebGL 转换为微信小游戏成功");
-            }
-            else
-            {
-                Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
-            }
+                if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+                {
+                    Debug.Log("[Build] WebGL 转换为微信小游戏成功");
+                }
+                else
+                {
+                    Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
+                }
+            });
         }
 
         [MenuItem("TEngine/Build/一键打包Window", false, 30)]
@@ -159,21 +162,25 @@ namespace TEngine
 
         /// <summary>
         /// 通过 BuildConfig 执行完整构建流程。
-        /// <remarks>打包前用 BuildMode 对应的宏集合覆盖所有平台宏，打完包后在 finally 中恢复原值。</remarks>
+        /// <remarks>打包前用 BuildMode 对应的宏集合覆盖目标平台宏 -> 打包 -> finally 恢复。
+        /// 仅覆盖当前打包目标平台（不影响其他平台），用 SetDefines 直接写入并刷新。</remarks>
         /// </summary>
-        public static void BuildWithConfig(BuildConfig config, bool buildPlayer)
+        /// <param name="postBuildCallback">构建完成后、恢复宏之前执行的回调。
+        /// 用于必须在“模式宏仍生效”期间执行的后续步骤（如微信小游戏 WXConvertCore.DoExport）。</param>
+        public static void BuildWithConfig(BuildConfig config, bool buildPlayer, Action postBuildCallback = null)
         {
-            // 0. 备份当前所有平台宏 -> 覆盖为构建模式宏集合 -> 打包 -> finally 恢复
             var modeDefines = config.GetBuildModeDefines();
             Debug.Log($"[BuildWithConfig] 构建模式: {config.BuildMode} (宏: {string.Join(";", modeDefines)})");
 
-            Dictionary<BuildTargetGroup, string[]> backup = null;
+            // 0. 仅对目标平台：备份原宏 -> 覆盖为模式宏 -> 打包 -> 回调 -> finally 恢复
+            BuildTarget target = (buildPlayer || config.BuildPlayer) ? config.PlayerPlatform : config.BuildTarget;
+            BuildTargetGroup targetGroup = BuildConfig.GetBuildTargetGroup(target);
+
+            string[] backup = null;
             try
             {
-                // 0.1 备份原始宏，覆盖为模式宏集合（确保热更 DLL 编译与 Player 构建均使用模式宏）
-                backup = ScriptingDefineSymbols.BackupAllPlatformDefines();
-                ScriptingDefineSymbols.OverrideAllPlatformDefines(modeDefines);
-                AssetDatabase.Refresh();
+                backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
+                ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
 
                 // 1. [可选] 编译热更DLL
                 if (config.BuildHotFixDll)
@@ -213,14 +220,16 @@ namespace TEngine
                         config.PlayerOutputPath
                     );
                 }
+
+                // 7. 构建后回调（此时模式宏仍生效；回调结束后 finally 才恢复原宏）
+                postBuildCallback?.Invoke();
             }
             finally
             {
-                // 7. 恢复打包前的原始宏
+                // 8. 恢复打包前的原始宏
                 if (backup != null)
                 {
-                    ScriptingDefineSymbols.RestoreAllPlatformDefines(backup);
-                    AssetDatabase.Refresh();
+                    ScriptingDefineSymbols.SetDefines(targetGroup, backup);
                     Debug.Log("[BuildWithConfig] 已恢复打包前的原始宏定义");
                 }
             }

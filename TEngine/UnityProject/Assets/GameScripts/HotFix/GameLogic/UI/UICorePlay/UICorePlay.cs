@@ -17,7 +17,7 @@ namespace GameLogic
         private RTLTextMeshPro _levelNameText;
 
         // private RTLTextMeshPro _answerDisplayText;
-        private RTLTextMeshPro _answerProgressText;
+        private RTLTextMeshPro _titleDesText;
         private RTLTextMeshPro _submitBtnText;
 
         private XYButton _submitButton;
@@ -42,7 +42,7 @@ namespace GameLogic
             base.ScriptGenerator();
             _levelNameText = FindChildComponent<RTLTextMeshPro>("Panel/TitleRoot/Titile");
             // _answerDisplayText = FindChildComponent<RTLTextMeshPro>("Answer");
-            _answerProgressText = FindChildComponent<RTLTextMeshPro>("Panel/AnswerProgress");
+            _titleDesText = FindChildComponent<RTLTextMeshPro>("Panel/TitleRoot/des");
             _submitBtnText = FindChildComponent<RTLTextMeshPro>("Panel/Buttom/SubmitBtn/m_text");
             _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
             _toastRoot = FindChildComponent<Transform>("Panel/Toast");
@@ -81,7 +81,7 @@ namespace GameLogic
             // 更新 UI
             if (GameManager.Instance.CurrentGamePlay is CorePlayGamePlay corePlay)
             {
-                RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
+                _titleDesText.text = string.Format(LocalizationHelper.GetLocalText(LanguageKey.game_des), corePlay.GetRequiredAnswerCount());
             }
             RefreshText();
             _layoutWidget.Activate();
@@ -120,10 +120,7 @@ namespace GameLogic
         /// <summary>重置道具使用完成：刷新进度文字（答案已清空 → 0/N）</summary>
         private void OnPropResetDone()
         {
-            if (GameManager.Instance?.CurrentGamePlay is CorePlayGamePlay corePlay)
-            {
-                RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
-            }
+            
         }
 
         private void SetLevelName()
@@ -131,32 +128,12 @@ namespace GameLogic
             if (_levelNameText != null)
                 _levelNameText.text = GetLevelName();
         }
-
-        // ================ 答案显示 ================
-
-        public void RefreshAnswerDisplay(List<string> foundAnswers, int requiredCount)
-        {
-            // if (_answerDisplayText != null)
-            // {
-            //     _answerDisplayText.text = string.Join("  ", foundAnswers);
-            // }
-
-            if (_answerProgressText != null)
-            {
-                _answerProgressText.text = $"{foundAnswers.Count}/{requiredCount}";
-            }
-        }
-
+        
         // ================ 提交结果 ================
 
         public void ShowSubmitResult(bool success, string answerCharacter, string message)
         {
             ShowResultTip(success, message);
-
-            if (success)
-            {
-                RefreshFromGamePlay();
-            }
         }
 
         private void ShowResultTip(bool success, string message)
@@ -175,25 +152,7 @@ namespace GameLogic
             _toastRoot.gameObject.SetActive(false);
         }
 
-        private void RefreshFromGamePlay()
-        {
-            var gamePlay = GameManager.Instance?.CurrentGamePlay;
-            if (gamePlay is CorePlayGamePlay corePlay)
-            {
-                RefreshAnswerDisplay(corePlay.GetFoundAnswerCharacters(), corePlay.GetRequiredAnswerCount());
-            }
-        }
-
         // ================ 通关面板 ================
         
-
-        // ================ 清除 ================
-
-        public void ClearAll()
-        {
-            // if (_answerDisplayText != null) _answerDisplayText.text = "尚未找到答案";
-            if (_answerProgressText != null) _answerProgressText.text = "0/0";
-            HideResultTip();
-        }
     }
 }
