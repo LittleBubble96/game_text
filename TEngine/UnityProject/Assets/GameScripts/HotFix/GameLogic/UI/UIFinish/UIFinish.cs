@@ -92,7 +92,7 @@ namespace GameLogic
             {
                 CompleteInAnimation();
                 // 入场动画完成后播放入场奖励动画
-                PlayRewardShowAnim();
+                // PlayRewardShowAnim();
             }).Forget();
         }
 

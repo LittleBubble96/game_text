@@ -58,6 +58,7 @@ public partial class GameApp
         GMSingle.Instance.Activate();
         InitSetting();
         AudioSystem.Instance.PlayBgm(AudioDefine.game_Bgm ,0.4f);
+        GameEvent.Send(EventDefine.GameStartSuccessEvent);
         Log.Warning("======= StartGameLogic Complete =======");
     }
 

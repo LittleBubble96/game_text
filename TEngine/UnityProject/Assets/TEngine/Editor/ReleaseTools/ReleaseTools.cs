@@ -104,6 +104,7 @@ namespace TEngine
             config.OutputRoot = Application.dataPath + "/../Builds/WebGL";
             config.BuildPlayer = false;
             config.BuildMode = mode;
+            // config.MinimalPackage = true;
             BuildWithConfig(config, buildPlayer: false, postBuildCallback: () =>
             {
                 if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
@@ -176,63 +177,69 @@ namespace TEngine
             BuildTarget target = (buildPlayer || config.BuildPlayer) ? config.PlayerPlatform : config.BuildTarget;
             BuildTargetGroup targetGroup = BuildConfig.GetBuildTargetGroup(target);
 
-            string[] backup = null;
-            try
+            // 用文件作用域捕获构建全程日志：切换宏会触发重编译清空 Console，落盘后才不丢
+            string logPath = BuildLogger.GetLogPath(target, config.BuildMode.ToString(), config.OutputRoot);
+            Debug.Log($"[BuildWithConfig] 构建日志: {logPath}");
+            using (BuildLogger.Begin(logPath))
             {
-                backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
-                ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
-
-                // 1. [可选] 编译热更DLL
-                if (config.BuildHotFixDll)
+                string[] backup = null;
+                try
                 {
-                    Debug.Log("[BuildWithConfig] 编译热更DLL...");
-                    BuildDLLCommand.BuildAndCopyDlls();
+                    backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
+                    ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
+
+                    // 1. [可选] 编译热更DLL
+                    if (config.BuildHotFixDll)
+                    {
+                        Debug.Log("[BuildWithConfig] 编译热更DLL...");
+                        BuildDLLCommand.BuildAndCopyDlls();
+                    }
+
+                    // 2. 刷新资源
+                    AssetDatabase.Refresh();
+
+                    // 3. 构建 AssetBundle
+                    var buildResult = BuildInternalWithConfig(config);
+                    if (!buildResult.Success)
+                    {
+                        Debug.LogError($"[BuildWithConfig] AssetBundle构建失败: {buildResult.ErrorInfo}");
+                        return;
+                    }
+
+                    Debug.Log($"[BuildWithConfig] AssetBundle构建成功: {buildResult.OutputPackageDirectory}");
+
+                    // 4. [最小包] 删除 StreamingAssets 中的 .bundle 文件
+                    if (config.MinimalPackage)
+                    {
+                        ProcessMinimalPackage(config.PackageVersion, config.RetainTags, buildResult.OutputPackageDirectory);
+                    }
+
+                    // 5. 刷新资源
+                    AssetDatabase.Refresh();
+
+                    // 6. [可选] 构建 Player
+                    if (buildPlayer || config.BuildPlayer)
+                    {
+                        BuildImp(
+                            BuildConfig.GetBuildTargetGroup(config.PlayerPlatform),
+                            config.PlayerPlatform,
+                            config.PlayerOutputPath
+                        );
+                    }
+
+                    // 7. 构建后回调（此时模式宏仍生效；回调结束后 finally 才恢复原宏）
+                    postBuildCallback?.Invoke();
                 }
-
-                // 2. 刷新资源
-                AssetDatabase.Refresh();
-
-                // 3. 构建 AssetBundle
-                var buildResult = BuildInternalWithConfig(config);
-                if (!buildResult.Success)
+                finally
                 {
-                    Debug.LogError($"[BuildWithConfig] AssetBundle构建失败: {buildResult.ErrorInfo}");
-                    return;
+                    // 8. 恢复打包前的原始宏
+                    if (backup != null)
+                    {
+                        ScriptingDefineSymbols.SetDefines(targetGroup, backup);
+                        Debug.Log("[BuildWithConfig] 已恢复打包前的原始宏定义");
+                    }
                 }
-
-                Debug.Log($"[BuildWithConfig] AssetBundle构建成功: {buildResult.OutputPackageDirectory}");
-
-                // 4. [最小包] 删除 StreamingAssets 中的 .bundle 文件
-                if (config.MinimalPackage)
-                {
-                    ProcessMinimalPackage(config.PackageVersion, config.RetainTags, buildResult.OutputPackageDirectory);
-                }
-
-                // 5. 刷新资源
-                AssetDatabase.Refresh();
-
-                // 6. [可选] 构建 Player
-                if (buildPlayer || config.BuildPlayer)
-                {
-                    BuildImp(
-                        BuildConfig.GetBuildTargetGroup(config.PlayerPlatform),
-                        config.PlayerPlatform,
-                        config.PlayerOutputPath
-                    );
-                }
-
-                // 7. 构建后回调（此时模式宏仍生效；回调结束后 finally 才恢复原宏）
-                postBuildCallback?.Invoke();
-            }
-            finally
-            {
-                // 8. 恢复打包前的原始宏
-                if (backup != null)
-                {
-                    ScriptingDefineSymbols.SetDefines(targetGroup, backup);
-                    Debug.Log("[BuildWithConfig] 已恢复打包前的原始宏定义");
-                }
-            }
+            } // end using BuildLogger
         }
 
         #endregion

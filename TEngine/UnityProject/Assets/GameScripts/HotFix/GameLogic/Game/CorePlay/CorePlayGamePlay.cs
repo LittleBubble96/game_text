@@ -265,8 +265,11 @@ namespace GameLogic.GamePlay.CorePlay
         public int GetRequiredAnswerCount()
         {
             if (_currentLevelData == null) return 0;
-            if (_currentLevelData.requiredAnswerCount > 0)
+            // 固定个数模式：数值有效时返回固定值，否则兜底按答案总数
+            if (_currentLevelData.answerCountMode == AnswerCountMode.FixedCount
+                && _currentLevelData.requiredAnswerCount > 0)
                 return _currentLevelData.requiredAnswerCount;
+            // 答案个数（默认）模式：需答对全部
             return _currentLevelData.answers.Count;
         }
 

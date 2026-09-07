@@ -15,9 +15,9 @@ MonoBehaviour:
   ProjectConf:
     projectName: "\u5BFB\u5B57\u5927\u5E08"
     Appid: wx308052a1ea617d67
-    CDN: https://636c-cloud1-d8gh27cku5807f11b-1463208085.tcb.qcloud.la/webgl/
+    CDN: https://xunzi.setworld.net/webgl/
     assetLoadType: 0
-    compressDataPackage: 0
+    compressDataPackage: 1
     VideoUrl: 
     relativeDST: E:/xx/NewText/output
     DST: E:/xx/NewText/output
@@ -54,7 +54,7 @@ MonoBehaviour:
     Il2CppOptimizeSize: 1
     profilingFuncs: 1
     Webgl2: 1
-    fbslim: 0
+    fbslim: 1
     DeleteStreamingAssets: 1
     ProfilingMemory: 0
     CleanBuild: 0

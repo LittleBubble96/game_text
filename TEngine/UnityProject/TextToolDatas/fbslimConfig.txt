@@ -1,0 +1,54 @@
+Soft.c1d63e75
+!UnityWatermark-small.d7411008
+EscToExit_back.21b1540e
+EscToExit_Text.2e1ee8b4
+UnityWatermark-trial-big.66f46ac8
+UnityWatermark-trial.60b4e34e
+!UnityWatermark-beta.dd37c61b
+!UnityWatermark-edu.a8c472ae
+!UnityWatermark-dev.ae1fc174
+!WarningSign.59b8d955
+!UnityWatermark-proto.5084375a
+!UnityWatermarkPlugin-beta.52403834
+!box.643f5df8
+!button active.c15aedb7
+!button hover.42efb15e
+!button on hover.2c40c4b8
+button on.7ff0e5a1
+button.bdec6b82
+horizontal scrollbar thumb.4137b46d
+horizontal scrollbar.0ac38291
+horizontalslider.722f02b2
+slider thumb active.168a62a9
+slider thumb.a7acef71
+slidert humb hover.0c248117
+toggle active.e32a2ca9
+toggle hover.614620f6
+toggle on hover.528d6b34
+toggle on.1f99750a
+toggle on active.9d52caeb
+toggle.6eafbcb0
+vertical scrollbar thumb.7ba97313
+vertical scrollbar.d38290f1
+verticalslider.58266f5f
+window on.38a76040
+window.a62d1258
+textfield.a75d69ec
+textfield on.f2c2fb5c
+textfield hover.8c7ae9d8
+UnitySplash-HolographicTrackingLoss.cbf38e69
+!Splash Screen Unity Logo.05ef6840
+!UISprite.b48f75d0
+!Background.665e03a7
+Wipe Pattern - Circle.55244ce5
+Sunny Days - Seamless.ea0505f1
+Fruit Jelly (B&W).6c26bfa1
+Floor Cement.04ff302c
+Gradient Diagonal (Color).10e4eb11
+Default Sprites.05f4323a
+!loadingBg.77c1fbad
+EmojiOne.9438d40e
+Github.29f976a5
+Brushed Metal 3.311b1635
+DropCap Numbers.eefcfb1d
+LiberationSans SDF Atlas.ac9f1c83

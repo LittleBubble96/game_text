@@ -34,6 +34,7 @@ namespace Launcher
         public override void OnInit(object param)
         {
             base.OnInit(param);
+            m_bar.gameObject.SetActive(true);
             m_textUpdateDesc.text = param?.ToString();
             RefreshProgress(0f);
         }
@@ -52,6 +53,11 @@ namespace Launcher
         internal void RefreshAppid(string appid)
         {
             m_textLabelAppid.text = appid;
+        }
+
+        public void HideBar()
+        {
+            m_bar.gameObject.SetActive(false);
         }
     }
 }

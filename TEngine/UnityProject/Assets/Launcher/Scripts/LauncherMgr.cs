@@ -14,7 +14,7 @@ namespace Launcher
         private static string UI_WINDOW_PATH = "UIWindow/";
         private static Transform m_uiRoot;
         private static readonly Dictionary<string, UIBase> m_uiMapDict = new Dictionary<string, UIBase>(4);
-
+        
         public static void Initialize()
         {
             m_uiRoot = GameObject.Find(UI_ROOT_PATH)?.transform;
@@ -110,7 +110,7 @@ namespace Launcher
                 float delay = 0;
                 if (ui is LoadUpdateUI) //防止异步黑屏
                 {
-                    delay = 1f;
+                    delay = 0.5f;
                 }
                 else
                 {

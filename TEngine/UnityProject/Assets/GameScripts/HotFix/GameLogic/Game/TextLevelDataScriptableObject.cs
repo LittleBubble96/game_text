@@ -40,6 +40,19 @@ namespace GameLogic.Data
     }
 
     /// <summary>
+    /// 通关所需答案个数的判定模式。
+    /// 默认值 AnswerCount 对应枚举 0，使旧 .asset 反序列化时自动落到默认模式。
+    /// </summary>
+    public enum AnswerCountMode
+    {
+        /// <summary>答案个数（默认）：需要找出全部答案才能通关</summary>
+        AnswerCount = 0,
+
+        /// <summary>固定个数：需要找出 requiredAnswerCount 个答案才能通关</summary>
+        FixedCount = 1,
+    }
+
+    /// <summary>
     /// 一个关卡：基字 + 多个答案
     /// </summary>
     [Serializable]
@@ -54,7 +67,9 @@ namespace GameLogic.Data
 
         [Tooltip("所有可从基字中找到的答案")] public List<LevelAnswer> answers = new List<LevelAnswer>();
 
-        [Tooltip("通关所需答案个数（0表示需要全部答对）")] public int requiredAnswerCount = 0;
+        [Tooltip("通关答案个数判定模式")] public AnswerCountMode answerCountMode = AnswerCountMode.AnswerCount;
+
+        [Tooltip("固定个数模式下所需的答案个数（仅 answerCountMode=FixedCount 时生效）")] public int requiredAnswerCount = 0;
 
         /// <summary>
         /// 校验关卡数据是否有效。
@@ -134,6 +149,9 @@ public class TextLevelEditorWindow : EditorWindow
     private bool _showStrokeHighlightFoldout = false;
     private List<int> _highlightedStrokeIndices = new List<int>();
 
+    // 全局删除答案：输入一个目标字，扫描所有关卡统一删除该字作为答案的条目
+    private string _globalDeleteAnswerChar = "";
+
     [MenuItem("Tools/关卡编辑器")]
     public static void ShowWindow()
     {
@@ -195,6 +213,9 @@ public class TextLevelEditorWindow : EditorWindow
         if (GUILayout.Button("刷新数据", GUILayout.Width(100)))
             RefreshAssets();
         EditorGUILayout.EndHorizontal();
+
+        // 全局删除答案：输入一个目标字，扫描所有关卡统一删除该字作为答案的条目
+        DrawGlobalDeleteAnswerRow();
 
         EditorGUILayout.Space();
 
@@ -330,18 +351,35 @@ public class TextLevelEditorWindow : EditorWindow
         level.positionOffset = EditorGUILayout.Vector2Field("位置偏移", level.positionOffset);
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
 
-        // 通关所需答案个数
+        // 通关答案个数判定模式
         EditorGUI.BeginChangeCheck();
-        level.requiredAnswerCount = EditorGUILayout.IntField("通关所需答案个数", level.requiredAnswerCount);
+        level.answerCountMode = (AnswerCountMode)EditorGUILayout.EnumPopup("答案个数模式", level.answerCountMode);
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
 
-        if (level.requiredAnswerCount <= 0)
+        if (level.answerCountMode == AnswerCountMode.FixedCount)
         {
-            EditorGUILayout.HelpBox("当前为 0，表示需要找出全部答案才能通关。", MessageType.Info);
+            // 固定个数模式：显示数值输入与校验
+            EditorGUI.BeginChangeCheck();
+            level.requiredAnswerCount = EditorGUILayout.IntField("固定答案个数", level.requiredAnswerCount);
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
+
+            if (level.requiredAnswerCount <= 0)
+            {
+                EditorGUILayout.HelpBox("固定个数模式下数值需 > 0，当前将按答案总数处理。", MessageType.Warning);
+            }
+            else if (level.requiredAnswerCount > level.answers.Count)
+            {
+                EditorGUILayout.HelpBox($"所需答案数 ({level.requiredAnswerCount}) 超出了实际答案总数 ({level.answers.Count})，关卡将无法通关！", MessageType.Warning);
+            }
+            else
+            {
+                EditorGUILayout.HelpBox($"需找出 {level.requiredAnswerCount} 个答案即可通关（共 {level.answers.Count} 个）。", MessageType.Info);
+            }
         }
-        else if (level.requiredAnswerCount > level.answers.Count)
+        else
         {
-            EditorGUILayout.HelpBox($"所需答案数 ({level.requiredAnswerCount}) 超出了实际答案总数 ({level.answers.Count})，关卡将无法通关！", MessageType.Warning);
+            // 答案个数（默认）模式：需找出全部答案
+            EditorGUILayout.HelpBox($"默认模式：需找出全部 {level.answers.Count} 个答案才能通关。", MessageType.Info);
         }
 
         if (!string.IsNullOrEmpty(level.baseCharacter) && _characterStrokeCount.ContainsKey(level.baseCharacter))
@@ -508,6 +546,86 @@ public class TextLevelEditorWindow : EditorWindow
         DrawSwapLevelRow();
 
         EditorGUILayout.EndScrollView();
+    }
+
+    /// <summary>
+    /// 全局删除答案行：输入一个目标字，点击「全局删除」后扫描所有关卡，
+    /// 统一删除该字作为答案的条目（跨关卡批量操作）。
+    /// </summary>
+    private void DrawGlobalDeleteAnswerRow()
+    {
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("全局删除答案（输入一个目标字，所有关卡统一删除）", EditorStyles.miniBoldLabel);
+        EditorGUILayout.BeginHorizontal();
+        _globalDeleteAnswerChar = EditorGUILayout.TextField(_globalDeleteAnswerChar, GUILayout.Width(80));
+        GUI.backgroundColor = new Color(1f, 0.4f, 0.3f);
+        if (GUILayout.Button("全局删除", GUILayout.Width(90)))
+        {
+            DeleteAnswerGlobally(_globalDeleteAnswerChar);
+        }
+        GUI.backgroundColor = Color.white;
+        EditorGUILayout.EndHorizontal();
+    }
+
+    /// <summary>
+    /// 在所有关卡中删除指定目标字作为答案的条目。
+    /// 先扫描统计命中关卡数与命中答案数，弹确认框二次确认后再执行删除。
+    /// </summary>
+    private void DeleteAnswerGlobally(string targetChar)
+    {
+        if (string.IsNullOrEmpty(targetChar))
+        {
+            EditorUtility.DisplayDialog("提示", "请输入要删除的目标字。", "确定");
+            return;
+        }
+
+        var list = _levelDataAsset.levelDataList;
+        if (list == null || list.Count == 0)
+        {
+            EditorUtility.DisplayDialog("提示", "当前没有任何关卡数据。", "确定");
+            return;
+        }
+
+        // 第一遍：仅扫描统计命中情况（不删除），用于确认框展示影响面
+        int hitLevelCount = 0;
+        int hitAnswerCount = 0;
+        foreach (var level in list)
+        {
+            if (level == null || level.answers == null) continue;
+            int n = level.answers.Count(a => a != null && a.answerCharacter == targetChar);
+            if (n > 0)
+            {
+                hitLevelCount++;
+                hitAnswerCount += n;
+            }
+        }
+
+        if (hitAnswerCount == 0)
+        {
+            EditorUtility.DisplayDialog("提示", $"没有关卡以『{targetChar}』作为答案。", "确定");
+            return;
+        }
+
+        // 二次确认：展示命中范围，取消则不做任何改动
+        if (!EditorUtility.DisplayDialog("确认全局删除",
+            $"即将删除所有关卡中目标字『{targetChar}』作为答案的条目。\n" +
+            $"命中关卡数：{hitLevelCount}，删除答案条目数：{hitAnswerCount}\n确认继续？",
+            "删除", "取消"))
+        {
+            return;
+        }
+
+        // 第二遍：确认后执行删除
+        foreach (var level in list)
+        {
+            if (level == null || level.answers == null) continue;
+            level.answers.RemoveAll(a => a != null && a.answerCharacter == targetChar);
+        }
+
+        EditorUtility.SetDirty(_levelDataAsset);
+        AssetDatabase.SaveAssets();
+        ResetEditState();
+        Debug.Log($"[全局删除] 已删除目标字『{targetChar}』作为答案的条目：命中 {hitLevelCount} 个关卡，共 {hitAnswerCount} 条");
     }
 
     /// <summary>

@@ -21,10 +21,10 @@ namespace GameLogic.GamePlay.CorePlay.View
         private float _highlightZOffset = -1f;
 
         // ================ 提示闪烁 ================
-        private Color _tipHighlightColor = new Color(1f, 0.4f, 0.1f, 1f);
-        private Color _tipFadeColor = new Color(1f, 0.4f, 0.1f, 0.2f);
-        private float _tipBlinkSpeed = 5f;
-        private float _tipBlinkDuration = 2f;
+        private Color _tipHighlightColor = new Color(0.1f, 1f, 0.1f, 1f);
+        private Color _tipFadeColor = new Color(0.1f, 0.8f, 0.1f, 0.2f);
+        private float _tipBlinkSpeed = 2f;
+        private float _tipBlinkDuration = 10f;
         private List<int> _tipHighlightStrokes;
         private float _tipBlinkTimer;
         private bool _tipBlinkActive;

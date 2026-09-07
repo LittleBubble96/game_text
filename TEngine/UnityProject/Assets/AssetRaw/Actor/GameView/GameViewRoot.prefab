@@ -78,6 +78,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2f7e980f2bd4e7f92e9f317514d81ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backGround: {fileID: 4635575103492148844}
   bg: {fileID: 2547111606998393250}
   characterRoot: {fileID: 4658086135343660628}
   characterIkRoot: {fileID: 8471310927485907356}

@@ -9,9 +9,17 @@ namespace Procedure
     {
         public override bool UseNativeDialog { get; }
 
+        private const string GameStartSuccessEvent = "GameStartSuccessEvent";
+
         protected override void OnEnter(IFsm<IProcedureModule> procedureOwner)
         {
             base.OnEnter(procedureOwner);
+            LauncherMgr.GetActiveUI<LoadUpdateUI>().HideBar();
+            GameEvent.AddEventListener(GameStartSuccessEvent, OnGameStartSuccessEvent);
+        }
+
+        private void OnGameStartSuccessEvent()
+        {
             StartGame().Forget();
         }
 
