@@ -107,13 +107,30 @@ namespace TEngine
             // config.MinimalPackage = true;
             BuildWithConfig(config, buildPlayer: false, postBuildCallback: () =>
             {
-                if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+                var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+                // 缓存微信 CDN 原值：转换期间临时改成版本化地址，转换完恢复，保证配置文件不被污染
+                string originCdn = wxConfig.ProjectConf.CDN;
+                try
                 {
-                    Debug.Log("[Build] WebGL 转换为微信小游戏成功");
+                    string versionedCdn = ApplyVersionedCdnToWxConfig();
+                    if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+                    {
+                        Debug.Log($"[Build] WebGL 转换为微信小游戏成功，CDN={versionedCdn}");
+                        // 归档微信导出的 webgl 产物到 {项目名}/v{版本号}/
+                        ArchiveWxExport();
+                    }
+                    else
+                    {
+                        Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
+                    }
                 }
-                else
+                finally
                 {
-                    Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
+                    // 恢复微信 CDN 原值，避免下次打包从已版本化的脏值重复累加
+                    wxConfig.ProjectConf.CDN = originCdn;
+                    EditorUtility.SetDirty(wxConfig);
+                    AssetDatabase.SaveAssets();
+                    Debug.Log($"[Build] 微信 CDN 已恢复原值: {originCdn}");
                 }
             });
         }
@@ -276,6 +293,10 @@ namespace TEngine
                 outputRoot = Path.Combine(Application.dataPath + "/../", outputRoot);
                 outputRoot = Path.GetFullPath(outputRoot).Replace('\\', '/');
             }
+
+            // outputRoot 基础上拼项目名 + App 版本号 + 平台子目录，打完直接整目录上传 CDN 的 {projectName}/v{AppVersion}/{platform}/
+            outputRoot = Path.Combine(outputRoot, Settings.UpdateSetting.GetProjectName(),
+                $"v{Application.version}", GetPlatformDirName(config.BuildTarget)).Replace('\\', '/');
 
             buildParameters.BuildOutputRoot = outputRoot;
             buildParameters.BuildinFileRoot = AssetBundleBuilderHelper.GetStreamingAssetsRoot();
@@ -530,36 +551,52 @@ namespace TEngine
                 return;
             }
 
-            int copiedCount = 0;
-            int skippedMetaCount = 0;
-
             // 拷贝所有文件（递归），跳过 .meta
-            string[] files = Directory.GetFiles(sourceRoot, "*", SearchOption.AllDirectories);
-            foreach (string sourceFile in files)
+            int copiedCount = CopyDirectory(sourceRoot, targetRoot);
+
+            Debug.Log($"[StreamingAssets拷贝] 完成: {sourceRoot} -> {targetRoot}（拷贝 {copiedCount} 个文件，跳过 .meta）");
+        }
+
+        /// <summary>
+        /// 递归拷贝目录内容到目标目录，跳过 .meta 文件。返回拷贝文件数。
+        /// </summary>
+        /// <param name="srcDir">源目录（须存在）。</param>
+        /// <param name="dstDir">目标目录（不存在则创建，调用方负责按需清空）。</param>
+        /// <returns>拷贝的文件数。</returns>
+        private static int CopyDirectory(string srcDir, string dstDir)
+        {
+            if (!Directory.Exists(srcDir))
             {
-                string fileName = Path.GetFileName(sourceFile);
+                Debug.LogWarning($"[拷贝] 源目录不存在: {srcDir}，跳过");
+                return 0;
+            }
+            Directory.CreateDirectory(dstDir);
+
+            int copied = 0;
+            string[] files = Directory.GetFiles(srcDir, "*", SearchOption.AllDirectories);
+            foreach (string srcFile in files)
+            {
+                string fileName = Path.GetFileName(srcFile);
                 if (fileName.EndsWith(".meta", StringComparison.OrdinalIgnoreCase))
                 {
-                    skippedMetaCount++;
                     continue;
                 }
 
-                string relative = sourceFile.Substring(sourceRoot.Length)
+                string relative = srcFile.Substring(srcDir.Length)
                     .TrimStart('/', '\\')
                     .Replace('\\', '/');
-                string targetFile = Path.Combine(targetRoot, relative);
+                string dstFile = Path.Combine(dstDir, relative);
 
-                string targetFileDir = Path.GetDirectoryName(targetFile);
-                if (!string.IsNullOrEmpty(targetFileDir) && !Directory.Exists(targetFileDir))
+                string dstFileDir = Path.GetDirectoryName(dstFile);
+                if (!string.IsNullOrEmpty(dstFileDir) && !Directory.Exists(dstFileDir))
                 {
-                    Directory.CreateDirectory(targetFileDir);
+                    Directory.CreateDirectory(dstFileDir);
                 }
 
-                File.Copy(sourceFile, targetFile, true);
-                copiedCount++;
+                File.Copy(srcFile, dstFile, true);
+                copied++;
             }
-
-            Debug.Log($"[StreamingAssets拷贝] 完成: {sourceRoot} -> {targetRoot}（拷贝 {copiedCount} 个文件，跳过 {skippedMetaCount} 个 .meta）");
+            return copied;
         }
 
         #endregion
@@ -594,6 +631,27 @@ namespace TEngine
         #endregion
 
         #region 工具方法
+
+        /// <summary>
+        /// 根据打包目标平台返回 CDN 目录用的小写平台目录名。
+        /// <remarks>与运行时 UpdateSetting.GetPlatformName().ToLower() 对齐，保证打包输出目录与客户端拉取目录一致。</remarks>
+        /// </summary>
+        private static string GetPlatformDirName(BuildTarget target)
+        {
+            switch (target)
+            {
+                case BuildTarget.Android: return "android";
+                case BuildTarget.iOS: return "ios";
+                case BuildTarget.WebGL: return "webgl";
+                case BuildTarget.StandaloneWindows64: return "windows64";
+                case BuildTarget.StandaloneOSX: return "macos";
+                case BuildTarget.StandaloneLinux64: return "linux";
+                case BuildTarget.PS4: return "ps4";
+                case BuildTarget.PS5: return "ps5";
+                case BuildTarget.Switch: return "switch";
+                default: return target.ToString().ToLower();
+            }
+        }
 
         private static BuildTarget GetBuildTarget(string platform)
         {
@@ -683,6 +741,81 @@ namespace TEngine
             Debug.Log($"[BuildInternal] Use EncryptionType from ResourceModuleDriver: {encryptionType}");
 
             return GetEncryptionFromType(encryptionType);
+        }
+
+        /// <summary>
+        /// 给微信小游戏配置注入带项目名 + App 版本号的 CDN 路径。
+        /// <remarks>mini 游戏 bundlePathIdentifier=StreamingAssets，CDN + StreamingAssets 即资源根，
+        /// 所以拼成 {baseCdn}/{projectName}/v{AppVersion}/ 形式，与 YooAsset 的版本目录对齐。
+        /// 项目名统一取 UpdateSetting.projectName（单一来源，与 YooAsset 侧一致）。
+        /// 注意：本方法会改写 MiniGameConfig 的 CDN 字段，调用方须在调用前缓存原值、调用后恢复，
+        /// 否则配置文件被污染，下次打包会从已版本化的脏值重复累加。</remarks>
+        /// </summary>
+        /// <returns>版本化后的完整 CDN 地址。</returns>
+        private static string ApplyVersionedCdnToWxConfig()
+        {
+            var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+            string baseCdn = wxConfig.ProjectConf.CDN.TrimEnd('/');
+
+            // 兼容旧值：若已含 /StreamingAssets/package 后缀先裁掉
+            int idx = baseCdn.IndexOf("/StreamingAssets/package", StringComparison.OrdinalIgnoreCase);
+            if (idx >= 0)
+            {
+                baseCdn = baseCdn.Substring(0, idx);
+            }
+
+            // 项目名统一取 UpdateSetting.projectName（单一来源）；微信转换固定 WebGL 平台，平台层用 webgl
+            string projectName = Settings.UpdateSetting.GetProjectName();
+            string platform = GetPlatformDirName(BuildTarget.WebGL);
+            string versionedCdn = $"{baseCdn}/{projectName}/v{Application.version}/{platform}/";
+            wxConfig.ProjectConf.CDN = versionedCdn;
+            EditorUtility.SetDirty(wxConfig);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[Build] 微信 CDN 已版本化: {versionedCdn}");
+            return versionedCdn;
+        }
+
+        /// <summary>
+        /// 将微信转换的 webgl 产物归档到 {导出目录同级}/{projectName}/v{AppVersion}/ 下。
+        /// <remarks>微信 DoExport 在 ProjectConf.DST 下生成 minigame/（最终工程）和 webgl/（中间产物），
+        /// 仅归档 webgl/（用于上传 CDN 的源），minigame/ 不复制。复制而非移动，保留原产物便于下次转换复用。</remarks>
+        /// </summary>
+        private static void ArchiveWxExport()
+        {
+            var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+            string dst = wxConfig.ProjectConf.DST;                        // 如 E:/xx/NewText/output
+            string projectName = Settings.UpdateSetting.GetProjectName(); // 与 CDN 同源，单一来源
+            string version = Application.version;
+            string platform = GetPlatformDirName(BuildTarget.WebGL);      // 微信转换固定 WebGL 平台
+
+            // 归档根 = DST 同级 / {projectName} / v{version} / {platform}
+            string dstParent = Directory.GetParent(dst)?.FullName;
+            if (string.IsNullOrEmpty(dstParent))
+            {
+                Debug.LogError($"[归档] 无法解析导出目录的父目录: {dst}，跳过归档");
+                return;
+            }
+            string archiveRoot = Path.Combine(dstParent, projectName, $"v{version}", platform).Replace('\\', '/');
+
+            // 清空该平台层归档目录后重建（仅清当前平台，不影响同版本其他平台归档）
+            try
+            {
+                if (Directory.Exists(archiveRoot))
+                {
+                    Directory.Delete(archiveRoot, true);
+                    Debug.Log($"[归档] 已清空旧归档目录: {archiveRoot}");
+                }
+                Directory.CreateDirectory(archiveRoot);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[归档] 归档目录准备失败: {archiveRoot}，{e.Message}");
+                return;
+            }
+
+            // 仅复制 webgl/（递归，跳过 .meta）；minigame/ 不归档
+            int copied = CopyDirectory(Path.Combine(dst, "webgl"), Path.Combine(archiveRoot, ""));
+            Debug.Log($"[归档] 完成: {dst} -> {archiveRoot}（共 {copied} 个文件）");
         }
 
         private static string GetBuildPackageVersion()

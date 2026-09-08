@@ -255,6 +255,7 @@ namespace TEngine
             _resourceModule.EncryptionType = encryptionType;
             _resourceModule.Milliseconds = milliseconds;
             _resourceModule.AutoUnloadBundleWhenUnused = autoUnloadBundleWhenUnused;
+            _resourceModule.ApplicableGameVersion = Application.version;
             _resourceModule.HostServerURL = Settings.UpdateSetting.GetResDownLoadPath();
             _resourceModule.FallbackHostServerURL = Settings.UpdateSetting.GetFallbackResDownLoadPath();
             _resourceModule.LoadResWayWebGL=Settings.UpdateSetting.GetLoadResWayWebGL();

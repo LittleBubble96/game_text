@@ -14,7 +14,7 @@ namespace TEngine
         /// <summary>
         /// 获取当前资源适用的游戏版本号。
         /// </summary>
-        string ApplicableGameVersion { get; }
+        string ApplicableGameVersion { get; set; }
 
         /// <summary>
         /// 获取当前内部资源版本号。

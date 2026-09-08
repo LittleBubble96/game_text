@@ -15,7 +15,7 @@ MonoBehaviour:
   ProjectConf:
     projectName: "\u5BFB\u5B57\u5927\u5E08"
     Appid: wx308052a1ea617d67
-    CDN: https://xunzi.setworld.net/webgl/
+    CDN: https://xunzi.setworld.net
     assetLoadType: 0
     compressDataPackage: 1
     VideoUrl: 

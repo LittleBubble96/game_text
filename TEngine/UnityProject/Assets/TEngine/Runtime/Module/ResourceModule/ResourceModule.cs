@@ -64,14 +64,12 @@ namespace TEngine
         /// </summary>
         public LoadResWayWebGL LoadResWayWebGL { get; set; }
 
-        private string _applicableGameVersion;
-
         private int _internalResourceVersion;
 
         /// <summary>
         /// 获取当前资源适用的游戏版本号。
         /// </summary>
-        public string ApplicableGameVersion => _applicableGameVersion;
+        public string ApplicableGameVersion { get; set; }
 
         /// <summary>
         /// 获取当前内部资源版本号。

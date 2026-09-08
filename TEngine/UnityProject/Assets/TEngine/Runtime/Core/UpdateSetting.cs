@@ -147,6 +147,15 @@ namespace TEngine
         }
 
         /// <summary>
+        /// 获取项目名称（CDN 路径第一段，需与微信 MiniGameConfig.projectName 保持一致）。
+        /// </summary>
+        /// <returns>项目名称。</returns>
+        public string GetProjectName()
+        {
+            return projectName;
+        }
+
+        /// <summary>
         /// 获取是否使用可寻址资源代替资源路径
         /// </summary>
         /// <returns></returns>
@@ -166,9 +175,12 @@ namespace TEngine
         /// </summary>
         public string GetResDownLoadPath()
         {
-            return Path.Combine(ResDownLoadPath).Replace("\\", "/");
-
-            // return Path.Combine(ResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
+            // 拼成: {ResDownLoadPath}/{projectName}/v{AppVersion}/{platform}/StreamingAssets/package/DefaultPackage
+            // projectName 来自 UpdateSetting.projectName，AppVersion 来自 Application.version（发版才变），
+            // platform 来自 GetPlatformName().ToLower()（按当前运行平台，CDN 目录用小写）
+            string platform = GetPlatformName().ToLower();
+            return Path.Combine(ResDownLoadPath, projectName, $"v{Application.version}", platform,
+                "StreamingAssets", "package", "DefaultPackage").Replace("\\", "/");
         }
 
         /// <summary>
@@ -176,9 +188,9 @@ namespace TEngine
         /// </summary>
         public string GetFallbackResDownLoadPath()
         {
-            return Path.Combine(FallbackResDownLoadPath).Replace("\\", "/");
-
-            // return Path.Combine(FallbackResDownLoadPath, projectName, GetPlatformName()).Replace("\\", "/");
+            string platform = GetPlatformName().ToLower();
+            return Path.Combine(FallbackResDownLoadPath, projectName, $"v{Application.version}", platform,
+                "StreamingAssets", "package", "DefaultPackage").Replace("\\", "/");
         }
 
         /// <summary>
