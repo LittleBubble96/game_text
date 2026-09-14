@@ -2,7 +2,6 @@
 // using Log;
 // using Logic.Message;
 using UnityEngine;
-using WeChatWASM;
 
 namespace TEngine
 {

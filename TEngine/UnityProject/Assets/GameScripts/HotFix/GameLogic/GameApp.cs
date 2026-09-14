@@ -7,7 +7,6 @@ using GameLogic.Localization;
 using Obfuz;
 #endif
 using TEngine;
-using WeChatWASM;
 
 #pragma warning disable CS0436
 

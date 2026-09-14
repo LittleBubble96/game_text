@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using TEngine;
 using UnityEngine;
-using WeChatWASM;
+using TTSDK;
 
 namespace GameLogic.Platform.Adapter
 {
@@ -211,16 +211,14 @@ namespace GameLogic.Platform.Adapter
 
         public Rect GetSafeArea()
         {
+            
 #if UNITY_EDITOR
             Rect safe = Screen.safeArea;
             Log.Info($"OffsetMaxAdapter.GetSafeArea UNITY_EDITOR: safeArea={safe}, screen=({Screen.width},{Screen.height})");
             return safe;
 #endif
-            WindowInfo windowInfo = WX.GetWindowInfo();
-            SafeArea safeArea = windowInfo.safeArea;
+            SafeArea safeArea = TT.GetSystemInfo().safeArea;
             Rect safeWx = new Rect(0, 0, (float)safeArea.width, (float)safeArea.height);
-            Log.Info($"OffsetMaxAdapter.GetSafeArea WX: safeArea={safeWx}, screen=({safeArea.width},{safeArea.height}) " +
-                     $"windowWH:{windowInfo.windowWidth},{windowInfo.windowHeight} , ScreenWH:{windowInfo.screenWidth} ,{windowInfo.screenHeight}");
             return safeWx;
         }
 
@@ -229,8 +227,7 @@ namespace GameLogic.Platform.Adapter
 #if UNITY_EDITOR
             return Screen.width;
 #endif
-            WindowInfo windowInfo = WX.GetWindowInfo();
-            return (int)windowInfo.screenWidth;
+            return (int)TT.GetSystemInfo().screenWidth;
         }
 
         private int GetScreenHeight()
@@ -238,8 +235,7 @@ namespace GameLogic.Platform.Adapter
 #if UNITY_EDITOR
             return Screen.height;
 #endif
-            WindowInfo windowInfo = WX.GetWindowInfo();
-            return (int)windowInfo.screenHeight;
+            return (int)TT.GetSystemInfo().screenHeight;
         }
     }
 }

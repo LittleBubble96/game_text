@@ -1,7 +1,7 @@
 ﻿using Launcher;
 using TEngine;
+using TTSDK;
 using UnityEngine;
-using WeChatWASM;
 using YooAsset;
 using ProcedureOwner = TEngine.IFsm<TEngine.IProcedureModule>;
 
@@ -102,54 +102,36 @@ namespace Procedure
 
         private void WxLogin()
         {
-            string openid = PlayerPrefs.GetString("WX_openid", "");
+            string openid = PlayerPrefs.GetString("DY_openid", "");
             if (!string.IsNullOrEmpty(openid))
             {
-                Log.Info($"[WXLogin] has openId {openid}");
+                Log.Info($"[DYLogin] has openId {openid}");
                 return;
             }
-            Log.Info("[WXLogin] InitSDK Begin");
-            WXBase.InitSDK(_ =>
-            {
-                Log.Info("[WXLogin] InitSDK Success");
-                LoginOption option = new LoginOption
+            Log.Info("[DYLogin] InitSDK Begin");
+            TT.Login(
+                successCallback: (string code, string anonymousCode, bool isLogin) =>
                 {
-                    success = (res) =>
+                    Debug.Log($"登录回调 code={code}, anonymousCode={anonymousCode}, isLogin={isLogin}");
+                    if(isLogin && !string.IsNullOrEmpty(code))
                     {
-                        Log.Info("[WXLogin] 登录成功: " + res.code);
-                        WXBase.cloud.Init(new ICloudConfig()
-                        {
-                            env = "cloud1-d8gh27cku5807f11b",
-                            traceUser = true
-                        });
-                        WXBase.cloud.CallFunction(new CallFunctionParam
-                        {
-                            name = "getOpenid",
-                            data = new {},
-                            success = (cloudResult) =>
-                            {
-                                Log.Info("[Cloud] 云函数返回: " + cloudResult.result);
-                                var r = JsonUtility.FromJson<OpenIdRet>(cloudResult.result);
-                                if (!string.IsNullOrEmpty(r.openid))
-                                {
-                                    PlayerPrefs.SetString("WX_openid", r.openid);
-                                    PlayerPrefs.Save();
-                                    Log.Info("[Cloud] openid 存好了: " + r.openid);
-                                }
-                            },
-                            fail = (cloudResult) =>
-                            {
-                                Log.Error("[Cloud] 云函数失败: " + cloudResult.errMsg);
-                            }
-                        });
-                    },
-                    fail = (res) =>
-                    {
-                        Log.Error("[WXLogin] 登录失败: " + res.errMsg);
+                        PlayerPrefs.SetString("DY_openid", anonymousCode);
+                        PlayerPrefs.Save();
+                        Log.Info("openid 存好了: " +anonymousCode);
+                        // 用户抖音已登录，拿到临时code（有效期3分钟）
+                        // ⚠️ 客户端**不能直接用code请求code2session**
                     }
-                };
-                WX.Login(option);
-            });
+                    else
+                    {
+                        // 用户没登录抖音，只能拿到anonymousCode（设备标识）
+                    }
+                },
+                failedCallback: (string errMsg) =>
+                {
+                    Debug.LogError("登录失败：" + errMsg);
+                },
+                forceLogin:true // 为true会弹出抖音登录授权弹窗
+            );
         }
     }
     

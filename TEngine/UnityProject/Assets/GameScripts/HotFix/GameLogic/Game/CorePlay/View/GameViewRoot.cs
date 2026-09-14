@@ -1,7 +1,6 @@
 ﻿using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
-using WeChatWASM;
+using TTSDK;
 
 namespace GameLogic.GamePlay.CorePlay.View
 {
@@ -70,11 +69,11 @@ namespace GameLogic.GamePlay.CorePlay.View
         
         private int GetScreenWidth()
         {
+            
 #if UNITY_EDITOR
             return Screen.width;
 #endif
-            WindowInfo windowInfo = WX.GetWindowInfo();
-            return (int)windowInfo.screenWidth;
+            return (int)TT.GetSystemInfo().screenWidth;
         }
 
         private int GetScreenHeight()
@@ -82,8 +81,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 #if UNITY_EDITOR
             return Screen.height;
 #endif
-            WindowInfo windowInfo = WX.GetWindowInfo();
-            return (int)windowInfo.screenHeight;
+            return (int)TT.GetSystemInfo().screenHeight;
         }
     }
 }

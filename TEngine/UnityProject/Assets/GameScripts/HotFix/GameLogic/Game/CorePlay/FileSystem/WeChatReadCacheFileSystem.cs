@@ -1,4 +1,4 @@
-﻿using WeChatWASM;
+﻿using TTSDK;
 
 namespace GameLogic
 {
@@ -8,17 +8,17 @@ namespace GameLogic
         
         public string ReadCache()
         {
-            return WXBase.StorageGetStringSync(_gameKey , "");
+            return TT.LoadSaving<string>(_gameKey);
         }
 
         public void WriteCache(string cacheJson)
         {
-            WXBase.StorageSetStringSync(_gameKey, cacheJson);
+            TT.Save(cacheJson, _gameKey);
         }
 
         public void DeleteAll()
         {
-            WX.RemoveStorageSync(_gameKey);
+            TT.DeleteSaving<string>(_gameKey);
         }
     }
 }

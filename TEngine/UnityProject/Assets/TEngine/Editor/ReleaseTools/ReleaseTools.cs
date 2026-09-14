@@ -6,7 +6,6 @@ using TEngine.Editor;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using WeChatWASM;
 using YooAsset;
 using YooAsset.Editor;
 using BuildResult = UnityEditor.Build.Reporting.BuildResult;
@@ -107,30 +106,30 @@ namespace TEngine
             // config.MinimalPackage = true;
             BuildWithConfig(config, buildPlayer: false, postBuildCallback: () =>
             {
-                var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+                // var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
                 // 缓存微信 CDN 原值：转换期间临时改成版本化地址，转换完恢复，保证配置文件不被污染
-                string originCdn = wxConfig.ProjectConf.CDN;
+                // string originCdn = wxConfig.ProjectConf.CDN;
                 try
                 {
-                    string versionedCdn = ApplyVersionedCdnToWxConfig();
-                    if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
-                    {
-                        Debug.Log($"[Build] WebGL 转换为微信小游戏成功，CDN={versionedCdn}");
-                        // 归档微信导出的 webgl 产物到 {项目名}/v{版本号}/
-                        ArchiveWxExport();
-                    }
-                    else
-                    {
-                        Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
-                    }
+                    // string versionedCdn = ApplyVersionedCdnToWxConfig();
+                    // if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
+                    // {
+                    //     Debug.Log($"[Build] WebGL 转换为微信小游戏成功，CDN={versionedCdn}");
+                    //     // 归档微信导出的 webgl 产物到 {项目名}/v{版本号}/
+                    //     ArchiveWxExport();
+                    // }
+                    // else
+                    // {
+                    //     Debug.LogError("[Build] WebGL 转换为微信小游戏失败");
+                    // }
                 }
                 finally
                 {
                     // 恢复微信 CDN 原值，避免下次打包从已版本化的脏值重复累加
-                    wxConfig.ProjectConf.CDN = originCdn;
-                    EditorUtility.SetDirty(wxConfig);
+                    // wxConfig.ProjectConf.CDN = originCdn;
+                    // EditorUtility.SetDirty(wxConfig);
                     AssetDatabase.SaveAssets();
-                    Debug.Log($"[Build] 微信 CDN 已恢复原值: {originCdn}");
+                    // Debug.Log($"[Build] 微信 CDN 已恢复原值: {originCdn}");
                 }
             });
         }
@@ -752,28 +751,28 @@ namespace TEngine
         /// 否则配置文件被污染，下次打包会从已版本化的脏值重复累加。</remarks>
         /// </summary>
         /// <returns>版本化后的完整 CDN 地址。</returns>
-        private static string ApplyVersionedCdnToWxConfig()
-        {
-            var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
-            string baseCdn = wxConfig.ProjectConf.CDN.TrimEnd('/');
-
-            // 兼容旧值：若已含 /StreamingAssets/package 后缀先裁掉
-            int idx = baseCdn.IndexOf("/StreamingAssets/package", StringComparison.OrdinalIgnoreCase);
-            if (idx >= 0)
-            {
-                baseCdn = baseCdn.Substring(0, idx);
-            }
-
-            // 项目名统一取 UpdateSetting.projectName（单一来源）；微信转换固定 WebGL 平台，平台层用 webgl
-            string projectName = Settings.UpdateSetting.GetProjectName();
-            string platform = GetPlatformDirName(BuildTarget.WebGL);
-            string versionedCdn = $"{baseCdn}/{projectName}/v{Application.version}/{platform}/";
-            wxConfig.ProjectConf.CDN = versionedCdn;
-            EditorUtility.SetDirty(wxConfig);
-            AssetDatabase.SaveAssets();
-            Debug.Log($"[Build] 微信 CDN 已版本化: {versionedCdn}");
-            return versionedCdn;
-        }
+        // private static string ApplyVersionedCdnToWxConfig()
+        // {
+        //     var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+        //     string baseCdn = wxConfig.ProjectConf.CDN.TrimEnd('/');
+        //
+        //     // 兼容旧值：若已含 /StreamingAssets/package 后缀先裁掉
+        //     int idx = baseCdn.IndexOf("/StreamingAssets/package", StringComparison.OrdinalIgnoreCase);
+        //     if (idx >= 0)
+        //     {
+        //         baseCdn = baseCdn.Substring(0, idx);
+        //     }
+        //
+        //     // 项目名统一取 UpdateSetting.projectName（单一来源）；微信转换固定 WebGL 平台，平台层用 webgl
+        //     string projectName = Settings.UpdateSetting.GetProjectName();
+        //     string platform = GetPlatformDirName(BuildTarget.WebGL);
+        //     string versionedCdn = $"{baseCdn}/{projectName}/v{Application.version}/{platform}/";
+        //     wxConfig.ProjectConf.CDN = versionedCdn;
+        //     EditorUtility.SetDirty(wxConfig);
+        //     AssetDatabase.SaveAssets();
+        //     Debug.Log($"[Build] 微信 CDN 已版本化: {versionedCdn}");
+        //     return versionedCdn;
+        // }
 
         /// <summary>
         /// 将微信转换的 webgl 产物归档到 {导出目录同级}/{projectName}/v{AppVersion}/ 下。
@@ -782,40 +781,40 @@ namespace TEngine
         /// </summary>
         private static void ArchiveWxExport()
         {
-            var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
-            string dst = wxConfig.ProjectConf.DST;                        // 如 E:/xx/NewText/output
-            string projectName = Settings.UpdateSetting.GetProjectName(); // 与 CDN 同源，单一来源
-            string version = Application.version;
-            string platform = GetPlatformDirName(BuildTarget.WebGL);      // 微信转换固定 WebGL 平台
-
-            // 归档根 = DST 同级 / {projectName} / v{version} / {platform}
-            string dstParent = Directory.GetParent(dst)?.FullName;
-            if (string.IsNullOrEmpty(dstParent))
-            {
-                Debug.LogError($"[归档] 无法解析导出目录的父目录: {dst}，跳过归档");
-                return;
-            }
-            string archiveRoot = Path.Combine(dstParent, projectName, $"v{version}", platform).Replace('\\', '/');
-
-            // 清空该平台层归档目录后重建（仅清当前平台，不影响同版本其他平台归档）
-            try
-            {
-                if (Directory.Exists(archiveRoot))
-                {
-                    Directory.Delete(archiveRoot, true);
-                    Debug.Log($"[归档] 已清空旧归档目录: {archiveRoot}");
-                }
-                Directory.CreateDirectory(archiveRoot);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"[归档] 归档目录准备失败: {archiveRoot}，{e.Message}");
-                return;
-            }
-
-            // 仅复制 webgl/（递归，跳过 .meta）；minigame/ 不归档
-            int copied = CopyDirectory(Path.Combine(dst, "webgl"), Path.Combine(archiveRoot, ""));
-            Debug.Log($"[归档] 完成: {dst} -> {archiveRoot}（共 {copied} 个文件）");
+            // var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
+            // string dst = wxConfig.ProjectConf.DST;                        // 如 E:/xx/NewText/output
+            // string projectName = Settings.UpdateSetting.GetProjectName(); // 与 CDN 同源，单一来源
+            // string version = Application.version;
+            // string platform = GetPlatformDirName(BuildTarget.WebGL);      // 微信转换固定 WebGL 平台
+            //
+            // // 归档根 = DST 同级 / {projectName} / v{version} / {platform}
+            // string dstParent = Directory.GetParent(dst)?.FullName;
+            // if (string.IsNullOrEmpty(dstParent))
+            // {
+            //     Debug.LogError($"[归档] 无法解析导出目录的父目录: {dst}，跳过归档");
+            //     return;
+            // }
+            // string archiveRoot = Path.Combine(dstParent, projectName, $"v{version}", platform).Replace('\\', '/');
+            //
+            // // 清空该平台层归档目录后重建（仅清当前平台，不影响同版本其他平台归档）
+            // try
+            // {
+            //     if (Directory.Exists(archiveRoot))
+            //     {
+            //         Directory.Delete(archiveRoot, true);
+            //         Debug.Log($"[归档] 已清空旧归档目录: {archiveRoot}");
+            //     }
+            //     Directory.CreateDirectory(archiveRoot);
+            // }
+            // catch (Exception e)
+            // {
+            //     Debug.LogError($"[归档] 归档目录准备失败: {archiveRoot}，{e.Message}");
+            //     return;
+            // }
+            //
+            // // 仅复制 webgl/（递归，跳过 .meta）；minigame/ 不归档
+            // int copied = CopyDirectory(Path.Combine(dst, "webgl"), Path.Combine(archiveRoot, ""));
+            // Debug.Log($"[归档] 完成: {dst} -> {archiveRoot}（共 {copied} 个文件）");
         }
 
         private static string GetBuildPackageVersion()
