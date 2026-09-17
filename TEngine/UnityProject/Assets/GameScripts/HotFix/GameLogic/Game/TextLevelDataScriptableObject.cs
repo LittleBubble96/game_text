@@ -134,6 +134,9 @@ public class TextLevelEditorWindow : EditorWindow
     private int _selectedExistingAnswerIndex = 0; // 0 = "-- 输入新字 --"
     private int _selectedCommonAnswerIndex = 0; // 0 = "-- 常用答案 --"
 
+    // 组合批量添加：从选中的笔画中任取 N 个生成全部组合（顺序无关）
+    private int _comboPickCount = 2;
+
     // 编辑状态：当前编辑哪个答案的哪组笔画 (-1表示无，-2表示新增模式)
     private int _editingAnswerIndex = -1;
     private int _editingSetIndex = -1;
@@ -492,6 +495,29 @@ public class TextLevelEditorWindow : EditorWindow
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("点击选择笔画（选中高亮，再次点击取消）", EditorStyles.miniLabel);
             DrawNewStrokeSelectButtons(selectStrokeCount);
+
+            // ===== 组合批量添加 =====
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("组合批量添加（从选中笔画中任取 N 个生成全部组合，顺序无关）", EditorStyles.miniBoldLabel);
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("目标字:", GUILayout.Width(45));
+            _newAnswerCharacter = EditorGUILayout.TextField(_newAnswerCharacter, GUILayout.Width(60));
+            GUILayout.Label("取N个:", GUILayout.Width(45));
+            _comboPickCount = EditorGUILayout.IntField(_comboPickCount, GUILayout.Width(40));
+            GUI.backgroundColor = new Color(0.4f, 0.8f, 0.9f);
+            if (GUILayout.Button("组合添加", GUILayout.Width(85)))
+            {
+                AddStrokeCombinations(level);
+            }
+            GUI.backgroundColor = Color.white;
+            EditorGUILayout.EndHorizontal();
+            int comboSelCount = _newStrokeIndices.Distinct().Count();
+            if (comboSelCount == 0)
+                EditorGUILayout.HelpBox("请先在上方选中笔画，再设置 N 进行组合添加。", MessageType.None);
+            else if (_comboPickCount < 1 || _comboPickCount > comboSelCount)
+                EditorGUILayout.HelpBox($"N 需在 1 ~ {comboSelCount} 之间（当前选中 {comboSelCount} 个笔画）。", MessageType.Warning);
+            else
+                EditorGUILayout.LabelField($"当前选中 {comboSelCount} 个笔画，任取 {_comboPickCount} 个，将生成 {CombinationCount(comboSelCount, _comboPickCount)} 种组合；已存在的组合自动跳过，添加后保留选中，可直接改 N/目标字继续（如 二→三→亖）。", EditorStyles.wordWrappedMiniLabel);
         }
 
         EditorGUILayout.HelpBox("笔画索引用逗号或英文句号分隔（支持中/英文逗号、空格、英文句号）。如目标字已有答案，将追加为新组合；否则新建答案。", MessageType.None);
@@ -837,7 +863,7 @@ public class TextLevelEditorWindow : EditorWindow
 
     // ==================== 辅助方法 ====================
 
-    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "十", "口" , "人", "八", "丨"};
+    private static readonly string[] _commonAnswerChars = { "一", "二", "三", "亖", "十", "口" , "人", "八", "丨"};
 
     private string[] GetCommonAnswerOptions()
     {
@@ -929,6 +955,7 @@ public class TextLevelEditorWindow : EditorWindow
     private static readonly Dictionary<string, string> _customTones = new Dictionary<string, string>()
     {
         { "丨", "gǔn" },
+        { "亖", "sì" },
     };
 
 
@@ -1039,6 +1066,131 @@ public class TextLevelEditorWindow : EditorWindow
         ResetStrokeHighlight();
         EditorUtility.SetDirty(_levelDataAsset);
         return true;
+    }
+
+    /// <summary>
+    /// 组合批量添加：从当前选中的笔画中任取 N 个，生成全部组合（顺序无关，即数学组合 C(M,N)），
+    /// 逐一加入目标字的答案；答案中已存在的组合（按索引集合比较，与顺序无关）自动跳过。
+    /// 添加后保留笔画选中与目标字，便于直接修改 N 连续添加 二→三→亖 等。
+    /// </summary>
+    private void AddStrokeCombinations(TextLevelData level)
+    {
+        if (string.IsNullOrEmpty(_newAnswerCharacter))
+        {
+            EditorUtility.DisplayDialog("提示", "请先输入目标字字符", "确定");
+            return;
+        }
+
+        var distinctIndices = _newStrokeIndices.Distinct().ToList();
+        if (distinctIndices.Count == 0)
+        {
+            EditorUtility.DisplayDialog("提示", "请先选中至少一个笔画", "确定");
+            return;
+        }
+        distinctIndices.Sort();
+
+        // 校验索引不越界
+        if (_characterStrokeCount.TryGetValue(level.baseCharacter, out int baseStrokes)
+            && distinctIndices.Any(idx => idx >= baseStrokes))
+        {
+            EditorUtility.DisplayDialog("提示", $"存在越界的笔画索引（基字共有 {baseStrokes} 个笔画，索引 0 ~ {baseStrokes - 1}）。", "确定");
+            return;
+        }
+
+        int n = distinctIndices.Count;
+        int k = _comboPickCount;
+        if (k < 1 || k > n)
+        {
+            EditorUtility.DisplayDialog("提示", $"取 N 个需在 1 ~ {n} 之间（当前选中 {n} 个笔画）。", "确定");
+            return;
+        }
+
+        long total = CombinationCount(n, k);
+        if (total > 10000)
+        {
+            EditorUtility.DisplayDialog("提示", $"组合数过多（{total} 种），请减少选中笔画数量或减小 N。", "确定");
+            return;
+        }
+        if (total > 1000)
+        {
+            if (!EditorUtility.DisplayDialog("确认", $"将生成 {total} 种组合并加入『{_newAnswerCharacter}』，确认继续？", "继续", "取消"))
+                return;
+        }
+
+        // 生成全部组合
+        var combos = new List<List<int>>();
+        GenerateCombinations(distinctIndices, k, combos);
+
+        // 查找目标字答案，没有则新建
+        LevelAnswer target = level.answers.Find(a => a.answerCharacter == _newAnswerCharacter);
+        if (target == null)
+        {
+            target = new LevelAnswer { answerCharacter = _newAnswerCharacter };
+            level.answers.Add(target);
+        }
+
+        // 逐组合加入，已存在（集合相同，与顺序无关）的跳过
+        int added = 0;
+        foreach (var combo in combos)
+        {
+            if (HasStrokeSet(target, combo)) continue;
+            target.strokeSets.Add(new StrokeSet { strokeIndices = combo });
+            added++;
+        }
+
+        EditorUtility.SetDirty(_levelDataAsset);
+        Debug.Log($"[组合添加]『{_newAnswerCharacter}』：选中 {n} 个笔画任取 {k} 个，共 {combos.Count} 种组合，新增 {added}，跳过已存在 {combos.Count - added}");
+        EditorUtility.DisplayDialog("完成",
+            $"目标字『{_newAnswerCharacter}』：选中 {n} 个笔画任取 {k} 个\n共 {combos.Count} 种组合\n新增：{added}\n跳过已存在：{combos.Count - added}",
+            "确定");
+    }
+
+    /// <summary>判断答案中是否已存在指定笔画组合（按索引集合比较，与顺序无关）。</summary>
+    private static bool HasStrokeSet(LevelAnswer answer, List<int> indices)
+    {
+        foreach (var set in answer.strokeSets)
+        {
+            if (set == null || set.strokeIndices == null) continue;
+            if (set.strokeIndices.Count != indices.Count) continue;
+            if (!set.strokeIndices.Except(indices).Any())
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>从 source（已升序去重）中任取 pickCount 个的全部组合，追加到 results。</summary>
+    private static void GenerateCombinations(List<int> source, int pickCount, List<List<int>> results)
+    {
+        var current = new List<int>(pickCount);
+        CombineRecursive(source, 0, pickCount, current, results);
+    }
+
+    private static void CombineRecursive(List<int> source, int start, int pickCount, List<int> current, List<List<int>> results)
+    {
+        if (current.Count == pickCount)
+        {
+            results.Add(new List<int>(current));
+            return;
+        }
+        // 剪枝：剩余可选数不足以凑齐 pickCount 时提前结束
+        for (int i = start; i <= source.Count - (pickCount - current.Count); i++)
+        {
+            current.Add(source[i]);
+            CombineRecursive(source, i + 1, pickCount, current, results);
+            current.RemoveAt(current.Count - 1);
+        }
+    }
+
+    /// <summary>计算组合数 C(n, k)；k 越界返回 0。</summary>
+    private static long CombinationCount(int n, int k)
+    {
+        if (k < 0 || n < 0 || k > n) return 0;
+        long result = 1;
+        for (int i = 1; i <= k; i++)
+        {
+            result = result * (n - k + i) / i;
+        }
+        return result;
     }
 
     /// <summary>
