@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using GameLogic.GamePlay;
@@ -20,14 +21,9 @@ namespace GameLogic.GamePlay.CorePlay.View
         private Color _defaultStrokeColor = Color.white * 0.5f;
         private float _highlightZOffset = -1f;
 
-        // ================ 提示闪烁 ================
+        // ================ 提示高亮 ================
         private Color _tipHighlightColor = new Color(0.1f, 1f, 0.1f, 1f);
-        private Color _tipFadeColor = new Color(0.1f, 0.8f, 0.1f, 0.2f);
-        private float _tipBlinkSpeed = 2f;
-        private float _tipBlinkDuration = 10f;
         private List<int> _tipHighlightStrokes;
-        private float _tipBlinkTimer;
-        private bool _tipBlinkActive;
 
         // ================ 内部状态 ================
 
@@ -297,7 +293,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnStrokeClicked(int strokeIndex)
         {
-            if (!_isInitialized || _gamePlay == null) return;
+            if (UIInteractionLock.IsLocked || !_isInitialized || _gamePlay == null) return;
             _gamePlay.ToggleStroke(strokeIndex);
             AudioSystem.Instance.PlayAudio(AudioDefine.clickCharacter_SFX);
         }
@@ -306,10 +302,6 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnStrokeSelectionChanged(int strokeIndex, bool isSelected)
         {
-            // 用户选中任意笔画后，清除提示闪烁效果
-            if (isSelected)
-                ClearTipBlink();
-
             UpdateStrokeVisual(strokeIndex, isSelected);
         }
 
@@ -350,6 +342,12 @@ namespace GameLogic.GamePlay.CorePlay.View
                 pos.z = 0;
                 obj.transform.localPosition = pos;
             }
+
+            // 提示笔画在提交前始终保持常亮，不被选中/取消选中的颜色覆盖。
+            if (_tipHighlightStrokes != null && _tipHighlightStrokes.Contains(strokeIndex))
+            {
+                _drawCharacter.SetStrokeColor(strokeIndex, _tipHighlightColor);
+            }
         }
 
         public void ClearAllHighlights()
@@ -368,75 +366,56 @@ namespace GameLogic.GamePlay.CorePlay.View
                 }
             }
 
-            // 同时清除提示闪烁
-            ClearTipBlink();
+            // 同时清除提示高亮
+            ClearTipHighlight();
         }
 
-        // ================ 提示闪烁效果 ================
+        // ================ 提示高亮效果 ================
 
-        private void Update()
-        {
-            if (!_tipBlinkActive || _drawCharacter == null) return;
-
-            _tipBlinkTimer -= Time.deltaTime;
-
-            // 闪烁2秒后自动消失
-            if (_tipBlinkTimer <= 0)
-            {
-                ClearTipBlink();
-                return;
-            }
-
-            // 闪烁效果：在亮色和暗色之间切换
-            float t = Mathf.PingPong(Time.time * _tipBlinkSpeed, 1f);
-            Color blinkColor = Color.Lerp(_tipFadeColor, _tipHighlightColor, t);
-
-            if (_tipHighlightStrokes != null)
-            {
-                foreach (int idx in _tipHighlightStrokes)
-                {
-                    _drawCharacter.SetStrokeColor(idx, blinkColor);
-                }
-            }
-        }
-
-        /// <summary>开始提示高亮闪烁</summary>
+        /// <summary>显示提示高亮，并保持到用户点击提交</summary>
         private void OnPropTipHighlight(List<int> strokeIndices)
         {
             if (strokeIndices == null || strokeIndices.Count == 0 || _drawCharacter == null) return;
 
-            // 先清除之前的闪烁
-            ClearTipBlink();
+            ClearTipHighlight();
 
             _tipHighlightStrokes = new List<int>(strokeIndices);
-            _tipBlinkTimer = _tipBlinkDuration;
-            _tipBlinkActive = true;
+            foreach (int strokeIndex in _tipHighlightStrokes)
+            {
+                _drawCharacter.SetStrokeColor(strokeIndex, _tipHighlightColor);
+            }
         }
 
-        /// <summary>清除提示高亮闪烁</summary>
+        /// <summary>清除提示高亮</summary>
         private void OnPropTipClearHighlight()
         {
-            ClearTipBlink();
+            ClearTipHighlight();
         }
 
-        /// <summary>重置道具使用完成：清空所有笔画高亮 + 清空已填 slot（不重绘 DrawCharacter）</summary>
+        /// <summary>重置道具使用完成：复位笔画高亮，不影响已填 slot</summary>
         private void OnPropResetDone()
         {
             ClearAllHighlights();
-            _gameSlotView?.ClearAllSlots();
         }
 
-        private void ClearTipBlink()
+        /// <summary>依次播放下一关道具补齐答案的入槽动画</summary>
+        public UniTask PlayNextPropAnswersAsync(IReadOnlyList<string> answerCharacters, int intervalFrames)
         {
-            _tipBlinkActive = false;
-            _tipBlinkTimer = 0;
+            return _gameSlotView == null
+                ? UniTask.CompletedTask
+                : _gameSlotView.PlayAnswersSequentiallyAsync(answerCharacters, intervalFrames);
+        }
 
-            // 恢复提示笔画为默认颜色
+        private void ClearTipHighlight()
+        {
+            // 根据当前选择状态恢复提示笔画颜色
             if (_tipHighlightStrokes != null && _drawCharacter != null)
             {
                 foreach (int idx in _tipHighlightStrokes)
                 {
-                    _drawCharacter.SetStrokeColor(idx, _defaultStrokeColor);
+                    bool isSelected = _gamePlay is CorePlayGamePlay corePlay
+                                      && corePlay.SelectedStrokeIndices.Contains(idx);
+                    _drawCharacter.SetStrokeColor(idx, isSelected ? _highlightColor : _defaultStrokeColor);
                 }
             }
             _tipHighlightStrokes = null;
@@ -466,6 +445,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void OnSubmitClicked()
         {
+            ClearTipHighlight();
             _gamePlay?.SubmitAnswer();
         }
 

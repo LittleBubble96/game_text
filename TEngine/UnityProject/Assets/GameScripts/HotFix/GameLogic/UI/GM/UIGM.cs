@@ -112,12 +112,16 @@ namespace GameLogic
             await CreateGmGroupAsync("关卡");
             await CreateBtnAndInputAsync("跳转关卡", (levelId) =>
             {
-                if (int.TryParse(levelId, out int id) && id >= 1)
+                if (!int.TryParse(levelId, out int id) || id < 1)
                 {
-                    GameManager.Instance.ResetProgress();
-                    GameManager.Instance.CurrentGamePlay?.LoadLevel(id);
-                    Log.Info($"[GM] 跳转至关卡 {id}");
+                    Log.Warning("[GM] 请输入大于 0 的整数关卡号");
+                    return;
                 }
+
+                if (GameManager.Instance.TrySetCorePlayLevel(id))
+                    Log.Info($"[GM] 关卡数据已切换并保存为 {id}，重新进入游戏后显示目标关卡");
+                else
+                    Log.Warning($"[GM] 跳关失败，请检查关卡 {id} 的配置；原进度未修改");
             });
             await CreateBtnAsync("下一关", () =>
             {
@@ -160,6 +164,19 @@ namespace GameLogic
                     Log.Info($"[GM] 重置道具设为 {count}");
                 }
             });
+
+            await CreateBtnAndInputAsync("设置下一关数量", (num) =>
+            {
+                if (int.TryParse(num, out int count))
+                {
+                    PropDefine.InitPropCounts(
+                        PropDefine.TipCount,
+                        PropDefine.CoinCount,
+                        PropDefine.ResetCount,
+                        count);
+                    Log.Info($"[GM] 下一关道具设为 {count}");
+                }
+            });
             
             await CreateBtnAndInputAsync("设置金币数量", (num) =>
             {
@@ -171,7 +188,7 @@ namespace GameLogic
             });
             await CreateBtnAsync("道具设为999", () =>
             {
-                PropDefine.InitPropCounts(999, 999, 999);
+                PropDefine.InitPropCounts(999, 999, 999, 999);
                 Log.Info("[GM] 道具均设为 999");
             });
 
@@ -185,6 +202,8 @@ namespace GameLogic
                 Log.Info($"[GM] 关卡总数: {gp?.TotalLevelCount ?? 0}");
                 Log.Info($"[GM] 游戏运行中: {gp?.IsGameRunning ?? false}");
                 Log.Info($"[GM] 提示道具: {PropDefine.TipCount}");
+                Log.Info($"[GM] 重置道具: {PropDefine.ResetCount}");
+                Log.Info($"[GM] 下一关道具: {PropDefine.NextCount}");
                 Log.Info($"[GM] 金币: {PropDefine.CoinCount}");
                 Log.Info($"[GM] 基字: {gp?.GetBaseCharacter() ?? "无"}");
                 Log.Info($"[GM] 已找到答案: {gp?.FoundAnswerIndices?.Count ?? 0}");

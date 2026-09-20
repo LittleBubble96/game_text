@@ -31,7 +31,7 @@ namespace GameLogic
         /// <summary>道具数量变化事件，携带 PropType 和 int（新数量）</summary>
         public static int Event_PropCountChanged = "Event_PropCountChanged".GetHashCode();
 
-        /// <summary>重置道具使用完成事件（清空答案并重载本关后发送，UI 据此刷新进度文字）</summary>
+        /// <summary>重置道具使用完成事件（清空当前选中笔画后发送，视图据此复位高亮）</summary>
         public static int Event_PropResetDone = "Event_PropResetDone".GetHashCode();
 
         /// <summary>UITop 金币增加动画事件，携带 int（增加数量），0.6s 内完成递增</summary>

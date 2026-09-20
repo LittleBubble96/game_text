@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
-using DG.Tweening;
 using GameConfig;
 using GameLogic.Localization;
 using RTLTMPro;
 using TEngine;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace GameLogic
 {
@@ -14,17 +14,21 @@ namespace GameLogic
     {
         private RTLTextMeshPro _nextBtnText;
         private RTLTextMeshPro _homeBtnText;
+        private RTLTextMeshPro _shareBtnText;
         private RTLTextMeshPro _titleText;
         private RTLTextMeshPro _desText;
         
         private XYButton _btnNext;
         private XYButton _btnHome;
+        private XYButton _btnShare;
         private GameObject _btnNextGo;
 
         #region 奖励
         private RectTransform _rewardRoot;
         private RewardItemWidget _rewardItemCoinWidget;
-        private RewardItemWidget _rewardItemTipPropWidget;
+        private RewardItemWidget _rewardItemPropWidget;
+        private readonly List<RewardItemWidget> _propRewardWidgets = new List<RewardItemWidget>();
+        private readonly List<RewardItemWidget> _activeRewardWidgets = new List<RewardItemWidget>();
 
         #endregion
 
@@ -49,17 +53,23 @@ namespace GameLogic
             _animation = transform.GetComponent<Animation>();
             _btnNext = CreateWidget<XYButton>("VictoryPanel/ButtonNext");
             _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonBack");
+            _btnShare = CreateWidget<XYButton>("VictoryPanel/ButtonShare");
+
             _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonNext/Text");
             _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonBack/Text");
+            _shareBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonShare/Text");
             _titleText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/Title");
             _desText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/m_des");
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
+            _btnShare.OnAddListener(OnBtnShareClick);
 
             _rewardRoot = FindChildComponent<RectTransform>("VictoryPanel/RewardRoot");
             _rewardItemCoinWidget = CreateWidget<RewardItemWidget>("VictoryPanel/RewardRoot/RewardBg/RewardCoinItem");
-            _rewardItemTipPropWidget = CreateWidget<RewardItemWidget>("VictoryPanel/RewardRoot/RewardBg/RewardTipsItem");
+            _rewardItemPropWidget = CreateWidget<RewardItemWidget>("VictoryPanel/RewardRoot/RewardBg/RewardTipsItem");
+            if (_rewardItemPropWidget != null)
+                _propRewardWidgets.Add(_rewardItemPropWidget);
         }
 
         protected override void OnRefresh()
@@ -108,6 +118,14 @@ namespace GameLogic
         {
             _rewardMap = new Dictionary<int, int>();
             _hasClaimedReward = false;
+            SetButtonsInteractable(true);
+            _activeRewardWidgets.Clear();
+            if (_rewardItemCoinWidget != null)
+                _rewardItemCoinWidget.Visible = false;
+            foreach (var widget in _propRewardWidgets)
+                widget.Visible = false;
+            // if (_rewardRoot != null)
+            //     _rewardRoot.gameObject.SetActive(false);
 
             // 获取关卡配置中的 RewardId
             var tbLevel = ConfigSystem.Instance.Tables.TbLevel;
@@ -124,66 +142,71 @@ namespace GameLogic
 
             _rewardMap = new Dictionary<int, int>(confReward.Rewards);
 
-            // 初始化奖励Widget（异步加载图标）
-            RefreshRewardWidgetsAsync().Forget();
+            RefreshRewardWidgets();
         }
 
-        /// <summary>刷新奖励Widget显示（异步加载奖励图标）</summary>
-        private async UniTaskVoid RefreshRewardWidgetsAsync()
+        /// <summary>金币使用专用节点，其余道具复用通用模板。</summary>
+        private void RefreshRewardWidgets()
         {
             var tbItem = ConfigSystem.Instance.Tables.TbItem;
-
-            // 金币
-            if (_rewardMap.TryGetValue(ItemId.Coin, out int coinCount) && coinCount > 0)
+            int propIndex = 0;
+            foreach (var reward in _rewardMap)
             {
-                var itemCfg = tbItem?.GetOrDefault(ItemId.Coin);
-                if (itemCfg != null && _rewardItemCoinWidget != null)
+                if (reward.Value <= 0) continue;
+                var itemCfg = tbItem?.GetOrDefault(reward.Key);
+                if (itemCfg == null) continue;
+                RewardItemWidget widget;
+                if (reward.Key == ItemId.Coin)
+                    widget = _rewardItemCoinWidget;
+                else
                 {
-                    _rewardItemCoinWidget.Visible = true;
-                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : await GameModule.Resource.LoadAssetAsync<Sprite>(itemCfg.ResIcon);
-                    _rewardItemCoinWidget.SetReward(sprite, coinCount);
+                    if (_rewardItemPropWidget == null) continue;
+                    if (propIndex >= _propRewardWidgets.Count)
+                    {
+                        var extra = CreateWidgetByPrefab<RewardItemWidget>(
+                            _rewardItemPropWidget.gameObject, _rewardItemPropWidget.transform.parent, false);
+                        if (extra == null) continue;
+                        _propRewardWidgets.Add(extra);
+                    }
+                    widget = _propRewardWidgets[propIndex++];
                 }
+                if (widget == null) continue;
+                widget.Visible = true;
+                widget.SetReward(null, reward.Value);
+                _activeRewardWidgets.Add(widget);
+                LoadRewardIconAsync(widget, itemCfg.ResIcon, _rewardMap).Forget();
             }
-            else if (_rewardItemCoinWidget != null)
-            {
-                _rewardItemCoinWidget.Visible = false;
-            }
-
-            // 提示道具
-            if (_rewardMap.TryGetValue(ItemId.TipProp, out int tipCount) && tipCount > 0)
-            {
-                var itemCfg = tbItem?.GetOrDefault(ItemId.TipProp);
-                if (itemCfg != null && _rewardItemTipPropWidget != null)
-                {
-                    _rewardItemTipPropWidget.Visible = true;
-                    var sprite = string.IsNullOrEmpty(itemCfg.ResIcon) ? null : await GameModule.Resource.LoadAssetAsync<Sprite>(itemCfg.ResIcon);
-                    _rewardItemTipPropWidget.SetReward(sprite, tipCount);
-                }
-            }
-            else if (_rewardItemTipPropWidget != null)
-            {
-                _rewardItemTipPropWidget.Visible = false;
-            }
-
-            // 没有奖励则隐藏 rewardRoot
             if (_rewardRoot != null)
+                _rewardRoot.gameObject.SetActive(_activeRewardWidgets.Count > 0);
+
+            // 所有子节点创建、显隐和缩放恢复后，统一重新计算奖励布局。
+            if (_activeRewardWidgets.Count > 0 &&
+                _activeRewardWidgets[0].transform.parent is RectTransform layoutRoot)
             {
-                _rewardRoot.gameObject.SetActive(_rewardMap.Count > 0);
+                LayoutRebuilder.MarkLayoutForRebuild(layoutRoot);
+                if (layoutRoot.gameObject.activeInHierarchy)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(layoutRoot);
             }
+        }
+
+        private async UniTaskVoid LoadRewardIconAsync(RewardItemWidget widget, string iconPath,
+            Dictionary<int, int> rewardMap)
+        {
+            if (string.IsNullOrEmpty(iconPath)) return;
+            var sprite = await GameModule.Resource.LoadAssetAsync<Sprite>(iconPath);
+            // 防止旧图标加载结果覆盖下一次结算或重置领取动画。
+            if (_rewardMap == rewardMap && !_hasClaimedReward && widget.gameObject != null)
+                widget.SetIcon(sprite);
         }
 
         /// <summary>播放奖励展示动画</summary>
         private void PlayRewardShowAnim()
         {
             float delay = 0f;
-            if (_rewardItemCoinWidget != null && _rewardItemCoinWidget.Visible)
+            foreach (var widget in _activeRewardWidgets)
             {
-                _rewardItemCoinWidget.PlayShowAnim(delay);
+                widget.PlayShowAnim(delay);
                 delay += 0.2f;
-            }
-            if (_rewardItemTipPropWidget != null && _rewardItemTipPropWidget.Visible)
-            {
-                _rewardItemTipPropWidget.PlayShowAnim(delay);
             }
         }
 
@@ -199,53 +222,26 @@ namespace GameLogic
             _hasClaimedReward = true;
             SetButtonsInteractable(false);
 
-            int coinCount = _rewardMap.TryGetValue(ItemId.Coin, out int c) ? c : 0;
-            int tipCount = _rewardMap.TryGetValue(ItemId.TipProp, out int t) ? t : 0;
-
-            // 奖励数据已在通关时发放，此处只播特效表现
-            DoClaimAnimations(coinCount, tipCount, onComplete).Forget();
+            // 奖励数据已在通关时发放，此处只播特效表现。
+            if (_rewardMap.TryGetValue(ItemId.Coin, out int coinCount) && coinCount > 0)
+                GameEvent.Send(EventDefine.Event_UITopCoinAddAnim, coinCount);
+            DoClaimAnimations(onComplete).Forget();
         }
 
-        private async UniTaskVoid DoClaimAnimations(int coinCount, int tipCount, System.Action onComplete)
+        private async UniTaskVoid DoClaimAnimations(System.Action onComplete)
         {
-            bool coinDone = coinCount <= 0;
-            bool tipDone = tipCount <= 0;
-
-            void CheckAllDone()
+            // 只等待实际创建的动画；没有可展示奖励时也必须完成结算。
+            var animations = new List<UniTask>();
+            foreach (var widget in _activeRewardWidgets)
             {
-                if (coinDone && tipDone)
-                {
-                    onComplete?.Invoke();
-                }
+                var completion = new UniTaskCompletionSource();
+                widget.PlayFlyAnim(0.6f, () => completion.TrySetResult());
+                animations.Add(completion.Task);
             }
-
-            // 金币飞行动画：使用 EffectHelper.FlyCoin，内部会自动更新顶部金币栏
-            if (coinCount > 0 && _rewardItemCoinWidget != null)
-            {
-                GameEvent.Send(EventDefine.Event_UITopCoinAddAnim, coinCount);
-                _rewardItemCoinWidget.PlayFlyAnim(0.6f, () =>
-                {
-                    coinDone = true;
-                    CheckAllDone();
-                });
-            }
-
-            // 提示道具飞行动画：上移 + 渐隐
-            if (tipCount > 0 && _rewardItemTipPropWidget != null)
-            {
-                _rewardItemTipPropWidget.PlayFlyAnim(0.6f, () =>
-                {
-                    tipDone = true;
-                    CheckAllDone();
-                });
-            }
-
-            // 等待所有动画完成
-            await UniTask.WaitWhile(() => !coinDone || !tipDone);
-
-            // 隐藏 rewardRoot
+            await UniTask.WhenAll(animations);
             if (_rewardRoot != null)
                 _rewardRoot.gameObject.SetActive(false);
+            onComplete?.Invoke();
         }
 
         #endregion
@@ -256,6 +252,14 @@ namespace GameLogic
         {
             _btnNext.Interactable = interactable;
             _btnHome.Interactable = interactable;
+            _btnShare.Interactable = interactable;
+        }
+
+        private void OnBtnShareClick()
+        {
+            if (_hasClaimedReward) return;
+
+            SDK.ShareAppMessage($"我已通过第{_completedLevelId}关，一起来挑战吧！");
         }
 
         private void OnBtnNextClick()
@@ -299,6 +303,7 @@ namespace GameLogic
             _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
             _titleText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_title);
             _desText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_des);
+            _shareBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_share);
         }
     }
 }

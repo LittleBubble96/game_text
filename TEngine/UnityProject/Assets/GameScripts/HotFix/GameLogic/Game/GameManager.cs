@@ -265,6 +265,24 @@ namespace GameLogic
             _cacheManager.Save();
         }
 
+        /// <summary>GM 跳关：只更新玩法数据和关卡存档，保留 UI 及其他存档。</summary>
+        public bool TrySetCorePlayLevel(int levelId)
+        {
+            if (_corePlayGamePlay == null || _cacheManager == null)
+            {
+                Log.Warning("[GameManager] 跳关失败：玩法或存档尚未初始化");
+                return false;
+            }
+
+            if (!_corePlayGamePlay.TrySetLevelData(levelId)) return false;
+
+            // 数据跳关不启动玩法，不能走仅保存运行中关卡的 SaveGameProgress。
+            // 用完整的新关卡存档替换旧答案与快照，避免下次进入复用旧关卡。
+            _cacheManager.CorePlayRestore.LoadFromData(_corePlayGamePlay.GetSaveData());
+            _cacheManager.Save();
+            return true;
+        }
+
         public void ResetProgress()
         {
             _cacheManager.DeleteAll();

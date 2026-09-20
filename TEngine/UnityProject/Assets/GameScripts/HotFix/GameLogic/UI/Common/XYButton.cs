@@ -2,6 +2,35 @@
 
 namespace GameLogic
 {
+    /// <summary>
+    /// 全局 UI 交互锁。动画等异步流程通过 Acquire 获取令牌，令牌释放后自动恢复交互。
+    /// 支持嵌套持有，避免多个流程并行时被其中一个提前解锁。
+    /// </summary>
+    public static class UIInteractionLock
+    {
+        private static int _lockCount;
+
+        public static bool IsLocked => _lockCount > 0;
+
+        public static System.IDisposable Acquire()
+        {
+            _lockCount++;
+            return new LockHandle();
+        }
+
+        private sealed class LockHandle : System.IDisposable
+        {
+            private bool _disposed;
+
+            public void Dispose()
+            {
+                if (_disposed) return;
+                _disposed = true;
+                _lockCount = System.Math.Max(0, _lockCount - 1);
+            }
+        }
+    }
+
     public class XYButton : UIWidget
     {
         private Button _button;
@@ -20,12 +49,17 @@ namespace GameLogic
         {
             _button.onClick.AddListener(() =>
             {
-                AudioSystem.Instance.PlayAudio(AudioDefine.btnClick_SFX , 1f);
+                if (UIInteractionLock.IsLocked)
+                {
+                    return;
+                }
+
                 UIWindow parentWindow = GetParentWindow();
                 if (parentWindow != null && parentWindow.IsAnimating)
                 {
                     return;
                 }
+                AudioSystem.Instance.PlayAudio(AudioDefine.btnClick_SFX , 1f);
                 call?.Invoke();
             });
         }

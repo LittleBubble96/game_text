@@ -91,40 +91,49 @@ namespace GameLogic.GamePlay.CorePlay
             LoadLevelInternal(levelId, restoredFoundAnswers, cachedLevelData);
         }
 
-        private void LoadLevelInternal(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData)
+        /// <summary>仅切换关卡数据，不通知视图、不启动玩法或触发通关。</summary>
+        public bool TrySetLevelData(int levelId)
+        {
+            return LoadLevelInternal(levelId, null, null, false);
+        }
+
+        private bool LoadLevelInternal(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData,
+            bool startGame = true)
         {
             if (_levelConfig == null)
             {
                 DebugLogError("LevelConfig 未初始化");
-                return;
+                return false;
             }
 
             if (levelId <= 0 || levelId > _levelConfig.MaxLevelId)
             {
                 DebugLogError($"关卡ID超出范围: {levelId}/{_levelConfig.MaxLevelId}");
-                return;
+                return false;
             }
 
-            _currentLevelId = levelId;
-
             // 关卡数据加载优先级：缓存快照 > 配置文件（通过 levelId -> levelName -> 配置）
+            TextLevelData levelData;
             if (cachedLevelData != null)
             {
-                _currentLevelData = cachedLevelData;
+                levelData = cachedLevelData;
                 DebugLog($"加载关卡 {levelId}: 使用缓存快照");
             }
             else
             {
-                _currentLevelData = _levelConfig.GetLevelDataByLevelId(levelId);
+                levelData = _levelConfig.GetLevelDataByLevelId(levelId);
                 DebugLog($"加载关卡 {levelId}: 使用配置文件");
             }
 
-            if (_currentLevelData == null)
+            if (levelData == null || !levelData.IsValid())
             {
-                DebugLogError($"关卡 {levelId} 对应的关卡数据未找到");
-                return;
+                DebugLogError($"关卡 {levelId} 对应的关卡数据未找到或无效");
+                return false;
             }
 
+            // 验证成功后再提交状态，失败时保留原关卡和答案进度。
+            _currentLevelId = levelId;
+            _currentLevelData = levelData;
             _selectedStrokeIndices.Clear();
             _foundAnswerIndices.Clear();
 
@@ -138,9 +147,11 @@ namespace GameLogic.GamePlay.CorePlay
                 }
             }
 
-            _isGameRunning = true;
+            _isGameRunning = startGame;
 
             DebugLog($"加载关卡 {levelId}: 基字『{_currentLevelData.baseCharacter}』, 共 {_currentLevelData.answers.Count} 个答案, 已找到 {_foundAnswerIndices.Count} 个");
+            if (!startGame) return true;
+
             OnLevelLoaded?.Invoke(_currentLevelData);
 
             // 如果已经全部完成，直接通关
@@ -148,6 +159,7 @@ namespace GameLogic.GamePlay.CorePlay
             {
                 CompleteLevel();
             }
+            return true;
         }
 
         // ================ 笔画操作 ================
@@ -402,6 +414,46 @@ namespace GameLogic.GamePlay.CorePlay
 
             ClearSelection();             // 清选中笔画，逐个回调 OnStrokeSelectionChanged=false
             _foundAnswerIndices.Clear();  // 清已找到答案
+            return true;
+        }
+
+        // ================ 下一关道具 ================
+
+        /// <summary>当前状态是否允许使用下一关道具</summary>
+        public bool CanUseNextProp()
+        {
+            return _isGameRunning && _currentLevelData != null && !IsLevelComplete();
+        }
+
+        /// <summary>
+        /// 将当前关补齐到通关所需答案数，但暂不触发通关事件。
+        /// 返回新增答案字符，供视图依次播放入槽动画；动画结束后调用 CompletePreparedLevel。
+        /// </summary>
+        public bool PrepareNextPropCompletion(out List<string> answerCharacters)
+        {
+            answerCharacters = new List<string>();
+            if (!CanUseNextProp()) return false;
+
+            ClearSelection();
+            int requiredCount = GetRequiredAnswerCount();
+            for (int answerIndex = 0;
+                 answerIndex < _currentLevelData.answers.Count && _foundAnswerIndices.Count < requiredCount;
+                 answerIndex++)
+            {
+                if (_foundAnswerIndices.Contains(answerIndex)) continue;
+
+                _foundAnswerIndices.Add(answerIndex);
+                answerCharacters.Add(_currentLevelData.answers[answerIndex].answerCharacter);
+            }
+
+            return answerCharacters.Count > 0 && IsLevelComplete();
+        }
+
+        /// <summary>完成已由下一关道具补齐的关卡，并触发统一结算流程</summary>
+        public bool CompletePreparedLevel()
+        {
+            if (!_isGameRunning || !IsLevelComplete()) return false;
+            CompleteLevel();
             return true;
         }
 

@@ -10,6 +10,7 @@ namespace GameLogic
         Coin,
         Tip,  //答案提示
         Reset, //重置答案
+        Next, //直接完成当前关卡
     }
 
     /// <summary>
@@ -25,7 +26,7 @@ namespace GameLogic
                 var cache = GameManager.Instance?.CacheManager?.CacheData;
                 if (cache != null && cache.gamePropData == null)
                 {
-                    cache.gamePropData = new GamePropData { tipCount = 3, coinCount = 0, resetCount = 1 };
+                    cache.gamePropData = new GamePropData { tipCount = 3, coinCount = 0, resetCount = 1, nextCount = 1 };
                 }
                 return cache?.gamePropData;
             }
@@ -111,6 +112,7 @@ namespace GameLogic
             {
                 PropType.Tip => TipCount > 0,
                 PropType.Reset => ResetCount > 0,
+                PropType.Next => NextCount > 0,
                 _ => false,
             };
         }
@@ -122,6 +124,7 @@ namespace GameLogic
             {
                 PropType.Tip => TipCount,
                 PropType.Reset => ResetCount,
+                PropType.Next => NextCount,
                 _ => 0,
             };
         }
@@ -157,18 +160,54 @@ namespace GameLogic
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Reset, ResetCount);
         }
 
+        /// <summary>下一关道具数量</summary>
+        public static int NextCount
+        {
+            get => Data?.nextCount ?? 0;
+            private set
+            {
+                var d = Data;
+                if (d != null) d.nextCount = value;
+                Save();
+            }
+        }
+
+        /// <summary>使用下一关道具（数量减1），返回是否成功</summary>
+        public static bool UseNext()
+        {
+            if (NextCount <= 0) return false;
+            NextCount--;
+            GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Next, NextCount);
+            return true;
+        }
+
+        /// <summary>增加下一关道具</summary>
+        public static void AddNext(int count)
+        {
+            NextCount += count;
+            GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Next, NextCount);
+        }
+
         /// <summary>设置初始道具数量（首次使用或重置时调用）</summary>
         public static void InitPropCounts(int tipCount, int coinCount, int resetCount)
+        {
+            InitPropCounts(tipCount, coinCount, resetCount, NextCount);
+        }
+
+        /// <summary>设置全部道具数量（GM 等批量修改场景使用）</summary>
+        public static void InitPropCounts(int tipCount, int coinCount, int resetCount, int nextCount)
         {
             var d = Data;
             if (d == null) return;
             d.tipCount = tipCount;
             d.coinCount = coinCount;
             d.resetCount = resetCount;
+            d.nextCount = nextCount;
             Save();
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Tip, tipCount);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Coin, coinCount);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Reset, resetCount);
+            GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Next, nextCount);
         }
 
         /// <summary>立即持久化存档</summary>

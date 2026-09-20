@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using GameLogic.GamePlay.CorePlay;
 using TEngine;
 using TMPro;
@@ -8,7 +9,7 @@ using UnityEngine.UI;
 namespace GameLogic
 {
     /// <summary>
-    /// CorePlay 道具按钮 Widget —— 支持 Tip（提示）/ Reset（重置）等道具类型。
+    /// CorePlay 道具按钮 Widget —— 支持 Tip（提示）/ Reset（免费重置）/ Next（下一关）等道具类型。
     /// 使用优先级（三档状态机，刷新与点击共用同一判定）：
     ///   1) 道具数量 > 0          → 显示数量节点，隐藏金币/广告节点，点击扣数量
     ///   2) 数量为 0 且金币足够   → 隐藏数量节点，显示金币节点，点击扣金币直接使用
@@ -23,6 +24,7 @@ namespace GameLogic
         private XYButton _propButton;
         private Transform _countRoot;          // 数量节点
         private TMP_Text _countText;          // 数量节点文字
+        private Image _backgroundImage;       // 道具背景（置灰用）
         private Image _iconImage;             // 道具图标（置灰用）
 
         // 金币替代使用节点（数量为 0 且金币足够时显示）
@@ -38,7 +40,7 @@ namespace GameLogic
         private int CoinCost => _propType switch
         {
             PropType.Tip => GameDefine.PropTipCoinCost,
-            PropType.Reset => GameDefine.PropResetCoinCost,
+            PropType.Next => GameDefine.PropNextCoinCost,
             _ => int.MaxValue,
         };
 
@@ -48,7 +50,8 @@ namespace GameLogic
             _propButton = CreateWidget<XYButton>("");
             _countRoot = FindChildComponent<Transform>("CountBg");
             _countText = FindChildComponent<TMP_Text>("CountBg/Count");
-            _iconImage = FindChildComponent<Image>("bg");
+            _backgroundImage = FindChildComponent<Image>("bg");
+            _iconImage = FindChildComponent<Image>("icon");
 
             _coinRoot = FindChildComponent<Transform>("CoinRoot");
             _coinText = FindChildComponent<TMP_Text>("CoinRoot/CoinText");
@@ -88,6 +91,9 @@ namespace GameLogic
                 case PropType.Reset:
                     UseResetProp();
                     break;
+                case PropType.Next:
+                    UseNextPropAsync().Forget();
+                    break;
             }
         }
 
@@ -125,30 +131,55 @@ namespace GameLogic
             if (needRefresh) RefreshDisplay();
         }
 
-        /// <summary>使用重置道具：清空当前关已找到的答案并刷新视图</summary>
+        /// <summary>使用重置道具：只清空当前选中的笔画，不影响已找到答案</summary>
         private void UseResetProp()
         {
             if (_corePlayGamePlay == null) return;
-
-            // 三档付费
-            if (!TryPayProp(() => PropDefine.UseReset(), out bool needRefresh))
+            if (_corePlayGamePlay.SelectedStrokeIndices.Count == 0)
             {
-                DebugLog("无可用使用方式（数量/金币/广告均不可用）");
+                DebugLog("当前没有选中的笔画");
                 return;
             }
 
-            // 清空答案（数据层）
-            if (!_corePlayGamePlay.ClearAnswers())
-            {
-                DebugLogError("重置失败，当前无有效关卡");
-                return;
-            }
-
-            // 通知视图层清空高亮与 slot、UI 层刷新进度文字
+            _corePlayGamePlay.ClearSelection();
             GameEvent.Send(EventDefine.Event_PropResetDone);
-            DebugLog("使用重置道具，清空已找到答案");
+            DebugLog("使用重置道具，清空当前选中笔画");
+        }
 
-            if (needRefresh) RefreshDisplay();
+        /// <summary>使用下一关道具：补齐答案，逐个播放入槽动画，最后触发统一结算</summary>
+        private async UniTaskVoid UseNextPropAsync()
+        {
+            if (_corePlayGamePlay == null || !_corePlayGamePlay.CanUseNextProp()) return;
+
+            var corePlayView = GameManager.Instance?.CurrentView;
+            if (corePlayView == null) return;
+
+            using (UIInteractionLock.Acquire())
+            {
+                if (!TryPayProp(() => PropDefine.UseNext(), out bool needRefresh))
+                {
+                    DebugLog("无可用使用方式（数量/金币/广告均不可用）");
+                    return;
+                }
+
+                if (!_corePlayGamePlay.PrepareNextPropCompletion(out List<string> answerCharacters))
+                {
+                    DebugLogError("下一关道具补齐答案失败");
+                    return;
+                }
+
+                if (needRefresh) RefreshDisplay();
+                GameManager.Instance.SaveGameProgress();
+                try
+                {
+                    await corePlayView.PlayNextPropAnswersAsync(answerCharacters, 10);
+                }
+                catch (System.OperationCanceledException)
+                {
+                    return;
+                }
+                _corePlayGamePlay.CompletePreparedLevel();
+            }
         }
 
         // ================ 三档付费状态机 ================
@@ -201,6 +232,16 @@ namespace GameLogic
         /// <summary>刷新数量/金币/广告三档显示与按钮置灰</summary>
         private void RefreshDisplay()
         {
+            // Reset 为免费功能，不展示或消耗数量、金币、广告。
+            if (_propType == PropType.Reset)
+            {
+                SetActive(_countRoot, false);
+                SetActive(_coinRoot, false);
+                SetActive(_adRoot, false);
+                ApplyAvailability(true);
+                return;
+            }
+
             bool hasCount = PropDefine.IsPropAvailable(_propType);
             bool hasCoin = PropDefine.CoinCount >= CoinCost;
             bool hasAd = AdSystem.IsAdAvailable;
@@ -241,10 +282,15 @@ namespace GameLogic
                 canUse = false;
             }
 
-            if (_iconImage != null)
-            {
-                _iconImage.color = canUse ? Color.white : Color.gray;
-            }
+            ApplyAvailability(canUse);
+        }
+
+        private void ApplyAvailability(bool canUse)
+        {
+            Color displayColor = canUse ? Color.white : Color.gray;
+            if (_backgroundImage != null) _backgroundImage.color = displayColor;
+            if (_iconImage != null) _iconImage.color = displayColor;
+            if (_propButton != null) _propButton.Interactable = canUse;
         }
 
         /// <summary>安全切换节点显隐（节点可能未在 Prefab 配置）</summary>

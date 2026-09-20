@@ -114,6 +114,24 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
         }
 
+        /// <summary>依次填充答案，每个答案的动画起点间隔指定帧数</summary>
+        public async UniTask PlayAnswersSequentiallyAsync(IReadOnlyList<string> answerCharacters, int intervalFrames)
+        {
+            if (answerCharacters == null || answerCharacters.Count == 0) return;
+
+            var cancellationToken = _slotRoot.GetCancellationTokenOnDestroy();
+            for (int i = 0; i < answerCharacters.Count; i++)
+            {
+                FillNextSlot(answerCharacters[i]);
+                if (i < answerCharacters.Count - 1 && intervalFrames > 0)
+                {
+                    await UniTask.DelayFrame(intervalFrames, cancellationToken: cancellationToken);
+                }
+            }
+
+            await UniTask.Delay(400, cancellationToken: cancellationToken);
+        }
+
         /// <summary>从存档恢复已找到的答案（无动画）</summary>
         public void RestoreAnswers(List<string> foundAnswers)
         {

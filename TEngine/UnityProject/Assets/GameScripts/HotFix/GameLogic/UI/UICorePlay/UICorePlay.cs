@@ -36,6 +36,8 @@ namespace GameLogic
 
         private CorePlayPropWidget _resetPropWidget;
         
+        //下一关道具
+        private CorePlayPropWidget _nextPropWidget;
 
         protected override void ScriptGenerator()
         {
@@ -52,6 +54,8 @@ namespace GameLogic
             _tipsPropWidget.OnInit(PropType.Tip);
             _resetPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/ResetProp");
             _resetPropWidget.OnInit(PropType.Reset);
+            _nextPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/NextProp");
+            _nextPropWidget.OnInit(PropType.Next);
             _submitButton.OnAddListener(OnSubmit);
         }
         
@@ -74,6 +78,7 @@ namespace GameLogic
             base.OnRefresh();
             _tipsPropWidget.Refresh();
             _resetPropWidget.Refresh();
+            _nextPropWidget.Refresh();
             _toastRoot.gameObject.SetActive(false);
 
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: true));
@@ -117,7 +122,7 @@ namespace GameLogic
             ShowSubmitResult(success, answerCharacter, message);
         }
 
-        /// <summary>重置道具使用完成：刷新进度文字（答案已清空 → 0/N）</summary>
+        /// <summary>重置道具使用完成</summary>
         private void OnPropResetDone()
         {
             

@@ -11,5 +11,6 @@
         //道具用金币替代使用时的消耗量（数量不足、金币足够时点击即扣此数量）
         public const int PropTipCoinCost = 100;   //提示道具
         public const int PropResetCoinCost = 50;  //重置道具
+        public const int PropNextCoinCost = 200;  //下一关道具
     }
 }

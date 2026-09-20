@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 30 个 Key）。
+    /// 多语言 Key 常量类（共 31 个 Key）。
     /// </summary>
     public static class LanguageKey
     {
@@ -25,6 +25,7 @@ namespace GameLogic.Localization
         public const string setting_notify = "setting_notify";
         public const string setting_language = "setting_language";
         public const string finish_title = "finish_title";
+        public const string finish_share = "finish_share";
         public const string finish_completeAllTitle = "finish_completeAllTitle";
         public const string finish_des = "finish_des";
         public const string finish_completeDes = "finish_completeDes";
