@@ -25,6 +25,9 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>笔画选中状态变化 (strokeIndex, isSelected)</summary>
         public event Action<int, bool> OnStrokeSelectionChanged;
 
+        /// <summary>整组选中笔画变化（包含提交后清空、全选和关卡加载）</summary>
+        public event Action OnSelectionChanged;
+
         /// <summary>答案提交结果 (success, answerCharacter, errorMessage)</summary>
         public event Action<bool, string, string> OnAnswerSubmitted;
 
@@ -70,6 +73,7 @@ namespace GameLogic.GamePlay.CorePlay
         {
             _isGameRunning = false;
             _selectedStrokeIndices.Clear();
+            OnSelectionChanged?.Invoke();
         }
 
         public bool IsGameOver()
@@ -153,6 +157,7 @@ namespace GameLogic.GamePlay.CorePlay
             if (!startGame) return true;
 
             OnLevelLoaded?.Invoke(_currentLevelData);
+            OnSelectionChanged?.Invoke();
 
             // 如果已经全部完成，直接通关
             if (IsLevelComplete())
@@ -179,6 +184,26 @@ namespace GameLogic.GamePlay.CorePlay
                 _selectedStrokeIndices.Add(strokeIndex);
                 OnStrokeSelectionChanged?.Invoke(strokeIndex, true);
             }
+            OnSelectionChanged?.Invoke();
+        }
+
+        /// <summary>选中基字的全部笔画，不提交答案、不改变已找到的答案。</summary>
+        public void SelectAllStrokes()
+        {
+            if (!_isGameRunning || _currentLevelData == null) return;
+            var strokes = _levelConfig?.GetGraphicData(_currentLevelData.baseCharacter)?.strokes;
+            if (strokes == null || strokes.Count == 0) return;
+
+            var addedIndices = new List<int>();
+            for (int i = 0; i < strokes.Count; i++)
+            {
+                if (_selectedStrokeIndices.Add(i)) addedIndices.Add(i);
+            }
+            if (addedIndices.Count == 0) return;
+
+            foreach (int index in addedIndices)
+                OnStrokeSelectionChanged?.Invoke(index, true);
+            OnSelectionChanged?.Invoke();
         }
 
         /// <summary>清除所有选中的笔画</summary>
@@ -192,6 +217,7 @@ namespace GameLogic.GamePlay.CorePlay
             {
                 OnStrokeSelectionChanged?.Invoke(idx, false);
             }
+            OnSelectionChanged?.Invoke();
         }
 
         // ================ 提交答案 ================
@@ -214,6 +240,7 @@ namespace GameLogic.GamePlay.CorePlay
             // 将选中的笔画索引排序以便比较
             List<int> selectedSorted = _selectedStrokeIndices.OrderBy(i => i).ToList();
             _selectedStrokeIndices.Clear();
+            OnSelectionChanged?.Invoke();
             // 遍历所有答案，检查是否匹配
             for (int ansIdx = 0; ansIdx < _currentLevelData.answers.Count; ansIdx++)
             {

@@ -89,7 +89,8 @@ namespace GameLogic.GamePlay.CorePlay.View
 
             foreach (var slotItem in _slotItems)
             {
-                slotItem.transform.localScale = Vector3.one;
+                // 入场动画只缩放 item 内部的 root，外层保留布局算出的缩放。
+                if (!_hasLayoutData) slotItem.transform.localScale = Vector3.one;
                 slotItem.PlayEnterAnim();
             }
         }
@@ -164,104 +165,62 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         /// <summary>
         /// 布局所有 slot。
-        /// 规则：
-        /// 1. 水平靠左、整体垂直居中
-        /// 2. 上方行“补满”：排到当前缩放下单行实际可容纳的最大数量，右边不留空
-        /// 3. 缩放上限为 1，超出边界则按宽高约束缩小
-        /// 4. 迭代收敛：按当前行数算缩放 → 用缩放后容量补满上方行 → 若补满后所需行数减少
-        ///    （例如两排补满后发现一排即可放下）则用更少行数重算，直到行数不再下降
-        /// 5. 间距与尺寸随缩放等比变化
+        /// 单行从左边界排列；多行排列区域整体水平居中，末行沿用相同列位置，不单独居中。
+        /// 按宽高限制统一缩小，格子和横纵间距等比缩放，整体垂直居中。
+        /// 前面的行按缩放后的容量填满，不通过拉大间距强行撑满宽度。
         /// </summary>
         public void LayoutSlots()
         {
             if (_slotItems.Count == 0 || !_hasLayoutData) return;
 
-            // 计算可用区域
             float leftBound = _currentLayoutData.Left.x;
-            float rightBound = _currentLayoutData.Right.x;
-            float topBound = _currentLayoutData.Top.y;
-            float bottomBound = _currentLayoutData.Bottom.y;
-            float centerY = _currentLayoutData.Center.y;
-
-            float availableWidth = rightBound - leftBound;
-            float availableHeight = topBound - bottomBound;
-
+            float availableWidth = _currentLayoutData.Right.x - leftBound;
+            float availableHeight = _currentLayoutData.Top.y - _currentLayoutData.Bottom.y;
             if (availableWidth <= 0 || availableHeight <= 0) return;
 
-            int slotCount = _slotItems.Count;
+            var (columns, rows, scale) = CalculateGrid(_slotItems.Count, availableWidth, availableHeight);
+            float size = _slotSize * scale;
+            float spacingY = _spacing * scale;
+            float spacingX = spacingY;
+            float totalHeight = rows * size + (rows - 1) * spacingY;
+            float totalWidth = columns * size + (columns - 1) * spacingX;
+            float centerY = (_currentLayoutData.Top.y + _currentLayoutData.Bottom.y) * 0.5f;
+            float offsetX = rows > 1 ? (availableWidth - totalWidth) * 0.5f : 0f;
+            float firstX = leftBound + offsetX + size * 0.5f;
+            float firstY = centerY + (totalHeight - size) * 0.5f;
 
-            // scale=1 时单行最多容量，作为初始行数估计
-            int maxColsFullScale = Mathf.FloorToInt((availableWidth + _spacing) / (_slotSize + _spacing));
-            if (maxColsFullScale < 1) maxColsFullScale = 1;
-
-            int rows = Mathf.CeilToInt((float)slotCount / maxColsFullScale);
-            float scale = 0f;
-            int colsCap = maxColsFullScale; // 缩放后单行实际容量（上方行补满到此数量）
-
-            // 迭代：rows 每轮单调递减，最多 slotCount 轮内必收敛
-            for (int iter = 0; iter < slotCount; iter++)
+            for (int i = 0; i < _slotItems.Count; i++)
             {
-                // 让 rows 行放下的最小每行数量
-                int cols = Mathf.CeilToInt((float)slotCount / rows);
-                scale = Mathf.Min(CalculateScale(cols, rows, availableWidth, availableHeight), 1f);
-                if (scale <= 0f) break;
-
-                // 缩放后单行实际容量（上方行补满的目标数量）
-                float scaledSlotSize = _slotSize * scale;
-                float scaledSpacing = _spacing * scale;
-                colsCap = Mathf.FloorToInt((availableWidth + scaledSpacing) / (scaledSlotSize + scaledSpacing));
-                if (colsCap < 1) colsCap = 1;
-
-                // 补满后若所需行数不再减少，收敛
-                int newRows = Mathf.CeilToInt((float)slotCount / colsCap);
-                if (newRows >= rows) break;
-                rows = newRows;
-            }
-
-            if (scale <= 0f || colsCap < 1) return;
-
-            // 最终排布参数
-            float finalSlotSize = _slotSize * scale;
-            float finalSpacing = _spacing * scale;
-            int finalRows = Mathf.CeilToInt((float)slotCount / colsCap);
-
-            // 整体垂直居中
-            float totalRowsHeight = finalRows * finalSlotSize + (finalRows - 1) * finalSpacing;
-            float startY = centerY + totalRowsHeight * 0.5f - finalSlotSize * 0.5f;
-            // 水平靠左
-            float startX = leftBound;
-
-            int placedCount = 0;
-            for (int row = 0; row < finalRows; row++)
-            {
-                // 上方行补满 colsCap 个，最后一行靠左放剩余
-                int colsInRow = (row < finalRows - 1) ? colsCap : (slotCount - placedCount);
-
-                for (int col = 0; col < colsInRow; col++)
-                {
-                    int i = placedCount + col;
-                    float x = startX + col * (finalSlotSize + finalSpacing) + finalSlotSize * 0.5f;
-                    float y = startY - row * (finalSlotSize + finalSpacing);
-
-                    GameSlotViewItem item = _slotItems[i];
-                    if (item != null)
-                    {
-                        item.transform.position = new Vector3(x, y, 0);
-                        item.transform.localScale = Vector3.one * scale;
-                    }
-                }
-                placedCount += colsInRow;
+                var item = _slotItems[i];
+                if (item == null) continue;
+                int row = i / columns;
+                int column = i % columns;
+                item.transform.position = new Vector3(
+                    firstX + column * (size + spacingX),
+                    firstY - row * (size + spacingY), 0);
+                item.transform.localScale = Vector3.one * scale;
             }
         }
 
         /// <summary>
-        /// 计算在指定行列数下的缩放比例
+        /// 在所有可行列数中选择最大的格子；缩放相同时优先增加列数，填满前面的行。
+        /// 一次计算同时考虑宽高，不再在“缩放”和“换行”之间反复迭代。
         /// </summary>
-        private float CalculateScale(int cols, int rows, float availableWidth, float availableHeight)
+        private static (int columns, int rows, float scale) CalculateGrid(int count, float width, float height)
         {
-            float widthScale = availableWidth / (cols * _slotSize + (cols - 1) * _spacing);
-            float heightScale = availableHeight / (rows * _slotSize + (rows - 1) * _spacing);
-            return Mathf.Min(widthScale, heightScale);
+            int bestColumns = 1;
+            float bestScale = 0f;
+            for (int columns = 1; columns <= count; columns++)
+            {
+                int rows = (count + columns - 1) / columns;
+                float widthScale = width / (columns * _slotSize + (columns - 1) * _spacing);
+                float heightScale = height / (rows * _slotSize + (rows - 1) * _spacing);
+                float scale = Mathf.Min(1f, Mathf.Min(widthScale, heightScale));
+                if (scale < bestScale) continue;
+                bestColumns = columns;
+                bestScale = scale;
+            }
+            return (bestColumns, (count + bestColumns - 1) / bestColumns, bestScale);
         }
 
         public void PlayBeginGameAnim()

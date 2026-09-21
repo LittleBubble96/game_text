@@ -1,15 +1,17 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 using GameLogic.GamePlay.CorePlay;
 using TEngine;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Ease = DG.Tweening.Ease;
 
 namespace GameLogic
 {
     /// <summary>
-    /// CorePlay 道具按钮 Widget —— 支持 Tip（提示）/ Reset（免费重置）/ Next（下一关）等道具类型。
+    /// CorePlay 道具按钮 Widget —— 支持 Tip（提示）/ Reset（免费全选或清空）/ Next（下一关）等道具类型。
     /// 使用优先级（三档状态机，刷新与点击共用同一判定）：
     ///   1) 道具数量 > 0          → 显示数量节点，隐藏金币/广告节点，点击扣数量
     ///   2) 数量为 0 且金币足够   → 隐藏数量节点，显示金币节点，点击扣金币直接使用
@@ -35,6 +37,15 @@ namespace GameLogic
         private Transform _adRoot;
 
         private CorePlayGamePlay _corePlayGamePlay;
+        private const string SelectAllIconPath = "Common_prop_all_select";
+        private const string ClearIconPath = "Common_prop_clear";
+        private Sprite _selectAllIcon;
+        private Sprite _clearIcon;
+        private Sprite _resetIconTarget;
+        private Vector3 _iconOriginalScale = Vector3.one;
+        private Sequence _iconSwitchTween;
+        private bool _resetIconsLoading;
+        private bool _isDestroyed;
 
         /// <summary>该道具的金币消耗量</summary>
         private int CoinCost => _propType switch
@@ -52,6 +63,7 @@ namespace GameLogic
             _countText = FindChildComponent<TMP_Text>("CountBg/Count");
             _backgroundImage = FindChildComponent<Image>("bg");
             _iconImage = FindChildComponent<Image>("icon");
+            if (_iconImage != null) _iconOriginalScale = _iconImage.transform.localScale;
 
             _coinRoot = FindChildComponent<Transform>("CoinRoot");
             _coinText = FindChildComponent<TMP_Text>("CoinRoot/CoinText");
@@ -64,6 +76,7 @@ namespace GameLogic
         public void OnInit(PropType propType)
         {
             _propType = propType;
+            if (_propType == PropType.Reset) LoadResetIconsAsync().Forget();
         }
 
         protected override void RegisterEvent()
@@ -74,8 +87,88 @@ namespace GameLogic
 
         public void Refresh()
         {
-            _corePlayGamePlay = GameManager.Instance?.CurrentGamePlay as CorePlayGamePlay;
+            var gamePlay = GameManager.Instance?.CurrentGamePlay as CorePlayGamePlay;
+            if (_corePlayGamePlay != gamePlay)
+            {
+                if (_corePlayGamePlay != null)
+                    _corePlayGamePlay.OnSelectionChanged -= OnSelectionChanged;
+                _corePlayGamePlay = gamePlay;
+                if (_corePlayGamePlay != null && _propType == PropType.Reset)
+                    _corePlayGamePlay.OnSelectionChanged += OnSelectionChanged;
+            }
             RefreshDisplay();
+            RefreshResetIcon(false);
+        }
+
+        protected override void OnDestroy()
+        {
+            _isDestroyed = true;
+            if (_corePlayGamePlay != null)
+                _corePlayGamePlay.OnSelectionChanged -= OnSelectionChanged;
+            StopIconSwitch();
+            base.OnDestroy();
+        }
+
+        private async UniTaskVoid LoadResetIconsAsync()
+        {
+            if (_resetIconsLoading || (_selectAllIcon != null && _clearIcon != null)) return;
+            _resetIconsLoading = true;
+            try
+            {
+                var token = gameObject.GetCancellationTokenOnDestroy();
+                var (selectAllIcon, clearIcon) = await UniTask.WhenAll(
+                    GameModule.Resource.LoadAssetAsync<Sprite>(SelectAllIconPath, token),
+                    GameModule.Resource.LoadAssetAsync<Sprite>(ClearIconPath, token));
+                if (_isDestroyed || _iconImage == null) return;
+                _selectAllIcon = selectAllIcon;
+                _clearIcon = clearIcon;
+                RefreshResetIcon(false);
+            }
+            catch (System.OperationCanceledException) { }
+            catch (System.Exception exception)
+            {
+                Log.Error($"[CorePlayPropWidget] 全选/清空图标加载失败: {exception}");
+            }
+            finally
+            {
+                _resetIconsLoading = false;
+            }
+        }
+
+        private void OnSelectionChanged()
+        {
+            RefreshResetIcon(true);
+        }
+
+        private void RefreshResetIcon(bool animate)
+        {
+            if (_propType != PropType.Reset || _isDestroyed || _iconImage == null) return;
+            var target = _corePlayGamePlay != null && _corePlayGamePlay.SelectedStrokeIndices.Count > 0
+                ? _clearIcon : _selectAllIcon;
+            if (target == null || (animate && target == _resetIconTarget)) return;
+
+            // 快速连续操作时中断旧动画，始终以最新选择状态为准。
+            StopIconSwitch();
+            _resetIconTarget = target;
+            if (!animate || !_iconImage.gameObject.activeInHierarchy || _iconImage.sprite == target)
+            {
+                _iconImage.sprite = target;
+                return;
+            }
+
+            _iconSwitchTween = DOTween.Sequence();
+            _iconSwitchTween.SetUpdate(true);
+            _iconSwitchTween.Append(_iconImage.transform.DOScale(Vector3.zero, 0.08f).SetEase(Ease.InQuad));
+            _iconSwitchTween.AppendCallback(() => _iconImage.sprite = target);
+            _iconSwitchTween.Append(_iconImage.transform.DOScale(_iconOriginalScale, 0.14f).SetEase(Ease.OutBack));
+            _iconSwitchTween.OnComplete(() => _iconSwitchTween = null);
+        }
+
+        private void StopIconSwitch()
+        {
+            _iconSwitchTween?.Kill();
+            _iconSwitchTween = null;
+            if (_iconImage != null) _iconImage.transform.localScale = _iconOriginalScale;
         }
 
         // ================ 点击分发 ================
@@ -131,13 +224,15 @@ namespace GameLogic
             if (needRefresh) RefreshDisplay();
         }
 
-        /// <summary>使用重置道具：只清空当前选中的笔画，不影响已找到答案</summary>
+        /// <summary>无选中笔画时全选，否则清空选择；两种操作均免费，不影响已找到答案。</summary>
         private void UseResetProp()
         {
-            if (_corePlayGamePlay == null) return;
+            if (_corePlayGamePlay == null || !_corePlayGamePlay.IsGameRunning) return;
             if (_corePlayGamePlay.SelectedStrokeIndices.Count == 0)
             {
-                DebugLog("当前没有选中的笔画");
+                GameEvent.Send(EventDefine.Event_PropTipClearHighlight);
+                _corePlayGamePlay.SelectAllStrokes();
+                DebugLog("使用全选道具，选中全部笔画");
                 return;
             }
 

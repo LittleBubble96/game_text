@@ -17,7 +17,8 @@ namespace GameLogic
         private RTLTextMeshPro _shareBtnText;
         private RTLTextMeshPro _titleText;
         private RTLTextMeshPro _desText;
-        
+        private RTLTextMeshPro _rewardText;
+
         private XYButton _btnNext;
         private XYButton _btnHome;
         private XYButton _btnShare;
@@ -60,6 +61,7 @@ namespace GameLogic
             _shareBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonShare/Text");
             _titleText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/Title");
             _desText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/m_des");
+            _rewardText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/RewardRoot/Reward");
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
@@ -304,6 +306,7 @@ namespace GameLogic
             _titleText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_title);
             _desText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_des);
             _shareBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_share);
+            _rewardText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_reward);
         }
     }
 }

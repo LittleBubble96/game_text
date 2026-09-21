@@ -64,6 +64,10 @@ namespace GameLogic
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
             GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
             OnTabBtnClick(ETabType.Level);
+            // 首页窗口复用且已停留在关卡页时，Tab 点击会直接返回，仍需刷新存档对应的关卡。
+            if (_tabContentWidgets.TryGetValue(ETabType.Level, out var levelWidget)
+                && levelWidget is UIHomeLevelTabContentWidget levelContent)
+                levelContent.RefreshLevelInfo();
         }
 
         #endregion
