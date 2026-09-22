@@ -5,5 +5,9 @@
         string GetOpenId();
 
         void ShareAppMessage(string title);
+
+        void CreateGameClubButton();
+
+        void OpenGameClub();
     }
 }

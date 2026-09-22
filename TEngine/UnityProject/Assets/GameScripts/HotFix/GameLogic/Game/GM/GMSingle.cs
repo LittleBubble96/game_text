@@ -14,7 +14,7 @@ namespace GameLogic
         {
             base.OnInit();
             detector = new CircleGestureDetector();
-#if UNITY_EDITOR
+#if TE_RELEASE
             GameModule.UI.ShowUIAsync<UIShowGM>();
 #endif
         }

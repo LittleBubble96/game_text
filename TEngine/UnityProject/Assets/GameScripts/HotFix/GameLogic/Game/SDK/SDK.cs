@@ -21,6 +21,16 @@
         public static void ShareAppMessage(string title)
         {
             _sdk?.ShareAppMessage(title);
-        } 
+        }
+
+        public static void CreateGameClubButton()
+        {
+            _sdk?.CreateGameClubButton();
+        }
+        
+        public static void OpenGameClub()
+        {
+            _sdk?.OpenGameClub();
+        }
     }
 }

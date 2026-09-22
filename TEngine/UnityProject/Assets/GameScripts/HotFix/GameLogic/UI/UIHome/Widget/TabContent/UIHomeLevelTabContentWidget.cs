@@ -10,17 +10,22 @@ namespace GameLogic.UI
         public const string LevelPrefabPath = "UIHome_LevelTabContent";
 
         private XYButton  _playBtn;
+        private XYButton _gameCenterBtn;
         private RTLTextMeshPro _playBtnName;
         private RTLTextMeshPro _levelNameText;
+        private RTLTextMeshPro _gameCenterText;
 
         protected override void OnCreate()
         {
             base.OnCreate();
             _playBtn = CreateWidget<XYButton>("m_btnStartLevel");
+            _gameCenterBtn = CreateWidget<XYButton>("rightActivity/gameCenter");
             _playBtnName = this.FindChildComponent<RTLTextMeshPro>("m_btnStartLevel/m_btnName");
             _levelNameText = FindChildComponent<RTLTextMeshPro>("m_btnStartLevel/Titile");
+            _gameCenterText = FindChildComponent<RTLTextMeshPro>("rightActivity/gameCenter/m_text");
 
             _playBtn.OnAddListener(OnStartLevel);
+            _gameCenterBtn.OnAddListener(OnGameCenterBtn);
         }
 
         protected override void OnRefresh()
@@ -52,6 +57,7 @@ namespace GameLogic.UI
         {
             _playBtnName.text = LocalizationHelper.GetLocalText(LanguageKey.start_game_btn);
             SetLevelName();
+            _gameCenterText.text = LocalizationHelper.GetLocalText(LanguageKey.home_social);
         }
 
 
@@ -71,6 +77,11 @@ namespace GameLogic.UI
 
             EnableBtn(false);
             GameManager.Instance.StartGame().Forget();
+        }
+
+        private void OnGameCenterBtn()
+        {
+            SDK.OpenGameClub();
         }
 
         private void SetLevelName()
