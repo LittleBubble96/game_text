@@ -99,9 +99,10 @@ namespace GameLogic.Data
 
     public class TextLevelDataScriptableObject : ScriptableObject
     {
+        public List<TextToneData> characterToTone = new List<TextToneData>();
+
         public List<TextLevelData> levelDataList = new List<TextLevelData>();
 
-        public List<TextToneData> characterToTone = new List<TextToneData>();
 
 #if UNITY_EDITOR
         [MenuItem("Assets/Create/TextLevelDataScriptableObject")]

@@ -655,13 +655,12 @@ namespace TEngine
             // 仅构建 Player 路径不经过 BuildWithConfig，需自行 备份 -> 覆盖 -> 构建 -> 恢复
             var modeDefines = _config.GetBuildModeDefines();
             BuildTargetGroup targetGroup = BuildConfig.GetBuildTargetGroup(_config.PlayerPlatform);
-            string[] backup = null;
+            BuildDefineScope defineScope = null;
             try
             {
                 Application.logMessageReceived += OnBuildLogReceived;
 
-                backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
-                ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
+                defineScope = BuildDefineScope.Begin(targetGroup, modeDefines);
 
                 ReleaseTools.BuildImp(
                     targetGroup,
@@ -680,11 +679,7 @@ namespace TEngine
                 Application.logMessageReceived -= OnBuildLogReceived;
 
                 // 恢复打包前的原始宏
-                if (backup != null)
-                {
-                    ScriptingDefineSymbols.SetDefines(targetGroup, backup);
-                    AddLog("已恢复打包前的原始宏定义");
-                }
+                defineScope?.Dispose();
             }
 
             _showBuildLog = true;

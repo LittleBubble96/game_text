@@ -199,12 +199,8 @@ namespace TEngine
             Debug.Log($"[BuildWithConfig] 构建日志: {logPath}");
             using (BuildLogger.Begin(logPath))
             {
-                string[] backup = null;
-                try
+                using (BuildDefineScope.Begin(targetGroup, modeDefines))
                 {
-                    backup = ScriptingDefineSymbols.GetScriptingDefineSymbols(targetGroup);
-                    ScriptingDefineSymbols.SetDefines(targetGroup, modeDefines);
-
                     // 1. [可选] 编译热更DLL
                     if (config.BuildHotFixDll)
                     {
@@ -246,15 +242,6 @@ namespace TEngine
 
                     // 7. 构建后回调（此时模式宏仍生效；回调结束后 finally 才恢复原宏）
                     postBuildCallback?.Invoke();
-                }
-                finally
-                {
-                    // 8. 恢复打包前的原始宏
-                    if (backup != null)
-                    {
-                        ScriptingDefineSymbols.SetDefines(targetGroup, backup);
-                        Debug.Log("[BuildWithConfig] 已恢复打包前的原始宏定义");
-                    }
                 }
             } // end using BuildLogger
         }

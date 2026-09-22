@@ -2545,6 +2545,64 @@ MonoBehaviour:
       - strokeIndices: 01000000000000000e0000000f000000
     answerCountMode: 0
     requiredAnswerCount: 0
+  - levelName: Level_54
+    baseCharacter: "\u9F9B"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u4EBA"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+    - answerCharacter: "\u5408"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    - answerCharacter: "\u9F99"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000090000000a000000
+    - answerCharacter: "\u513F"
+      strokeSets:
+      - strokeIndices: 0700000008000000
+    - answerCharacter: "\u4E03"
+      strokeSets:
+      - strokeIndices: 0600000008000000
+    - answerCharacter: "\u5140"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000
+    - answerCharacter: "\u5144"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000700000008000000
+    - answerCharacter: "\u9F9B"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
+    - answerCharacter: "\u5C24"
+      strokeSets:
+      - strokeIndices: 0600000007000000080000000a000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000
+    - answerCharacter: "\u89C1"
+      strokeSets:
+      - strokeIndices: 03000000040000000700000008000000
+    - answerCharacter: "\u5143"
+      strokeSets:
+      - strokeIndices: 02000000050000000700000008000000
+    - answerCharacter: "\u65E0"
+      strokeSets:
+      - strokeIndices: 05000000060000000700000008000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 02000000
+      - strokeIndices: 05000000
+      - strokeIndices: 06000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0200000005000000
+      - strokeIndices: 0200000006000000
+      - strokeIndices: 0500000006000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 020000000500000006000000
+    answerCountMode: 0
+    requiredAnswerCount: 16
   - levelName: Level_55
     baseCharacter: "\u9616"
     positionOffset: {x: -2, y: -1}
@@ -8845,6 +8903,755 @@ MonoBehaviour:
       - strokeIndices: 01000000020000000300000006000000
     answerCountMode: 0
     requiredAnswerCount: 0
+  - levelName: Level_157
+    baseCharacter: "\u51DB"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 040000000500000009000000
+      - strokeIndices: 060000000700000008000000
+    - answerCharacter: "\u56DE"
+      strokeSets:
+      - strokeIndices: 040000000500000006000000070000000800000009000000
+    - answerCharacter: "\u4E8D"
+      strokeSets:
+      - strokeIndices: 0a0000000b0000000c000000
+    - answerCharacter: "\u516B"
+      strokeSets:
+      - strokeIndices: 0d0000000e000000
+    - answerCharacter: "\u4E01"
+      strokeSets:
+      - strokeIndices: 0b0000000c000000
+    - answerCharacter: "\u5C0F"
+      strokeSets:
+      - strokeIndices: 0c0000000d0000000e000000
+    - answerCharacter: "\u793A"
+      strokeSets:
+      - strokeIndices: 0a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u7980"
+      strokeSets:
+      - strokeIndices: 02000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u51DB"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 04000000050000000800000009000000
+    - answerCharacter: "\u4E98"
+      strokeSets:
+      - strokeIndices: 03000000040000000500000008000000090000000a000000
+    - answerCharacter: "\u65E6"
+      strokeSets:
+      - strokeIndices: 040000000500000008000000090000000a000000
+    - answerCharacter: "\u4EA1"
+      strokeSets:
+      - strokeIndices: 02000000030000000400000009000000
+    - answerCharacter: "\u516D"
+      strokeSets:
+      - strokeIndices: 02000000030000000d0000000e000000
+    - answerCharacter: "\u53EA"
+      strokeSets:
+      - strokeIndices: 0400000005000000090000000d0000000e000000
+    - answerCharacter: "\u4EAC"
+      strokeSets:
+      - strokeIndices: 02000000030000000400000005000000090000000c0000000d0000000e000000
+    - answerCharacter: "\u51C9"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000090000000c0000000d0000000e000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 03000000
+      - strokeIndices: 08000000
+      - strokeIndices: 09000000
+      - strokeIndices: 0a000000
+      - strokeIndices: 0b000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0300000008000000
+      - strokeIndices: 0300000009000000
+      - strokeIndices: 030000000a000000
+      - strokeIndices: 030000000b000000
+      - strokeIndices: 0800000009000000
+      - strokeIndices: 080000000a000000
+      - strokeIndices: 080000000b000000
+      - strokeIndices: 090000000a000000
+      - strokeIndices: 090000000b000000
+      - strokeIndices: 0a0000000b000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 030000000800000009000000
+      - strokeIndices: 03000000080000000a000000
+      - strokeIndices: 03000000080000000b000000
+      - strokeIndices: 03000000090000000a000000
+      - strokeIndices: 03000000090000000b000000
+      - strokeIndices: 030000000a0000000b000000
+      - strokeIndices: 08000000090000000a000000
+      - strokeIndices: 08000000090000000b000000
+      - strokeIndices: 080000000a0000000b000000
+      - strokeIndices: 090000000a0000000b000000
+    - answerCharacter: "\u4E96"
+      strokeSets:
+      - strokeIndices: 0300000008000000090000000a000000
+      - strokeIndices: 0300000008000000090000000b000000
+      - strokeIndices: 03000000080000000a0000000b000000
+      - strokeIndices: 03000000090000000a0000000b000000
+      - strokeIndices: 08000000090000000a0000000b000000
+    answerCountMode: 0
+    requiredAnswerCount: 21
+  - levelName: Level_158
+    baseCharacter: "\u538B"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u738B"
+      strokeSets:
+      - strokeIndices: 00000000020000000300000004000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 000000000300000004000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 020000000300000004000000
+    - answerCharacter: "\u7389"
+      strokeSets:
+      - strokeIndices: 0000000002000000030000000400000005000000
+    - answerCharacter: "\u5382"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+    - answerCharacter: "\u538B"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0200000003000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 000000000200000003000000
+    - answerCharacter: "\u535C"
+      strokeSets:
+      - strokeIndices: 0300000005000000
+    - answerCharacter: "\u4E0B"
+      strokeSets:
+      - strokeIndices: 000000000300000005000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 02000000
+      - strokeIndices: 04000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000002000000
+      - strokeIndices: 0000000004000000
+      - strokeIndices: 0200000004000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 000000000200000004000000
+    answerCountMode: 0
+    requiredAnswerCount: 13
+  - levelName: Level_159
+    baseCharacter: "\u666E"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u5170"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000070000000b000000
+    - answerCharacter: "\u4E9A"
+      strokeSets:
+      - strokeIndices: 020000000300000004000000050000000600000007000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 08000000090000000b000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 08000000090000000a0000000b000000
+    - answerCharacter: "\u666E"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 020000000300000007000000
+      - strokeIndices: 020000000400000007000000
+    - answerCharacter: "\u4E1A"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000600000007000000
+    - answerCharacter: "\u664B"
+      strokeSets:
+      - strokeIndices: 02000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u7ACB"
+      strokeSets:
+      - strokeIndices: 0000000002000000050000000600000007000000
+    - answerCharacter: "\u97F3"
+      strokeSets:
+      - strokeIndices: 000000000200000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u5F53"
+      strokeSets:
+      - strokeIndices: 000000000100000004000000090000000a0000000b000000
+    - answerCharacter: "\u5E76"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000007000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 02000000
+      - strokeIndices: 07000000
+      - strokeIndices: 0a000000
+      - strokeIndices: 0b000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0200000007000000
+      - strokeIndices: 020000000a000000
+      - strokeIndices: 020000000b000000
+      - strokeIndices: 070000000a000000
+      - strokeIndices: 070000000b000000
+      - strokeIndices: 0a0000000b000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 02000000070000000a000000
+      - strokeIndices: 02000000070000000b000000
+      - strokeIndices: 020000000a0000000b000000
+      - strokeIndices: 070000000a0000000b000000
+    - answerCharacter: "\u4E96"
+      strokeSets:
+      - strokeIndices: 02000000070000000a0000000b000000
+    answerCountMode: 0
+    requiredAnswerCount: 16
+  - levelName: Level_160
+    baseCharacter: "\u8F9E"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u5343"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0100000002000000
+      - strokeIndices: 0b0000000c000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000
+    - answerCharacter: "\u53E4"
+      strokeSets:
+      - strokeIndices: 0100000002000000030000000400000005000000
+    - answerCharacter: "\u820C"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 070000000a0000000c000000
+    - answerCharacter: "\u7ACB"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000090000000a000000
+    - answerCharacter: "\u4EC1"
+      strokeSets:
+      - strokeIndices: 0000000002000000070000000a000000
+    - answerCharacter: "\u4F4D"
+      strokeSets:
+      - strokeIndices: 0000000002000000060000000700000008000000090000000a000000
+    - answerCharacter: "\u8F9E"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c000000
+    - answerCharacter: "\u4EC0"
+      strokeSets:
+      - strokeIndices: 00000000020000000b0000000c000000
+    - answerCharacter: "\u8F9B"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000090000000a0000000b0000000c000000
+    - answerCharacter: "\u58EB"
+      strokeSets:
+      - strokeIndices: 0a0000000b0000000c000000
+    - answerCharacter: "\u4E2B"
+      strokeSets:
+      - strokeIndices: 08000000090000000c000000
+    - answerCharacter: "\u58EC"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000005000000
+    - answerCharacter: "\u53F6"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000b0000000c000000
+    - answerCharacter: "\u4EE8"
+      strokeSets:
+      - strokeIndices: 0000000002000000070000000a0000000b000000
+    - answerCharacter: "\u5416"
+      strokeSets:
+      - strokeIndices: 03000000040000000500000008000000090000000c000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 07000000
+      - strokeIndices: 0a000000
+      - strokeIndices: 0b000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 070000000a000000
+      - strokeIndices: 070000000b000000
+      - strokeIndices: 0a0000000b000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 070000000a0000000b000000
+    answerCountMode: 0
+    requiredAnswerCount: 21
+  - levelName: Level_161
+    baseCharacter: "\u6F6E"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u6C41"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000
+      - strokeIndices: 000000000100000002000000090000000a000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 050000000600000008000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 05000000060000000700000008000000
+    - answerCharacter: "\u65E9"
+      strokeSets:
+      - strokeIndices: 05000000060000000700000008000000090000000a000000
+    - answerCharacter: "\u53E4"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000600000008000000
+    - answerCharacter: "\u6CBD"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000050000000600000008000000
+    - answerCharacter: "\u6708"
+      strokeSets:
+      - strokeIndices: 0b0000000c0000000d0000000e000000
+    - answerCharacter: "\u671D"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u660E"
+      strokeSets:
+      - strokeIndices: 050000000600000007000000080000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u6F6E"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u65E6"
+      strokeSets:
+      - strokeIndices: 0500000006000000070000000800000009000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 03000000090000000a000000
+    - answerCharacter: "\u4E98"
+      strokeSets:
+      - strokeIndices: 030000000500000006000000070000000800000009000000
+    - answerCharacter: "\u6E56"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000080000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u6C68"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000005000000060000000700000008000000
+    - answerCharacter: "\u4E0A"
+      strokeSets:
+      - strokeIndices: 040000000700000009000000
+    - answerCharacter: "\u58EB"
+      strokeSets:
+      - strokeIndices: 030000000400000007000000
+    - answerCharacter: "\u6C57"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000090000000a000000
+    - answerCharacter: "\u80E1"
+      strokeSets:
+      - strokeIndices: 03000000040000000500000006000000080000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 030000000400000009000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0300000004000000
+      - strokeIndices: 090000000a000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 03000000
+      - strokeIndices: 07000000
+      - strokeIndices: 08000000
+      - strokeIndices: 09000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0300000007000000
+      - strokeIndices: 0300000008000000
+      - strokeIndices: 0300000009000000
+      - strokeIndices: 0700000008000000
+      - strokeIndices: 0700000009000000
+      - strokeIndices: 0800000009000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 030000000700000008000000
+      - strokeIndices: 030000000700000009000000
+      - strokeIndices: 030000000800000009000000
+      - strokeIndices: 070000000800000009000000
+    - answerCharacter: "\u4E96"
+      strokeSets:
+      - strokeIndices: 03000000070000000800000009000000
+    answerCountMode: 0
+    requiredAnswerCount: 25
+  - levelName: Level_162
+    baseCharacter: "\u672B"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u516B"
+      strokeSets:
+      - strokeIndices: 0300000004000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0000000002000000
+      - strokeIndices: 0100000002000000
+    - answerCharacter: "\u6728"
+      strokeSets:
+      - strokeIndices: 01000000020000000300000004000000
+    - answerCharacter: "\u672B"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 01000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000001000000
+    answerCountMode: 0
+    requiredAnswerCount: 6
+  - levelName: Level_163
+    baseCharacter: "\u5965"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u6728"
+      strokeSets:
+      - strokeIndices: 05000000060000000700000008000000
+    - answerCharacter: "\u516B"
+      strokeSets:
+      - strokeIndices: 0300000004000000
+      - strokeIndices: 0700000008000000
+    - answerCharacter: "\u4EBA"
+      strokeSets:
+      - strokeIndices: 0a0000000b000000
+    - answerCharacter: "\u5927"
+      strokeSets:
+      - strokeIndices: 090000000a0000000b000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 050000000600000009000000
+    - answerCharacter: "\u7C73"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0500000006000000
+    - answerCharacter: "\u535C"
+      strokeSets:
+      - strokeIndices: 0600000008000000
+    - answerCharacter: "\u5965"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u4E0A"
+      strokeSets:
+      - strokeIndices: 060000000800000009000000
+    - answerCharacter: "\u72AC"
+      strokeSets:
+      - strokeIndices: 08000000090000000a0000000b000000
+    - answerCharacter: "\u79BE"
+      strokeSets:
+      - strokeIndices: 0000000005000000060000000700000008000000
+    - answerCharacter: "\u5343"
+      strokeSets:
+      - strokeIndices: 000000000500000006000000
+    - answerCharacter: "\u592D"
+      strokeSets:
+      - strokeIndices: 00000000090000000a0000000b000000
+    - answerCharacter: "\u5929"
+      strokeSets:
+      - strokeIndices: 05000000090000000a0000000b000000
+    - answerCharacter: "\u4E11"
+      strokeSets:
+      - strokeIndices: 02000000050000000600000009000000
+    - answerCharacter: "\u5173"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000090000000a0000000b000000
+    - answerCharacter: "\u7C7B"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u5185"
+      strokeSets:
+      - strokeIndices: 01000000020000000a0000000b000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 05000000
+      - strokeIndices: 09000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0500000009000000
+    answerCountMode: 0
+    requiredAnswerCount: 21
+  - levelName: Level_164
+    baseCharacter: "\u767E"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u767D"
+      strokeSets:
+      - strokeIndices: 0100000002000000030000000400000005000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 02000000030000000400000005000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 020000000300000005000000
+    - answerCharacter: "\u767E"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 00000000
+      - strokeIndices: 04000000
+      - strokeIndices: 05000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0000000004000000
+      - strokeIndices: 0000000005000000
+      - strokeIndices: 0400000005000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 000000000400000005000000
+    answerCountMode: 0
+    requiredAnswerCount: 7
+  - levelName: Level_165
+    baseCharacter: "\u8857"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0300000004000000
+      - strokeIndices: 0600000007000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000
+      - strokeIndices: 060000000700000008000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 050000000600000007000000
+    - answerCharacter: "\u738B"
+      strokeSets:
+      - strokeIndices: 05000000060000000700000008000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 050000000700000008000000
+    - answerCharacter: "\u572D"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u4ED5"
+      strokeSets:
+      - strokeIndices: 0100000002000000060000000700000008000000
+    - answerCharacter: "\u4EC0"
+      strokeSets:
+      - strokeIndices: 01000000020000000600000007000000
+    - answerCharacter: "\u4E8D"
+      strokeSets:
+      - strokeIndices: 090000000a0000000b000000
+    - answerCharacter: "\u884C"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000090000000a0000000b000000
+    - answerCharacter: "\u4E01"
+      strokeSets:
+      - strokeIndices: 0a0000000b000000
+    - answerCharacter: "\u4EC3"
+      strokeSets:
+      - strokeIndices: 01000000020000000a0000000b000000
+    - answerCharacter: "\u4F73"
+      strokeSets:
+      - strokeIndices: 0100000002000000030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u4EC1"
+      strokeSets:
+      - strokeIndices: 01000000020000000600000008000000
+    - answerCharacter: "\u4EE8"
+      strokeSets:
+      - strokeIndices: 0100000002000000030000000500000008000000
+    - answerCharacter: "\u8857"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u4EFB"
+      strokeSets:
+      - strokeIndices: 01000000020000000300000004000000050000000700000008000000
+    - answerCharacter: "\u58EC"
+      strokeSets:
+      - strokeIndices: 0300000004000000050000000700000008000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 03000000
+      - strokeIndices: 05000000
+      - strokeIndices: 06000000
+      - strokeIndices: 08000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0300000005000000
+      - strokeIndices: 0300000006000000
+      - strokeIndices: 0300000008000000
+      - strokeIndices: 0500000006000000
+      - strokeIndices: 0500000008000000
+      - strokeIndices: 0600000008000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 030000000500000006000000
+      - strokeIndices: 030000000500000008000000
+      - strokeIndices: 030000000600000008000000
+      - strokeIndices: 050000000600000008000000
+    - answerCharacter: "\u4E96"
+      strokeSets:
+      - strokeIndices: 03000000050000000600000008000000
+    answerCountMode: 0
+    requiredAnswerCount: 22
+  - levelName: Level_166
+    baseCharacter: "\u8C23"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u5348"
+      strokeSets:
+      - strokeIndices: 06000000070000000800000009000000
+    - answerCharacter: "\u5C71"
+      strokeSets:
+      - strokeIndices: 090000000a0000000b000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0700000009000000
+      - strokeIndices: 0800000009000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 070000000800000009000000
+    - answerCharacter: "\u8C23"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u8BA1"
+      strokeSets:
+      - strokeIndices: 00000000010000000800000009000000
+    - answerCharacter: "\u8BA6"
+      strokeSets:
+      - strokeIndices: 0000000001000000070000000800000009000000
+    - answerCharacter: "\u8BB8"
+      strokeSets:
+      - strokeIndices: 000000000100000006000000070000000800000009000000
+    - answerCharacter: "\u8BAA"
+      strokeSets:
+      - strokeIndices: 0000000001000000090000000a0000000b000000
+    - answerCharacter: "\u5343"
+      strokeSets:
+      - strokeIndices: 020000000800000009000000
+    - answerCharacter: "\u4E2B"
+      strokeSets:
+      - strokeIndices: 030000000500000009000000
+    - answerCharacter: "\u7F36"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 07000000
+      - strokeIndices: 08000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0700000008000000
+    answerCountMode: 0
+    requiredAnswerCount: 14
+  - levelName: Level_167
+    baseCharacter: "\u5250"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u4EBA"
+      strokeSets:
+      - strokeIndices: 0500000006000000
+    - answerCharacter: "\u529B"
+      strokeSets:
+      - strokeIndices: 0400000005000000
+    - answerCharacter: "\u5185"
+      strokeSets:
+      - strokeIndices: 03000000040000000500000006000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 02000000
+    - answerCharacter: "\u5250"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u53E6"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000400000005000000
+    - answerCharacter: "\u5459"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000
+    - answerCharacter: "\u522B"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000004000000050000000700000008000000
+    - answerCharacter: "\u4E19"
+      strokeSets:
+      - strokeIndices: 0200000003000000040000000500000006000000
+    answerCountMode: 0
+    requiredAnswerCount: 10
+  - levelName: Level_168
+    baseCharacter: "\u5F3A"
+    positionOffset: {x: -2, y: -1}
+    answers:
+    - answerCharacter: "\u5F13"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u5DFE"
+      strokeSets:
+      - strokeIndices: 060000000700000009000000
+    - answerCharacter: "\u4E2D"
+      strokeSets:
+      - strokeIndices: 06000000070000000800000009000000
+    - answerCharacter: "\u5E72"
+      strokeSets:
+      - strokeIndices: 050000000800000009000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 08000000090000000a000000
+    - answerCharacter: "\u866B"
+      strokeSets:
+      - strokeIndices: 060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u540A"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000009000000
+    - answerCharacter: "\u867D"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u5415"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0800000009000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 05000000090000000a000000
+    - answerCharacter: "\u738B"
+      strokeSets:
+      - strokeIndices: 0500000008000000090000000a000000
+    - answerCharacter: "\u535C"
+      strokeSets:
+      - strokeIndices: 090000000b000000
+    - answerCharacter: "\u4E0B"
+      strokeSets:
+      - strokeIndices: 05000000090000000b000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 030000000400000005000000
+      - strokeIndices: 060000000700000008000000
+    - answerCharacter: "\u5F3A"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
+    - answerCharacter: "\u5F15"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000009000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 05000000
+      - strokeIndices: 08000000
+      - strokeIndices: 0a000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0500000008000000
+      - strokeIndices: 050000000a000000
+      - strokeIndices: 080000000a000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 05000000080000000a000000
+    answerCountMode: 0
+    requiredAnswerCount: 20
   characterToTone:
   - character: "\u4E00"
     tone: "y\u012B"
@@ -9302,6 +10109,20 @@ MonoBehaviour:
     tone: "j\u012B"
   - character: "\u4EA2"
     tone: "k\xE0ng"
+  - character: "\u5408"
+    tone: "h\xE9"
+  - character: "\u9F99"
+    tone: "l\xF3ng"
+  - character: "\u4E03"
+    tone: "q\u012B"
+  - character: "\u9F9B"
+    tone: "k\u0101n"
+  - character: "\u5C24"
+    tone: "y\xF3u"
+  - character: "\u89C1"
+    tone: "ji\xE0n"
+  - character: "\u65E0"
+    tone: "w\xFA"
   - character: "\u76BF"
     tone: "m\u012Dn"
   - character: "\u95E8"
@@ -9332,8 +10153,6 @@ MonoBehaviour:
     tone: "hu\xE1i"
   - character: "\u5C39"
     tone: "y\u012Dn"
-  - character: "\u89C1"
-    tone: "ji\xE0n"
   - character: "\u4F2F"
     tone: "b\xF3"
   - character: "\u5987"
@@ -9940,8 +10759,6 @@ MonoBehaviour:
     tone: "qi\u016B"
   - character: "\u6732"
     tone: "r\xE9n"
-  - character: "\u4E03"
-    tone: "q\u012B"
   - character: "\u67D2"
     tone: "q\u012B"
   - character: "\u6D3B"
@@ -10032,3 +10849,61 @@ MonoBehaviour:
     tone: "qu\u0103n"
   - character: "\u5C3A"
     tone: "ch\u012D"
+  - character: "\u7980"
+    tone: "b\u012Dng"
+  - character: "\u51DB"
+    tone: "l\u012Dn"
+  - character: "\u51C9"
+    tone: "li\xE1ng"
+  - character: "\u538B"
+    tone: "y\u0101"
+  - character: "\u4E9A"
+    tone: "y\xE0"
+  - character: "\u666E"
+    tone: "p\u016D"
+  - character: "\u4E1A"
+    tone: "y\xE8"
+  - character: "\u664B"
+    tone: "j\xECn"
+  - character: "\u5F53"
+    tone: "d\u0101ng"
+  - character: "\u5E76"
+    tone: "b\xECng"
+  - character: "\u4F4D"
+    tone: "w\xE8i"
+  - character: "\u8F9E"
+    tone: "c\xED"
+  - character: "\u671D"
+    tone: "ch\xE1o"
+  - character: "\u6F6E"
+    tone: "ch\xE1o"
+  - character: "\u5965"
+    tone: "\xE0o"
+  - character: "\u7C7B"
+    tone: "l\xE8i"
+  - character: "\u5185"
+    tone: "n\xE8i"
+  - character: "\u4F73"
+    tone: "ji\u0101"
+  - character: "\u8857"
+    tone: "ji\u0113"
+  - character: "\u8C23"
+    tone: "y\xE1o"
+  - character: "\u8BAA"
+    tone: "sh\xE0n"
+  - character: "\u7F36"
+    tone: "f\u014Fu"
+  - character: "\u5250"
+    tone: "gu\u0103"
+  - character: "\u5459"
+    tone: "gu\u014D"
+  - character: "\u522B"
+    tone: "bi\xE9"
+  - character: "\u4E19"
+    tone: "b\u012Dng"
+  - character: "\u867D"
+    tone: "su\u012B"
+  - character: "\u5F3A"
+    tone: "qi\xE1ng"
+  - character: "\u5F15"
+    tone: "y\u012Dn"
