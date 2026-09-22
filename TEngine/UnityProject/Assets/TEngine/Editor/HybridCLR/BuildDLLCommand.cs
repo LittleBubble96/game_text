@@ -89,6 +89,8 @@ public static class BuildDLLCommand
 #if ENABLE_HYBRIDCLR
         BuildTarget target = EditorUserBuildSettings.activeBuildTarget;
         CompileDllCommand.CompileDll(target);
+        // 新增的热更 API 必须在构建主包前加入防裁剪清单。
+        LinkGeneratorCommand.GenerateLinkXml(target);
         CopyAOTHotUpdateDlls(target);
 #endif
     }
@@ -97,6 +99,7 @@ public static class BuildDLLCommand
     {
 #if ENABLE_HYBRIDCLR
         CompileDllCommand.CompileDll(target);
+        LinkGeneratorCommand.GenerateLinkXml(target);
         CopyAOTHotUpdateDlls(target);
 #endif
     }

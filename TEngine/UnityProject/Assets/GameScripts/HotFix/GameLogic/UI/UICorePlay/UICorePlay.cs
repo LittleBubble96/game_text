@@ -21,6 +21,7 @@ namespace GameLogic
         private RTLTextMeshPro _submitBtnText;
 
         private XYButton _submitButton;
+        private bool _guideRequested;
         
 
         private float _resultTipDuration = 1f;
@@ -76,6 +77,7 @@ namespace GameLogic
         protected override void OnRefresh()
         {
             base.OnRefresh();
+            _guideRequested = false;
             _tipsPropWidget.Refresh();
             _resetPropWidget.Refresh();
             _nextPropWidget.Refresh();
@@ -100,6 +102,15 @@ namespace GameLogic
 
         protected override void OnUpdate()
         {
+            var manager = GameManager.Instance;
+            if (!_guideRequested && !manager.FirstLevelGuideCompleted &&
+                manager.CurrentGamePlay is CorePlayGamePlay game && game.CurrentLevelId == 1 &&
+                manager.CurrentView != null && manager.CurrentView.GuideReady)
+            {
+                _guideRequested = true;
+                GameModule.UI.ShowUIAsync<UIGuide>(game, manager.CurrentView,
+                    FindChildComponent<RectTransform>("Panel/Buttom/SubmitBtn"));
+            }
             if (_isShowingTip)
             {
                 _resultTipTimer -= Time.deltaTime;
@@ -155,6 +166,12 @@ namespace GameLogic
         {
             _isShowingTip = false;
             _toastRoot.gameObject.SetActive(false);
+        }
+
+        protected override void OnDestroy()
+        {
+            GameModule.UI.CloseUI<UIGuide>();
+            base.OnDestroy();
         }
 
         // ================ 通关面板 ================

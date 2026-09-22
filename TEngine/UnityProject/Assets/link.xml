@@ -1,0 +1,13 @@
+<linker>
+  <!-- UIGuide uses these APIs from hot-update code. Keep this manual file
+       separate from the generated HybridCLRGenerate/link.xml. -->
+  <assembly fullname="UnityEngine.CoreModule">
+    <type fullname="UnityEngine.RenderTexture" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.UI">
+    <type fullname="UnityEngine.UI.RawImage" preserve="all" />
+    <type fullname="UnityEngine.EventSystems.EventTrigger" preserve="all" />
+    <type fullname="UnityEngine.EventSystems.EventTrigger/Entry" preserve="all" />
+    <type fullname="UnityEngine.EventSystems.EventTrigger/TriggerEvent" preserve="all" />
+  </assembly>
+</linker>

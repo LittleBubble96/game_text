@@ -25,6 +25,14 @@ namespace GameLogic
 
         private LevelDataConfigParse _levelConfig;
         private GameCacheManager _cacheManager;
+        public bool FirstLevelGuideCompleted => _cacheManager?.CacheData?.firstLevelGuideCompleted ?? false;
+
+        public void CompleteFirstLevelGuide()
+        {
+            if (_cacheManager?.CacheData == null) return;
+            _cacheManager.CacheData.firstLevelGuideCompleted = true;
+            _cacheManager.Save();
+        }
 
         /// <summary>当前玩法（通过接口暴露，扩展时替换实现即可）</summary>
         public IGamePlay CurrentGamePlay { get; private set; }

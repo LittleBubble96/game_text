@@ -32,6 +32,8 @@ namespace GameLogic.GamePlay.CorePlay.View
         private DrawCharacter _drawCharacter;
         private StrokeInputHandler _strokeInputHandler;
         private bool _isInitialized;
+        public bool GuideReady { get; private set; }
+        public DrawCharacter GuideCharacter => _drawCharacter;
 
         private GameViewRoot _gameViewRoot;
         private GameSlotView _gameSlotView;
@@ -72,6 +74,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
         public void Initialize(IGamePlay gamePlay, LevelDataConfigParse levelConfig)
         {
+            GuideReady = false;
             // 如果已初始化，先反注册所有事件，避免重复注册
             if (_isInitialized)
             {
@@ -239,6 +242,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         // slot 分配已异步化，这里用 async void 串行 await，保证「分配完成 → 恢复答案」的顺序。
         private async void OnLevelLoaded(TextLevelData levelData)
         {
+            GuideReady = false;
             await RenderLevelAsync(levelData);
 
             // 初始化 slot 视图（答案数量）
@@ -257,6 +261,7 @@ namespace GameLogic.GamePlay.CorePlay.View
                     _gameSlotView?.RestoreAnswers(foundAnswers);
                 }
             }
+            GuideReady = _drawCharacter != null && _drawCharacter.StrokeObjects.Count > 0;
         }
 
         /// <summary>渲染关卡：解析数据并绘制笔画</summary>
@@ -293,6 +298,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnStrokeClicked(int strokeIndex)
         {
+            if (UIGuide.BlocksGameplayInput) return;
             if (UIInteractionLock.IsLocked || !_isInitialized || _gamePlay == null) return;
             _gamePlay.ToggleStroke(strokeIndex);
             AudioSystem.Instance.PlayAudio(AudioDefine.clickCharacter_SFX);
@@ -445,6 +451,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void OnSubmitClicked()
         {
+            if (UIGuide.BlocksGameplayInput) return;
             ClearTipHighlight();
             _gamePlay?.SubmitAnswer();
         }
