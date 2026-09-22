@@ -19,5 +19,18 @@ namespace GameLogic
                 query=$"inviter={GetOpenId()}&sid={Guid.NewGuid():N}"
             });
         }
+
+        public void CreateGameClubButton()
+        {
+            WXCreateGameClubButtonParam param = new WXCreateGameClubButtonParam();
+            GameClubButtonStyle clubButtonStyle = new GameClubButtonStyle();
+            clubButtonStyle.left = 10;
+            clubButtonStyle.top = 76;
+            clubButtonStyle.width = 40;
+            clubButtonStyle.height = 40;
+            param.style = clubButtonStyle;
+            param.type = GameClubButtonType.text;
+            WX.CreateGameClubButton(param);
+        }
     }
 }
