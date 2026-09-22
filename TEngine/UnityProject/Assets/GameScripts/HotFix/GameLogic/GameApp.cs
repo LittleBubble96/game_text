@@ -59,6 +59,7 @@ public partial class GameApp
         InitSetting();
         AudioSystem.Instance.PlayBgm(AudioDefine.game_Bgm ,0.4f);
         GameEvent.Send(EventDefine.GameStartSuccessEvent);
+        SDK.CreateGameClubButton();
         Log.Warning("======= StartGameLogic Complete =======");
     }
 
