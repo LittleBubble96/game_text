@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 39 个 Key）。
+    /// 多语言 Key 常量类（共 50 个 Key）。
     /// </summary>
     public static class LanguageKey
     {
@@ -20,6 +20,8 @@ namespace GameLogic.Localization
         public const string next_level_btn = "next_level_btn";
         public const string level_title = "level_title";
         public const string home_social = "home_social";
+        public const string home_share = "home_share";
+        public const string home_setting = "home_setting";
         public const string setting_title = "setting_title";
         public const string setting_music = "setting_music";
         public const string setting_sfx = "setting_sfx";
@@ -45,11 +47,20 @@ namespace GameLogic.Localization
         public const string toast_answerFinded = "toast_answerFinded";
         public const string toast_answerError = "toast_answerError";
         public const string game_des = "game_des";
+        public const string game_prop_next = "game_prop_next";
+        public const string game_prop_tip = "game_prop_tip";
+        public const string game_prop_clear = "game_prop_clear";
+        public const string game_prop_select_all = "game_prop_select_all";
         public const string guide_step1 = "guide_step1";
         public const string guide_step2 = "guide_step2";
         public const string guide_step3 = "guide_step3";
         public const string guide_step4 = "guide_step4";
         public const string guide_step5 = "guide_step5";
         public const string guide_step6 = "guide_step6";
+        public const string game_tips1 = "game_tips1";
+        public const string game_tips2 = "game_tips2";
+        public const string game_tips3 = "game_tips3";
+        public const string game_tips4 = "game_tips4";
+        public const string game_tips5 = "game_tips5";
     }
 }

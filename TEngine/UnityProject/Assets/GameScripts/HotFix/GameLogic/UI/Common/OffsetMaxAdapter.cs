@@ -115,7 +115,7 @@ namespace GameLogic.Platform.Adapter
             // 安全区无效（极早期/无显示）时退回零偏移，避免误伤全屏内容
             if (safe.width <= 0 || safe.height <= 0 || sw <= 0 || sh <= 0)
             {
-                Log.Info($"OffsetMaxAdapter.Apply: safeArea={safe}, screen=({sw},{sh}), reset offset to zero");
+                // Log.Info($"OffsetMaxAdapter.Apply: safeArea={safe}, screen=({sw},{sh}), reset offset to zero");
                 SetOffsets(rt, ZeroOffset, ZeroOffset);
                 return;
             }
@@ -152,7 +152,7 @@ namespace GameLogic.Platform.Adapter
             }
 
             SetOffsets(rt, new Vector2(offsetXMax, offsetYMax), new Vector2(offsetXMin, offsetYMin));
-            Log.Info($"OffsetMaxAdapter.Apply: safeArea={safe}, screen=({sw},{sh}), offsetMax=({offsetXMax},{offsetYMax}), offsetMin=({offsetXMin},{offsetYMin})");
+            // Log.Info($"OffsetMaxAdapter.Apply: safeArea={safe}, screen=({sw},{sh}), offsetMax=({offsetXMax},{offsetYMax}), offsetMin=({offsetXMin},{offsetYMin})");
         }
 
         /// <summary>仅在值真的变化时写 offset，减少 OnRectTransformDimensionsChange 的级联触发</summary>
@@ -213,14 +213,14 @@ namespace GameLogic.Platform.Adapter
         {
 #if UNITY_EDITOR
             Rect safe = Screen.safeArea;
-            Log.Info($"OffsetMaxAdapter.GetSafeArea UNITY_EDITOR: safeArea={safe}, screen=({Screen.width},{Screen.height})");
+            // Log.Info($"OffsetMaxAdapter.GetSafeArea UNITY_EDITOR: safeArea={safe}, screen=({Screen.width},{Screen.height})");
             return safe;
 #endif
             WindowInfo windowInfo = WX.GetWindowInfo();
             SafeArea safeArea = windowInfo.safeArea;
             Rect safeWx = new Rect(0, 0, (float)safeArea.width, (float)safeArea.height);
-            Log.Info($"OffsetMaxAdapter.GetSafeArea WX: safeArea={safeWx}, screen=({safeArea.width},{safeArea.height}) " +
-                     $"windowWH:{windowInfo.windowWidth},{windowInfo.windowHeight} , ScreenWH:{windowInfo.screenWidth} ,{windowInfo.screenHeight}");
+            // Log.Info($"OffsetMaxAdapter.GetSafeArea WX: safeArea={safeWx}, screen=({safeArea.width},{safeArea.height}) " +
+            //          $"windowWH:{windowInfo.windowWidth},{windowInfo.windowHeight} , ScreenWH:{windowInfo.screenWidth} ,{windowInfo.screenHeight}");
             return safeWx;
         }
 

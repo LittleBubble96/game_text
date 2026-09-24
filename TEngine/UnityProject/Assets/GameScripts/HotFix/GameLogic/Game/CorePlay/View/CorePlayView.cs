@@ -24,6 +24,10 @@ namespace GameLogic.GamePlay.CorePlay.View
         // ================ 提示高亮 ================
         private Color _tipHighlightColor = new Color(0.1f, 1f, 0.1f, 1f);
         private List<int> _tipHighlightStrokes;
+        private const float TipPulsePeriod = 1.2f;
+        private float _tipHighlightStartTime;
+        private Color CurrentTipColor => Color.Lerp(_defaultStrokeColor, _tipHighlightColor,
+            (Mathf.Cos((Time.unscaledTime - _tipHighlightStartTime) * (2f * Mathf.PI / TipPulsePeriod)) + 1f) * 0.5f);
 
         // ================ 内部状态 ================
 
@@ -242,6 +246,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         // slot 分配已异步化，这里用 async void 串行 await，保证「分配完成 → 恢复答案」的顺序。
         private async void OnLevelLoaded(TextLevelData levelData)
         {
+            ClearTipHighlight();
             GuideReady = false;
             await RenderLevelAsync(levelData);
 
@@ -349,10 +354,10 @@ namespace GameLogic.GamePlay.CorePlay.View
                 obj.transform.localPosition = pos;
             }
 
-            // 提示笔画在提交前始终保持常亮，不被选中/取消选中的颜色覆盖。
-            if (_tipHighlightStrokes != null && _tipHighlightStrokes.Contains(strokeIndex))
+            // 选中时显示选择色，取消选择后恢复当前明暗相位，保留提示直到提交。
+            if (!isSelected && _tipHighlightStrokes != null && _tipHighlightStrokes.Contains(strokeIndex))
             {
-                _drawCharacter.SetStrokeColor(strokeIndex, _tipHighlightColor);
+                _drawCharacter.SetStrokeColor(strokeIndex, CurrentTipColor);
             }
         }
 
@@ -378,7 +383,20 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         // ================ 提示高亮效果 ================
 
-        /// <summary>显示提示高亮，并保持到用户点击提交</summary>
+        private void Update()
+        {
+            if (_tipHighlightStrokes == null || _drawCharacter == null) return;
+
+            Color color = CurrentTipColor;
+            var corePlay = _gamePlay as CorePlayGamePlay;
+            foreach (int strokeIndex in _tipHighlightStrokes)
+            {
+                if (corePlay != null && corePlay.SelectedStrokeIndices.Contains(strokeIndex)) continue;
+                _drawCharacter.SetStrokeColor(strokeIndex, color);
+            }
+        }
+
+        /// <summary>循环渐亮渐暗，保持到用户点击提交；选中的笔画暂不闪烁。</summary>
         private void OnPropTipHighlight(List<int> strokeIndices)
         {
             if (strokeIndices == null || strokeIndices.Count == 0 || _drawCharacter == null) return;
@@ -386,9 +404,12 @@ namespace GameLogic.GamePlay.CorePlay.View
             ClearTipHighlight();
 
             _tipHighlightStrokes = new List<int>(strokeIndices);
+            _tipHighlightStartTime = Time.unscaledTime;
             foreach (int strokeIndex in _tipHighlightStrokes)
             {
-                _drawCharacter.SetStrokeColor(strokeIndex, _tipHighlightColor);
+                bool isSelected = _gamePlay is CorePlayGamePlay corePlay
+                                  && corePlay.SelectedStrokeIndices.Contains(strokeIndex);
+                UpdateStrokeVisual(strokeIndex, isSelected);
             }
         }
 
@@ -401,7 +422,13 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>重置道具使用完成：复位笔画高亮，不影响已填 slot</summary>
         private void OnPropResetDone()
         {
-            ClearAllHighlights();
+            if (_drawCharacter == null) return;
+            for (int i = 0; i < _drawCharacter.StrokeObjects.Count; i++)
+            {
+                bool isSelected = _gamePlay is CorePlayGamePlay corePlay
+                                  && corePlay.SelectedStrokeIndices.Contains(i);
+                UpdateStrokeVisual(i, isSelected);
+            }
         }
 
         /// <summary>依次播放下一关道具补齐答案的入槽动画</summary>
@@ -438,6 +465,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>退出游戏动画：背景淡出 + 销毁 DrawCharacter</summary>
         public void OnEndGameAnim()
         {
+            ClearTipHighlight();
             _gameViewRoot?.OnEndGameAnim();
             // 即时销毁，避免延迟 Destroy 与后续 CreateDrawCharacter 同帧新建产生竞态，导致笔画叠加
             if (_drawCharacter != null)

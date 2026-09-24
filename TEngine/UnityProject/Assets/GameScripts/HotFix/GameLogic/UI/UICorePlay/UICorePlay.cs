@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GameLogic.GamePlay.CorePlay;
 using GameLogic.Localization;
 using TEngine;
@@ -78,6 +78,7 @@ namespace GameLogic
         {
             base.OnRefresh();
             _guideRequested = false;
+            AdSystem.EnterPage(AdIds.Tip, AdIds.Next);
             _tipsPropWidget.Refresh();
             _resetPropWidget.Refresh();
             _nextPropWidget.Refresh();
@@ -170,6 +171,7 @@ namespace GameLogic
 
         protected override void OnDestroy()
         {
+            AdSystem.ExitPage(AdIds.Tip, AdIds.Next);
             GameModule.UI.CloseUI<UIGuide>();
             base.OnDestroy();
         }

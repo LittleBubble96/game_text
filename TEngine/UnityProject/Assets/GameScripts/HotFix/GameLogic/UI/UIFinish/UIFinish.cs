@@ -92,6 +92,8 @@ namespace GameLogic
                 _btnNextGo.SetActive(_hasNextLevel);
             }
 
+            BiMgr.FinishShown();
+
             // 加载奖励数据（内部异步加载奖励图标，fire-and-forget）
             LoadRewardData();
 
@@ -261,11 +263,13 @@ namespace GameLogic
         {
             if (_hasClaimedReward) return;
 
+            BiMgr.ShareClicked("finish");
             SDK.ShareAppMessage($"我已通过第{_completedLevelId}关，一起来挑战吧！");
         }
 
         private void OnBtnNextClick()
         {
+            BiMgr.FinishAction("next");
             if (_hasClaimedReward)
             {
                 // 已领取，直接跳转
@@ -284,6 +288,7 @@ namespace GameLogic
 
         private void OnBtnHomeClick()
         {
+            BiMgr.FinishAction("home");
             if (_hasClaimedReward)
             {
                 GameManager.Instance.ReturnToHome();

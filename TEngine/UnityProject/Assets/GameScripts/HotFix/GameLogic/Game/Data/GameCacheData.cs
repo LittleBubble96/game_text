@@ -23,6 +23,7 @@ namespace GameLogic.Data
     public class GameCacheData
     {
         public bool firstLevelGuideCompleted;
+        public string biAllLevelsCompletedVersion;
         // ===== 关卡缓存 =====
         public CorePlaySaveData corePlaySaveData;
 

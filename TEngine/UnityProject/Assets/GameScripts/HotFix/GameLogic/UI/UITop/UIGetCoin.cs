@@ -62,17 +62,18 @@ namespace GameLogic
             RefreshNewDay();
             int coinCount = GameDefine.NewDayCoinByDay;
             GameEvent.Send(EventDefine.Event_UITopCoinAddAnim , coinCount);
-            PropDefine.AddCoin(coinCount);
+            PropDefine.AddCoin(coinCount, "daily_claim");
         }
 
         private void OnAddShare()
         {
             CommonGameSystem.ShareNewDay();
+            BiMgr.ShareClicked("get_coin");
             SDK.ShareAppMessage("一起来玩");
             RefreshShare();
             int coinCount = GameDefine.ShareCoinByDay;
             GameEvent.Send(EventDefine.Event_UITopCoinAddAnim , coinCount);
-            PropDefine.AddCoin(coinCount);
+            PropDefine.AddCoin(coinCount, "share_reward");
         }
         
         protected override void OnInAnimation()

@@ -1,7 +1,10 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using GameLogic.Data;
 using GameLogic.GamePlay.CorePlay;
+using GameLogic.Localization;
+using RTLTMPro;
 using TEngine;
 using TMPro;
 using UnityEngine;
@@ -17,7 +20,7 @@ namespace GameLogic
     ///   2) 数量为 0 且金币足够   → 隐藏数量节点，显示金币节点，点击扣金币直接使用
     ///   3) 数量为 0、金币不足、有广告 → 隐藏数量/金币，显示广告，点击看激励广告
     ///   4) 数量为 0、金币不足、无广告 → 全部隐藏，按钮置灰
-    /// 广告接入见 <see cref="AdSystem"/>（当前占位返回 false）。
+    /// 广告接入见 <see cref="AdSystem"/>。
     /// </summary>
     public class CorePlayPropWidget : UIWidget
     {
@@ -26,6 +29,7 @@ namespace GameLogic
         private XYButton _propButton;
         private Transform _countRoot;          // 数量节点
         private TMP_Text _countText;          // 数量节点文字
+        private RTLTextMeshPro _des;
         private Image _backgroundImage;       // 道具背景（置灰用）
         private Image _iconImage;             // 道具图标（置灰用）
 
@@ -33,8 +37,10 @@ namespace GameLogic
         private Transform _coinRoot;
         private TMP_Text _coinText;
 
-        // 广告节点（数量与金币都不可用时显示，未来扩展）
+        // 广告节点（数量与金币都不可用时显示）
         private Transform _adRoot;
+        private Transform _adLoading;
+        private Transform _adComplete;
 
         private CorePlayGamePlay _corePlayGamePlay;
         private const string SelectAllIconPath = "Common_prop_all_select";
@@ -46,6 +52,10 @@ namespace GameLogic
         private Sequence _iconSwitchTween;
         private bool _resetIconsLoading;
         private bool _isDestroyed;
+        private bool _usingProp;
+        private int _levelVersion;
+        private Transform _adSpinner;
+        private string AdId => _propType == PropType.Next ? AdIds.Next : AdIds.Tip;
 
         /// <summary>该道具的金币消耗量</summary>
         private int CoinCost => _propType switch
@@ -61,6 +71,7 @@ namespace GameLogic
             _propButton = CreateWidget<XYButton>("");
             _countRoot = FindChildComponent<Transform>("CountBg");
             _countText = FindChildComponent<TMP_Text>("CountBg/Count");
+            _des = FindChildComponent<RTLTextMeshPro>("des");
             _backgroundImage = FindChildComponent<Image>("bg");
             _iconImage = FindChildComponent<Image>("icon");
             if (_iconImage != null) _iconOriginalScale = _iconImage.transform.localScale;
@@ -68,8 +79,12 @@ namespace GameLogic
             _coinRoot = FindChildComponent<Transform>("CoinRoot");
             _coinText = FindChildComponent<TMP_Text>("CoinRoot/CoinText");
 
-            _adRoot = FindChildComponent<Transform>("AdRoot");
+            _adRoot = FindChildComponent<Transform>("adRoot");
+            _adLoading = FindChildComponent<Transform>("adRoot/m_adLoadingRoot");
+            _adComplete = FindChildComponent<Transform>("adRoot/m_adSuccessRoot");
 
+            _adSpinner = FindChildComponent<Transform>("adRoot/m_adLoadingRoot/loading");
+            AdSystem.StateChanged += OnAdStateChanged;
             _propButton.OnAddListener(OnPropClicked);
         }
 
@@ -91,20 +106,30 @@ namespace GameLogic
             if (_corePlayGamePlay != gamePlay)
             {
                 if (_corePlayGamePlay != null)
+                {
                     _corePlayGamePlay.OnSelectionChanged -= OnSelectionChanged;
+                    _corePlayGamePlay.OnLevelLoaded -= OnAdLevelLoaded;
+                }
                 _corePlayGamePlay = gamePlay;
+                _levelVersion++;
+                if (_corePlayGamePlay != null) _corePlayGamePlay.OnLevelLoaded += OnAdLevelLoaded;
                 if (_corePlayGamePlay != null && _propType == PropType.Reset)
                     _corePlayGamePlay.OnSelectionChanged += OnSelectionChanged;
             }
             RefreshDisplay();
             RefreshResetIcon(false);
+            RefreshDes();
         }
 
         protected override void OnDestroy()
         {
             _isDestroyed = true;
+            AdSystem.StateChanged -= OnAdStateChanged;
             if (_corePlayGamePlay != null)
+            {
                 _corePlayGamePlay.OnSelectionChanged -= OnSelectionChanged;
+                _corePlayGamePlay.OnLevelLoaded -= OnAdLevelLoaded;
+            }
             StopIconSwitch();
             base.OnDestroy();
         }
@@ -145,6 +170,7 @@ namespace GameLogic
             if (_propType != PropType.Reset || _isDestroyed || _iconImage == null) return;
             var target = _corePlayGamePlay != null && _corePlayGamePlay.SelectedStrokeIndices.Count > 0
                 ? _clearIcon : _selectAllIcon;
+            RefreshDes();
             if (target == null || (animate && target == _resetIconTarget)) return;
 
             // 快速连续操作时中断旧动画，始终以最新选择状态为准。
@@ -173,38 +199,53 @@ namespace GameLogic
 
         // ================ 点击分发 ================
 
-        /// <summary>道具按钮点击</summary>
-        private void OnPropClicked()
+        private void OnAdStateChanged(string adId)
         {
-            switch (_propType)
+            // 仅查询自身广告位状态；跨广告位不设置展示互斥。
+            RefreshDisplay();
+        }
+
+        private void OnAdLevelLoaded(TextLevelData data) { _levelVersion++; }
+
+        private void OnPropClicked() { UsePropAsync().Forget(); }
+
+        private async UniTaskVoid UsePropAsync()
+        {
+            if (_usingProp || AdSystem.IsBusy(AdId) || _isDestroyed) return;
+            _usingProp = true;
+            try
             {
-                case PropType.Tip:
-                    UseTipProp();
-                    break;
-                case PropType.Reset:
-                    UseResetProp();
-                    break;
-                case PropType.Next:
-                    UseNextPropAsync().Forget();
-                    break;
+                switch (_propType)
+                {
+                    case PropType.Tip: await UseTipPropAsync(); break;
+                    case PropType.Reset: UseResetProp(); break;
+                    case PropType.Next: await UseNextPropAsync(); break;
+                }
             }
+            catch (System.OperationCanceledException) { }
+            catch (System.Exception error) { Log.Error("[CorePlayPropWidget] 道具使用失败: " + error); }
+            finally { _usingProp = false; if (!_isDestroyed) RefreshDisplay(); }
         }
 
         /// <summary>使用提示道具</summary>
-        private void UseTipProp()
+        private async UniTask UseTipPropAsync()
         {
-            if (_corePlayGamePlay == null) return;
+            if (_corePlayGamePlay == null || !_corePlayGamePlay.IsGameRunning) return;
 
             // 检查是否还有未找到的答案
             if (!_corePlayGamePlay.HasUnfoundAnswers())
             {
+                BiMgr.PropUsed("tip", "none", 0, false, "no_remaining_answer");
                 DebugLog("没有剩余答案可提示");
                 return;
             }
 
             // 三档付费：数量优先、其次金币、最后广告
-            if (!TryPayProp(() => PropDefine.UseTip(), out bool needRefresh))
+            var (paid, payment, cost) = await PayPropAsync(() => PropDefine.UseTip());
+            if (_isDestroyed || payment == "stale") return;
+            if (!paid)
             {
+                BiMgr.PropUsed("tip", payment, cost, false, "payment_failed");
                 DebugLog("无可用使用方式（数量/金币/广告均不可用）");
                 return;
             }
@@ -213,15 +254,17 @@ namespace GameLogic
             List<int> strokeSet = _corePlayGamePlay.GetRandomUnfoundAnswerStrokeSet();
             if (strokeSet == null || strokeSet.Count == 0)
             {
+                BiMgr.PropUsed("tip", payment, cost, false, "invalid_answer_strokes");
                 DebugLogError("获取提示笔画失败");
                 return;
             }
 
             // 发送高亮事件，触发闪烁效果
             GameEvent.Send(EventDefine.Event_PropTipHighlight, strokeSet);
+            BiMgr.PropUsed("tip", payment, cost, true, "");
             DebugLog($"使用提示道具，高亮笔画: [{string.Join(", ", strokeSet)}]");
 
-            if (needRefresh) RefreshDisplay();
+            RefreshDisplay();
         }
 
         /// <summary>无选中笔画时全选，否则清空选择；两种操作均免费，不影响已找到答案。</summary>
@@ -230,7 +273,6 @@ namespace GameLogic
             if (_corePlayGamePlay == null || !_corePlayGamePlay.IsGameRunning) return;
             if (_corePlayGamePlay.SelectedStrokeIndices.Count == 0)
             {
-                GameEvent.Send(EventDefine.Event_PropTipClearHighlight);
                 _corePlayGamePlay.SelectAllStrokes();
                 DebugLog("使用全选道具，选中全部笔画");
                 return;
@@ -242,28 +284,31 @@ namespace GameLogic
         }
 
         /// <summary>使用下一关道具：补齐答案，逐个播放入槽动画，最后触发统一结算</summary>
-        private async UniTaskVoid UseNextPropAsync()
+        private async UniTask UseNextPropAsync()
         {
             if (_corePlayGamePlay == null || !_corePlayGamePlay.CanUseNextProp()) return;
 
             var corePlayView = GameManager.Instance?.CurrentView;
             if (corePlayView == null) return;
 
+            var (paid, payment, cost) = await PayPropAsync(() => PropDefine.UseNext());
+            if (_isDestroyed || payment == "stale") return;
+            if (!paid)
+            {
+                BiMgr.PropUsed("next", payment, cost, false, "payment_failed");
+                return;
+            }
             using (UIInteractionLock.Acquire())
             {
-                if (!TryPayProp(() => PropDefine.UseNext(), out bool needRefresh))
-                {
-                    DebugLog("无可用使用方式（数量/金币/广告均不可用）");
-                    return;
-                }
-
                 if (!_corePlayGamePlay.PrepareNextPropCompletion(out List<string> answerCharacters))
                 {
+                    BiMgr.PropUsed("next", payment, cost, false, "completion_prepare_failed");
                     DebugLogError("下一关道具补齐答案失败");
                     return;
                 }
 
-                if (needRefresh) RefreshDisplay();
+                BiMgr.PropUsed("next", payment, cost, true, "");
+                RefreshDisplay();
                 GameManager.Instance.SaveGameProgress();
                 try
                 {
@@ -279,37 +324,28 @@ namespace GameLogic
 
         // ================ 三档付费状态机 ================
 
-        /// <summary>
-        /// 按优先级尝试付费：数量 → 金币 → 广告。
-        /// </summary>
-        /// <param name="useByCount">数量付费执行体（已扣数量并返回 true）</param>
-        /// <param name="paidByNonCount">是否经金币或广告付费（需返回后刷新显示）</param>
-        /// <returns>是否付费成功</returns>
-        private bool TryPayProp(System.Func<bool> useByCount, out bool paidByNonCount)
+        /// <summary>库存、金币即时支付；广告必须等待完整观看。</summary>
+        private async UniTask<(bool paid, string payment, int cost)> PayPropAsync(System.Func<bool> useByCount)
         {
-            paidByNonCount = false;
-
-            // 1) 数量付费
             if (PropDefine.IsPropAvailable(_propType))
             {
-                return useByCount();
+                bool paid = useByCount();
+                return (paid, "inventory", paid ? 1 : 0);
             }
-
-            // 2) 金币付费（当场扣金币直接使用）
             if (PropDefine.CoinCount >= CoinCost)
             {
-                if (PropDefine.UsePropByCoin(CoinCost))
-                {
-                    GameEvent.Send(EventDefine.Event_UITopCoinAddAnim, -CoinCost);
-                    paidByNonCount = true;
-                    return true;
-                }
+                bool paid = PropDefine.UsePropByCoin(CoinCost, _propType == PropType.Tip ? "tip" : "next");
+                if (paid) GameEvent.Send(EventDefine.Event_UITopCoinAddAnim, -CoinCost);
+                return (paid, "coin", paid ? CoinCost : 0);
             }
-
-            // 3) 广告付费（当前占位 IsAdAvailable 恒 false，此分支不会进入）
-            // 接入激励广告后：先 ShowRewardedAd，成功回调中执行与金币分支等价的道具效果逻辑。
-            // 因广告为异步回调流程，此处返回 false，真实接入时需重构为回调驱动使用。
-            return false;
+            int version = _levelVersion;
+            bool rewarded = await AdSystem.ShowRewardedAdAsync(AdId);
+            // 超时后可能已退出或切关；迟到奖励不能作用于另一局。
+            if (_isDestroyed || version != _levelVersion || _corePlayGamePlay == null || !_corePlayGamePlay.IsGameRunning)
+                return (false, "stale", 0);
+            if (!rewarded)
+                GameEvent.Send(EventDefine.Event_AnswerSubmitted, false, "", LocalizationHelper.GetLocalText(LanguageKey.game_tips5));
+            return (rewarded, "ad", 0);
         }
 
         // ================ 显示刷新 ================
@@ -324,9 +360,27 @@ namespace GameLogic
             }
         }
 
+        private void RefreshDes()
+        {
+            if (_propType == PropType.Reset)
+            {
+                var target = _corePlayGamePlay != null && _corePlayGamePlay.SelectedStrokeIndices.Count > 0;
+                _des.text = LocalizationHelper.GetLocalText(target ? LanguageKey.game_prop_clear : LanguageKey.game_prop_select_all);
+            }
+            else if (_propType == PropType.Next)
+            {
+                _des.text = LocalizationHelper.GetLocalText(LanguageKey.game_prop_next);
+            }
+            else if (_propType == PropType.Tip)
+            {
+                _des.text = LocalizationHelper.GetLocalText(LanguageKey.game_prop_tip);
+            }
+        }
+
         /// <summary>刷新数量/金币/广告三档显示与按钮置灰</summary>
         private void RefreshDisplay()
         {
+            if (_isDestroyed) return;
             // Reset 为免费功能，不展示或消耗数量、金币、广告。
             if (_propType == PropType.Reset)
             {
@@ -339,7 +393,9 @@ namespace GameLogic
 
             bool hasCount = PropDefine.IsPropAvailable(_propType);
             bool hasCoin = PropDefine.CoinCount >= CoinCost;
-            bool hasAd = AdSystem.IsAdAvailable;
+            bool hasAd = AdSystem.IsAdAvailable(AdId);
+            SetActive(_adLoading, AdSystem.IsLoading(AdId));
+            SetActive(_adComplete, hasAd);
 
             bool canUse;
             if (hasCount)
@@ -360,13 +416,13 @@ namespace GameLogic
                 SetActive(_adRoot, false);
                 canUse = true;
             }
-            else if (hasAd)
+            else if (hasAd || AdSystem.IsLoading(AdId))
             {
                 // 广告替代：隐藏数量/金币，显示广告
                 SetActive(_countRoot, false);
                 SetActive(_coinRoot, false);
                 SetActive(_adRoot, true);
-                canUse = true;
+                canUse = hasAd;
             }
             else
             {
@@ -378,6 +434,16 @@ namespace GameLogic
             }
 
             ApplyAvailability(canUse);
+        }
+
+        protected override void OnUpdate()
+        {
+            if (_adSpinner != null && _adSpinner.gameObject.activeInHierarchy && AdSystem.IsLoading(AdId))
+            {
+                var anim = _adSpinner.GetComponent<Animation>();
+                if (anim == null || !anim.enabled)
+                    _adSpinner.Rotate(0, 0, -240f * Time.unscaledDeltaTime);
+            }
         }
 
         private void ApplyAvailability(bool canUse)

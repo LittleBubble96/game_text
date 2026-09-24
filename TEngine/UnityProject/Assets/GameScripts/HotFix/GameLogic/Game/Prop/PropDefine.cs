@@ -60,33 +60,41 @@ namespace GameLogic
         public static bool IsTipAvailable => TipCount > 0;
 
         /// <summary>使用提示道具（数量减1），返回是否成功</summary>
-        public static bool UseTip()
+        public static bool UseTip(string source = "tip")
         {
+            int before = TipCount;
             if (TipCount <= 0) return false;
             TipCount--;
+            BiMgr.ResourceChanged("tip", before, TipCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Tip, TipCount);
             return true;
         }
 
         /// <summary>增加提示道具</summary>
-        public static void AddTip(int count)
+        public static void AddTip(int count, string source = "unknown")
         {
+            int before = TipCount;
             TipCount += count;
+            BiMgr.ResourceChanged("tip", before, TipCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Tip, TipCount);
         }
 
         /// <summary>增加金币</summary>
-        public static void AddCoin(int count)
+        public static void AddCoin(int count, string source = "unknown")
         {
+            int before = CoinCount;
             CoinCount += count;
+            BiMgr.ResourceChanged("coin", before, CoinCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Coin, CoinCount);
         }
 
         /// <summary>使用金币，返回是否成功</summary>
-        public static bool UseCoin(int count)
+        public static bool UseCoin(int count, string source = "unknown")
         {
+            int before = CoinCount;
             if (CoinCount < count) return false;
             CoinCount -= count;
+            BiMgr.ResourceChanged("coin", before, CoinCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Coin, CoinCount);
             return true;
         }
@@ -97,12 +105,9 @@ namespace GameLogic
         /// </summary>
         /// <param name="coinCost">该道具的单次金币消耗量（见 GameDefine.PropXxxCoinCost）</param>
         /// <returns>是否扣款成功</returns>
-        public static bool UsePropByCoin(int coinCost)
+        public static bool UsePropByCoin(int coinCost, string source = "prop")
         {
-            if (CoinCount < coinCost) return false;
-            CoinCount -= coinCost;
-            GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Coin, CoinCount);
-            return true;
+            return UseCoin(coinCost, source);
         }
 
         /// <summary>指定道具数量是否大于 0（统一查询入口）</summary>
@@ -145,18 +150,22 @@ namespace GameLogic
         public static bool IsResetAvailable => ResetCount > 0;
 
         /// <summary>使用重置道具（数量减1），返回是否成功</summary>
-        public static bool UseReset()
+        public static bool UseReset(string source = "reset")
         {
+            int before = ResetCount;
             if (ResetCount <= 0) return false;
             ResetCount--;
+            BiMgr.ResourceChanged("reset", before, ResetCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Reset, ResetCount);
             return true;
         }
 
         /// <summary>增加重置道具</summary>
-        public static void AddReset(int count)
+        public static void AddReset(int count, string source = "unknown")
         {
+            int before = ResetCount;
             ResetCount += count;
+            BiMgr.ResourceChanged("reset", before, ResetCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Reset, ResetCount);
         }
 
@@ -173,18 +182,22 @@ namespace GameLogic
         }
 
         /// <summary>使用下一关道具（数量减1），返回是否成功</summary>
-        public static bool UseNext()
+        public static bool UseNext(string source = "next")
         {
+            int before = NextCount;
             if (NextCount <= 0) return false;
             NextCount--;
+            BiMgr.ResourceChanged("next", before, NextCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Next, NextCount);
             return true;
         }
 
         /// <summary>增加下一关道具</summary>
-        public static void AddNext(int count)
+        public static void AddNext(int count, string source = "unknown")
         {
+            int before = NextCount;
             NextCount += count;
+            BiMgr.ResourceChanged("next", before, NextCount, source);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Next, NextCount);
         }
 
@@ -199,11 +212,16 @@ namespace GameLogic
         {
             var d = Data;
             if (d == null) return;
+            int oldTip = d.tipCount, oldCoin = d.coinCount, oldReset = d.resetCount, oldNext = d.nextCount;
             d.tipCount = tipCount;
             d.coinCount = coinCount;
             d.resetCount = resetCount;
             d.nextCount = nextCount;
             Save();
+            BiMgr.ResourceChanged("tip", oldTip, tipCount, "set_counts");
+            BiMgr.ResourceChanged("coin", oldCoin, coinCount, "set_counts");
+            BiMgr.ResourceChanged("reset", oldReset, resetCount, "set_counts");
+            BiMgr.ResourceChanged("next", oldNext, nextCount, "set_counts");
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Tip, tipCount);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Coin, coinCount);
             GameEvent.Send(EventDefine.Event_PropCountChanged, PropType.Reset, resetCount);

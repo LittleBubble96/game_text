@@ -1,22 +1,9 @@
-﻿
-using System.Collections.Generic;
-using Cysharp.Threading.Tasks;
-using GameLogic.Localization;
-using GameLogic.UI;
-using RTLTMPro;
+﻿using GameLogic.UI;
 using TEngine;
 using UnityEngine;
 
 namespace GameLogic
 {
-    public enum ETabType
-    {
-        None = 0,
-        Level = 1,
-        Setting = 2,
-        Store = 3,
-    }
-
     [Window(UILayer.UI,location:"UIHome")]
     class UIHome : UIWindow
     {
@@ -24,11 +11,8 @@ namespace GameLogic
 
         private Animation _animation;
         private RectTransform _tabContentRect;
-
-        private ETabType _curIndex = ETabType.None;
+        private UIHomeLevelTabContentWidget _levelTabContentWidget; 
         
-        private Dictionary<ETabType, UIHomeTabContentWidget> _tabContentWidgets = new Dictionary<ETabType, UIHomeTabContentWidget>();
-        private Dictionary<ETabType ,HomeTabButtonWidget> _tabBtnWidgets = new Dictionary<ETabType, HomeTabButtonWidget>();
 
         private string _showAnim = "Ui_HomeShow";
         private string _hideAnim = "Ui_HomeHide";
@@ -36,16 +20,7 @@ namespace GameLogic
         protected override void ScriptGenerator()
         {
             _animation = transform.GetComponent<Animation>();
-            RectTransform btnLayout = FindChildComponent<RectTransform>("Panel/BottomLayout");
-            _tabContentRect = FindChildComponent<RectTransform>("Panel/Content");
-            for (int i = 0; i < btnLayout.childCount; i++)
-            {
-                ETabType tabType = (ETabType)(i + 1);
-                GameObject childObj = btnLayout.GetChild(i).gameObject;
-                HomeTabButtonWidget widget = CreateWidget<HomeTabButtonWidget>(childObj , childObj.activeInHierarchy);
-                widget.Init(tabType , OnTabBtnClick);
-                _tabBtnWidgets.Add(tabType , widget);
-            }
+            _levelTabContentWidget = CreateWidget<UIHomeLevelTabContentWidget>("Panel/Content/UIHome_LevelTabContent");
         }
 
         protected override void OnInAnimation()
@@ -63,76 +38,7 @@ namespace GameLogic
             base.OnRefresh();
             GameEvent.Send(EventDefine.Event_UITopUpdate, new UITopData(showCoin: true, showBack: false));
             GameEvent.Send(EventDefine.Event_UITopCoinUpdate, PropDefine.CoinCount);
-            OnTabBtnClick(ETabType.Level);
-            // 首页窗口复用且已停留在关卡页时，Tab 点击会直接返回，仍需刷新存档对应的关卡。
-            if (_tabContentWidgets.TryGetValue(ETabType.Level, out var levelWidget)
-                && levelWidget is UIHomeLevelTabContentWidget levelContent)
-                levelContent.RefreshLevelInfo();
-        }
-
-        #endregion
-
-        #region 事件
-
-        private void OnTabBtnClick(ETabType index)
-        {
-            if (_curIndex == index)
-            {
-                return;
-            }
-            if (_tabBtnWidgets.TryGetValue(_curIndex, out var btnWidget))
-            {
-                btnWidget.DoUnSelect();
-            }
-            OnSelectTab(index).Forget();
-            _curIndex = index;
-            if (_tabBtnWidgets.TryGetValue(index, out var unSelectBtnWidget))
-            {
-                unSelectBtnWidget.DoSelect();
-            }
-        }
-        
-        #endregion
-
-        #region TabContent
-
-        private void EnableTabBtn(bool enable)
-        {
-            foreach (var tabBtnWidget in _tabBtnWidgets)
-            {
-                tabBtnWidget.Value.EnableBtn(enable);
-            }
-        }
-
-        private async UniTaskVoid OnSelectTab(ETabType index)
-        {
-            EnableTabBtn(false);
-            bool isRight = index < _curIndex;
-            if (_curIndex != ETabType.None)
-            {
-                _tabContentWidgets[_curIndex].OnExit(isRight);
-            }
-            if (!_tabContentWidgets.TryGetValue(index, out var widget))
-            {
-                widget = await GenerateUiWidget(index);
-                widget.OnInit(_tabContentRect);
-                _tabContentWidgets.Add(index, widget);
-            }
-            widget.OnEnter(_curIndex == ETabType.None , isRight);
-            EnableTabBtn(true);
-        }
-
-        private async UniTask<UIHomeTabContentWidget> GenerateUiWidget(ETabType index)
-        {
-            switch (index)
-            {
-                case ETabType.Level:
-                    return await CreateWidgetByPathAsync<UIHomeLevelTabContentWidget>(_tabContentRect , UIHomeLevelTabContentWidget.LevelPrefabPath);
-                case ETabType.Setting:
-                    return await CreateWidgetByPathAsync<UIHomeSettingTabContentWidget>(_tabContentRect , UIHomeSettingTabContentWidget.SettingPrefabPath);
-                default:
-                    return null;
-            }
+            _levelTabContentWidget.RefreshLevelInfo();
         }
 
         #endregion

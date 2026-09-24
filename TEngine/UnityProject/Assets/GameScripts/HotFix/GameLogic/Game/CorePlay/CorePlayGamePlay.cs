@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameLogic.Data;
+using GameLogic.Localization;
 using TEngine;
 
 namespace GameLogic.GamePlay.CorePlay
@@ -19,6 +20,7 @@ namespace GameLogic.GamePlay.CorePlay
         private HashSet<int> _selectedStrokeIndices = new HashSet<int>();
         private HashSet<int> _foundAnswerIndices = new HashSet<int>();
         private bool _isGameRunning;
+        private string _completionMethod = "manual";
 
         // ================ 事件 ================
 
@@ -86,13 +88,13 @@ namespace GameLogic.GamePlay.CorePlay
         /// <summary>加载指定关卡（从配置全新加载）</summary>
         public void LoadLevel(int levelId)
         {
-            LoadLevelInternal(levelId, null, null);
+            LoadLevelInternal(levelId, null, null, true, "next");
         }
 
         /// <summary>加载关卡，可选恢复已找到的答案 + 缓存关卡快照</summary>
         public void LoadLevel(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData = null)
         {
-            LoadLevelInternal(levelId, restoredFoundAnswers, cachedLevelData);
+            LoadLevelInternal(levelId, restoredFoundAnswers, cachedLevelData, true, "home");
         }
 
         /// <summary>仅切换关卡数据，不通知视图、不启动玩法或触发通关。</summary>
@@ -102,7 +104,7 @@ namespace GameLogic.GamePlay.CorePlay
         }
 
         private bool LoadLevelInternal(int levelId, List<int> restoredFoundAnswers, TextLevelData cachedLevelData,
-            bool startGame = true)
+            bool startGame = true, string entry = "direct")
         {
             if (_levelConfig == null)
             {
@@ -152,16 +154,20 @@ namespace GameLogic.GamePlay.CorePlay
             }
 
             _isGameRunning = startGame;
+            _completionMethod = "manual";
 
             DebugLog($"加载关卡 {levelId}: 基字『{_currentLevelData.baseCharacter}』, 共 {_currentLevelData.answers.Count} 个答案, 已找到 {_foundAnswerIndices.Count} 个");
             if (!startGame) return true;
 
+            BiMgr.LevelStarted(levelId, levelData.levelName, levelData.baseCharacter, entry,
+                cachedLevelData != null || _foundAnswerIndices.Count > 0, _foundAnswerIndices.Count, GetRequiredAnswerCount());
             OnLevelLoaded?.Invoke(_currentLevelData);
             OnSelectionChanged?.Invoke();
 
             // 如果已经全部完成，直接通关
             if (IsLevelComplete())
             {
+                _completionMethod = "restored_complete";
                 CompleteLevel();
             }
             return true;
@@ -227,13 +233,14 @@ namespace GameLogic.GamePlay.CorePlay
         {
             if (!_isGameRunning || _currentLevelData == null)
             {
-                OnAnswerSubmitted?.Invoke(false, "", "游戏未运行");
+                OnAnswerSubmitted?.Invoke(false, "", LocalizationHelper.GetLocalText(LanguageKey.game_tips1));
                 return;
             }
 
             if (_selectedStrokeIndices.Count == 0)
             {
-                OnAnswerSubmitted?.Invoke(false, "", "请先选择笔画");
+                BiMgr.AnswerSubmitted("empty", "", _foundAnswerIndices.Count, 0);
+                OnAnswerSubmitted?.Invoke(false, "", LocalizationHelper.GetLocalText(LanguageKey.game_tips2));
                 return;
             }
 
@@ -256,6 +263,7 @@ namespace GameLogic.GamePlay.CorePlay
                     if (setSorted.SequenceEqual(selectedSorted))
                     {
                         // 匹配成功！
+                        BiMgr.AnswerSubmitted("correct", answer.answerCharacter, _foundAnswerIndices.Count + 1, selectedSorted.Count);
                         OnAnswerFound(ansIdx, answer.answerCharacter);
                         return;
                     }
@@ -273,14 +281,16 @@ namespace GameLogic.GamePlay.CorePlay
                     List<int> setSorted = set.strokeIndices.OrderBy(i => i).ToList();
                     if (setSorted.SequenceEqual(selectedSorted))
                     {
-                        OnAnswerSubmitted?.Invoke(false, answer.answerCharacter, "该答案已找到");
+                        BiMgr.AnswerSubmitted("duplicate", answer.answerCharacter, _foundAnswerIndices.Count, selectedSorted.Count);
+                        OnAnswerSubmitted?.Invoke(false, answer.answerCharacter, LocalizationHelper.GetLocalText(LanguageKey.game_tips3));
                         return;
                     }
                 }
             }
 
             // 未匹配任何答案
-            OnAnswerSubmitted?.Invoke(false, "", "所选笔画组合不正确");
+            BiMgr.AnswerSubmitted("wrong", "", _foundAnswerIndices.Count, selectedSorted.Count);
+            OnAnswerSubmitted?.Invoke(false, "", LocalizationHelper.GetLocalText(LanguageKey.game_tips4));
         }
 
         private void OnAnswerFound(int answerIndex, string answerCharacter)
@@ -321,7 +331,9 @@ namespace GameLogic.GamePlay.CorePlay
 
         private void CompleteLevel()
         {
+            if (!_isGameRunning) return;
             _isGameRunning = false;
+            BiMgr.LevelCompleted(_foundAnswerIndices.Count, _completionMethod);
             DebugLog($"关卡 {_currentLevelId} 通关!");
             OnLevelCompleted?.Invoke(_currentLevelId);
             GameEvent.Send(EventDefine.Event_LevelCompleted, _currentLevelId);
@@ -473,7 +485,9 @@ namespace GameLogic.GamePlay.CorePlay
                 answerCharacters.Add(_currentLevelData.answers[answerIndex].answerCharacter);
             }
 
-            return answerCharacters.Count > 0 && IsLevelComplete();
+            bool prepared = answerCharacters.Count > 0 && IsLevelComplete();
+            if (prepared) _completionMethod = "next_prop";
+            return prepared;
         }
 
         /// <summary>完成已由下一关道具补齐的关卡，并触发统一结算流程</summary>

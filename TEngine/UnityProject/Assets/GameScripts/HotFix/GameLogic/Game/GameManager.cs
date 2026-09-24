@@ -75,6 +75,7 @@ namespace GameLogic
 
         private void HandleAppPause(bool pauseStatus)
         {
+            BiMgr.SetPaused(pauseStatus);
             if (pauseStatus)
             {
                 SaveGameProgress();
@@ -186,6 +187,19 @@ namespace GameLogic
             // 结算界面点击按钮只播奖励飞行动画表现，不再改数据。
             GrantLevelReward(levelId);
 
+            if (!_corePlayGamePlay.HasNextLevel())
+            {
+                // 每个内容版本仅记录一次；旧存档缺省为 null。
+                string contentVersion = Application.version + ":" + _levelConfig.MaxLevelId;
+                var cache = _cacheManager.CacheData;
+                if (cache.biAllLevelsCompletedVersion != contentVersion)
+                {
+                    cache.biAllLevelsCompletedVersion = contentVersion;
+                    _cacheManager.Save();
+                    BiMgr.AllLevelsCompleted(levelId, contentVersion);
+                }
+            }
+
             Log.Info($"[GameManager] 游戏通关! 关卡: {levelId}");
             // 弹出结算界面（奖励仍按已通关的 levelId 查配置，用于展示数量）
             GameModule.UI.ShowUIAsync<UIFinish>(levelId);
@@ -201,9 +215,9 @@ namespace GameLogic
             if (rewardMap == null || rewardMap.Count == 0) return;
 
             if (rewardMap.TryGetValue(ItemId.Coin, out int coinCount) && coinCount > 0)
-                PropDefine.AddCoin(coinCount);
+                PropDefine.AddCoin(coinCount, "level_reward");
             if (rewardMap.TryGetValue(ItemId.TipProp, out int tipCount) && tipCount > 0)
-                PropDefine.AddTip(tipCount);
+                PropDefine.AddTip(tipCount, "level_reward");
         }
 
         /// <summary>查询关卡奖励映射（itemId -> 数量），无奖励返回 null</summary>
@@ -251,6 +265,7 @@ namespace GameLogic
         /// <summary>返回主界面</summary>
         public void ReturnToHome()
         {
+            BiMgr.LeaveLevelForHome(_corePlayGamePlay.FoundAnswerIndices.Count);
             SaveGameProgress();
             _corePlayView?.ClearAllHighlights();
             _corePlayView?.OnEndGameAnim();

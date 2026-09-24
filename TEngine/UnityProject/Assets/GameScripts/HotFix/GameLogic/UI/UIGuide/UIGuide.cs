@@ -132,6 +132,7 @@ namespace GameLogic
             _camera.cullingMask = 1 << layer;
             _camera.clearFlags = CameraClearFlags.SolidColor; _camera.backgroundColor = Color.clear;
             _camera.enabled = false; _camera.allowHDR = false; _camera.allowMSAA = false;
+            BiMgr.GuideStarted();
             BeginAnswer();
         }
         private void BeginAnswer()
@@ -170,6 +171,7 @@ namespace GameLogic
                 else
                 {
                     RestoreStroke(); _step = Step.Submit;
+                    BiMgr.GuideStep("answer_" + (_answerIndex + 1) + "_selected");
                     RaiseSubmit();
                     SetText(_answerIndex == 0 ? LanguageKey.guide_step4 : LanguageKey.guide_step5);
                 }
@@ -186,6 +188,7 @@ namespace GameLogic
             if (_step != Step.Submit) return;
             if (!success || character != _game.CurrentLevelData.answers[_answerIndex].answerCharacter)
             { _game.ClearSelection(); _strokeOffset = 0; ShowStroke(); return; }
+            BiMgr.GuideStep("answer_" + (_answerIndex + 1) + "_submitted");
             _answerIndex++; BeginAnswer();
         }
         private void Finish()
@@ -195,6 +198,7 @@ namespace GameLogic
             _input.raycastTarget = false; _handRoot.gameObject.SetActive(false); _highlight.enabled = false;
             SetText(LanguageKey.guide_step6);
             GameManager.Instance.CompleteFirstLevelGuide();
+            BiMgr.GuideStep("complete");
         }
         private void SetText(string languageKey)
         {
