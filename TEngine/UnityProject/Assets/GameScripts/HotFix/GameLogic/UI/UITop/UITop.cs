@@ -243,7 +243,7 @@ namespace GameLogic
 
         #region 生命周期
 
-        protected override void OnDestroy()
+        protected override void OnClose()
         {
             // 清理 DOTween
             _coinAddTweener?.Kill();
@@ -253,7 +253,7 @@ namespace GameLogic
             if (_coinCanvasGroup != null) DOTween.Kill(_coinCanvasGroup);
             if (_backCanvasGroup != null) DOTween.Kill(_backCanvasGroup);
 
-            base.OnDestroy();
+            base.OnClose();
         }
 
         #endregion

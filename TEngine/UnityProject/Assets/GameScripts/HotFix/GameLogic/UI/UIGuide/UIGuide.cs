@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using GameLogic.GamePlay.CorePlay;
 using GameLogic.GamePlay.CorePlay.View;
@@ -87,7 +87,7 @@ namespace GameLogic
         }
         // 独立控制文案过渡，不让旧 UIFade 动画覆盖遮罩和输入状态。
         protected override void OnInAnimation() { OnInAnimationComplete(); }
-        protected override void OnOutAnimation() { OnOutAnimationComplete(); }
+        protected override void OnOutAnimation() { CompleteOutAnimation(); }
         protected override void OnRefresh()
         {
             Cleanup(); _closed = false;
@@ -343,7 +343,7 @@ namespace GameLogic
             if (_closed) return;
             _closed = true; Cleanup(); GameModule.UI.CloseUI<UIGuide>();
         }
-        protected override void OnDestroy() { Cleanup(); base.OnDestroy(); }
+        protected override void OnClose() { Cleanup(); base.OnClose(); }
         protected override void OnSetVisible(bool visible)
         {
             if (!visible && _active == this) CloseGuide();

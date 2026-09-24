@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -13,12 +14,12 @@ namespace GameLogic
             call?.Invoke();
         }
         
-        public static async UniTaskVoid PlayAnimWithDelayAnimLen(this Animation animation , string animName, Action call)
+        public static async UniTaskVoid PlayAnimWithDelayAnimLen(this Animation animation , string animName, Action call, CancellationToken cancellationToken = default)
         {
             float len = animation.GetClip(animName).length;
             animation.Play(animName);
-            await UniTask.WaitForSeconds(len);
-            call?.Invoke();
+            if (await UniTask.Delay(TimeSpan.FromSeconds(len), cancellationToken: cancellationToken).SuppressCancellationThrow()) return;
+            if (!cancellationToken.IsCancellationRequested) call?.Invoke();
         }
     }
 }

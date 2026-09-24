@@ -19,6 +19,7 @@ namespace GameLogic
         private bool _enableErrorLog = true;                    // 是否启用错误日志
         private Camera _uiCamera = null;                        // UI专用摄像机
         private readonly List<UIWindow> _uiStack = new List<UIWindow>(128); // 窗口堆栈
+        private readonly Dictionary<string, UIWindow> _windowCache = new Dictionary<string, UIWindow>();
         private ErrorLogger _errorLogger;                       // 错误日志记录器
 
         // 常量定义
@@ -327,9 +328,26 @@ namespace GameLogic
             {
                 window = GetWindow(windowName);
                 Pop(window); //弹出窗口
+                if (window.LoadError != null || window.IsDestroyed)
+                {
+                    window.InternalDestroy();
+                    return false;
+                }
                 Push(window); //重新压入
                 window.TryInvoke(OnWindowPrepare, userDatas);
                 
+                return true;
+            }
+            if (_windowCache.TryGetValue(windowName, out window))
+            {
+                _windowCache.Remove(windowName);
+                if (window.LoadError != null || window.IsDestroyed)
+                {
+                    window.InternalDestroy();
+                    return false;
+                }
+                Push(window);
+                window.TryInvoke(OnWindowPrepare, userDatas);
                 return true;
             }
             return false;
@@ -340,27 +358,27 @@ namespace GameLogic
             Type type = typeof(T);
             string windowName = type.FullName;
 
-            if (TryGetWindow(windowName, out UIWindow window, userDatas))
-            {
-                return window as T;
-            }
-            else
+            if (!TryGetWindow(windowName, out UIWindow window, userDatas))
             {
                 window = CreateInstance<T>();
-                Push(window); //首次压入
+                Push(window);
                 window.InternalLoad(window.AssetName, OnWindowPrepare, isAsync, userDatas).Forget();
-                float time = 0f;
-                while (!window.IsLoadDone)
-                {
-                    time += Time.deltaTime;
-                    if (time > 60f)
-                    {
-                        break;
-                    }
-                    await UniTask.Yield();
-                }
-                return window as T;
             }
+            int version = window.OpenVersion;
+            float deadline = Time.realtimeSinceStartup + 60f;
+            while (!window.IsLoadDone && window.IsOpen && !window.IsDestroyed && window.OpenVersion == version)
+            {
+                if (Time.realtimeSinceStartup >= deadline)
+                {
+                    DestroyUI(type);
+                    throw new TimeoutException($"UI load timeout: {windowName}");
+                }
+                await UniTask.Yield();
+            }
+            if (window.IsDestroyed || !window.IsOpen || window.OpenVersion != version)
+                throw new OperationCanceledException($"UI closed while opening: {windowName}");
+            if (window.LoadError != null) throw window.LoadError;
+            return window as T;
         }
 
         /// <summary>
@@ -379,12 +397,38 @@ namespace GameLogic
             if (window == null)
                 return;
 
-            window.InternalDestroy();
             Pop(window);
+            if (window.CacheOnClose && window.LoadError == null)
+            {
+                window.InternalClose();
+                _windowCache[windowName] = window;
+            }
+            else window.InternalDestroy();
             OnSortWindowDepth(window.WindowLayer);
             OnSetWindowVisible();
         }
         
+        /// <summary>真正释放窗口（包括缓存）；常规关闭使用 CloseUI。</summary>
+        public void DestroyUI<T>() where T : UIWindow => DestroyUI(typeof(T));
+        public void DestroyUI(Type type)
+        {
+            string name = type.FullName;
+            var window = GetWindow(name);
+            if (window != null) Pop(window);
+            else if (_windowCache.TryGetValue(name, out window)) _windowCache.Remove(name);
+            if (window == null) return;
+            window.InternalDestroy();
+            OnSortWindowDepth(window.WindowLayer);
+            OnSetWindowVisible();
+        }
+
+        public void ClearWindowCache()
+        {
+            var cached = new List<UIWindow>(_windowCache.Values);
+            _windowCache.Clear();
+            foreach (var window in cached) window.InternalDestroy();
+        }
+
         public void HideUI<T>() where T : UIWindow
         {
             HideUI(typeof(T));
@@ -407,6 +451,11 @@ namespace GameLogic
                     return;
                 }
 
+                if (window.CacheOnClose)
+                {
+                    CloseUI(type);
+                    return;
+                }
                 window.CancelHideToCloseTimer();
                 window.Visible = false;
                 window.IsHide = true;
@@ -427,13 +476,18 @@ namespace GameLogic
         /// </summary>
         public void CloseAll(bool isShutDown = false)
         {
-            for (int i = 0; i < _uiStack.Count; i++)
+            var windows = _uiStack.ToArray();
+            if (!isShutDown)
             {
-                UIWindow window = _uiStack[i];
+                foreach (var window in windows) CloseUI(window.GetType());
+                return;
+            }
+            _uiStack.Clear();
+            foreach (var window in windows)
+            {
                 window.InternalDestroy(isShutDown);
             }
-
-            _uiStack.Clear();
+            ClearWindowCache();
         }
 
         /// <summary>
@@ -441,16 +495,14 @@ namespace GameLogic
         /// </summary>
         public void CloseAllWithOut(UIWindow withOut)
         {
-            for (int i = _uiStack.Count - 1; i >= 0; i--)
+            foreach (var window in _uiStack.ToArray())
             {
-                UIWindow window = _uiStack[i];
                 if (window == withOut)
                 {
                     continue;
                 }
 
-                window.InternalDestroy();
-                _uiStack.RemoveAt(i);
+                CloseUI(window.GetType());
             }
         }
 
@@ -459,23 +511,23 @@ namespace GameLogic
         /// </summary>
         public void CloseAllWithOut<T>() where T : UIWindow
         {
-            for (int i = _uiStack.Count - 1; i >= 0; i--)
+            foreach (var window in _uiStack.ToArray())
             {
-                UIWindow window = _uiStack[i];
                 if (window.GetType() == typeof(T))
                 {
                     continue;
                 }
 
-                window.InternalDestroy();
-                _uiStack.RemoveAt(i);
+                CloseUI(window.GetType());
             }
         }
 
         private void OnWindowPrepare(UIWindow window)
         {
+            if (!window.IsOpen || window.IsDestroyed) return;
             window.InternalCreate();
             window.InternalRefresh();
+            if (!window.IsOpen || window.IsDestroyed) return;
             OnSortWindowDepth(window.WindowLayer);
             OnSetWindowVisible();
             window.StartInAnimation();

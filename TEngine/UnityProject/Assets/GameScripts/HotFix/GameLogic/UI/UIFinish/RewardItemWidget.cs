@@ -17,6 +17,12 @@ namespace GameLogic
             _count = FindChildComponent<RTLTextMeshPro>("m_num");
         }
 
+        protected override void OnClose()
+        {
+            DOTween.Kill(transform);
+            base.OnClose();
+        }
+
         /// <summary>设置奖励道具图标和数量</summary>
         public void SetReward(Sprite icon, int count)
         {

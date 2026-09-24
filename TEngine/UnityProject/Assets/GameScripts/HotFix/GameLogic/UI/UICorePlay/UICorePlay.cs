@@ -169,11 +169,11 @@ namespace GameLogic
             _toastRoot.gameObject.SetActive(false);
         }
 
-        protected override void OnDestroy()
+        protected override void OnClose()
         {
             AdSystem.ExitPage(AdIds.Tip, AdIds.Next);
             GameModule.UI.CloseUI<UIGuide>();
-            base.OnDestroy();
+            base.OnClose();
         }
 
         // ================ 通关面板 ================

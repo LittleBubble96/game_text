@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameConfig;
 using GameLogic.Localization;
@@ -107,12 +107,12 @@ namespace GameLogic
                 CompleteInAnimation();
                 // 入场动画完成后播放入场奖励动画
                 // PlayRewardShowAnim();
-            }).Forget();
+            }, CloseToken).Forget();
         }
 
         protected override void OnOutAnimation()
         {
-            _animation.PlayAnimWithDelayAnimLen(_animHideName, CompleteOutAnimation).Forget();
+            _animation.PlayAnimWithDelayAnimLen(_animHideName, CompleteOutAnimation, CloseToken).Forget();
         }
 
         #region 奖励逻辑
@@ -199,7 +199,7 @@ namespace GameLogic
             if (string.IsNullOrEmpty(iconPath)) return;
             var sprite = await GameModule.Resource.LoadAssetAsync<Sprite>(iconPath);
             // 防止旧图标加载结果覆盖下一次结算或重置领取动画。
-            if (_rewardMap == rewardMap && !_hasClaimedReward && widget.gameObject != null)
+            if (IsOpen && _rewardMap == rewardMap && !_hasClaimedReward && widget.gameObject != null)
                 widget.SetIcon(sprite);
         }
 
@@ -234,6 +234,8 @@ namespace GameLogic
 
         private async UniTaskVoid DoClaimAnimations(System.Action onComplete)
         {
+            int version = OpenVersion;
+            var token = CloseToken;
             // 只等待实际创建的动画；没有可展示奖励时也必须完成结算。
             var animations = new List<UniTask>();
             foreach (var widget in _activeRewardWidgets)
@@ -242,7 +244,8 @@ namespace GameLogic
                 widget.PlayFlyAnim(0.6f, () => completion.TrySetResult());
                 animations.Add(completion.Task);
             }
-            await UniTask.WhenAll(animations);
+            if (await UniTask.WhenAll(animations).AttachExternalCancellation(token).SuppressCancellationThrow()) return;
+            if (!IsOpen || version != OpenVersion) return;
             if (_rewardRoot != null)
                 _rewardRoot.gameObject.SetActive(false);
             onComplete?.Invoke();

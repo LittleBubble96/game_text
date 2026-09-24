@@ -25,12 +25,12 @@ namespace GameLogic
 
         protected override void OnInAnimation()
         {
-            _animation.PlayAnimWithDelayAnimLen(_showAnim, OnInAnimationComplete).Forget();
+            _animation.PlayAnimWithDelayAnimLen(_showAnim, OnInAnimationComplete, CloseToken).Forget();
         }
 
         protected override void OnOutAnimation()
         {
-            _animation.PlayAnimWithDelayAnimLen(_hideAnim, OnOutAnimationComplete).Forget();
+            _animation.PlayAnimWithDelayAnimLen(_hideAnim, CompleteOutAnimation, CloseToken).Forget();
         }
 
         protected override void OnRefresh()

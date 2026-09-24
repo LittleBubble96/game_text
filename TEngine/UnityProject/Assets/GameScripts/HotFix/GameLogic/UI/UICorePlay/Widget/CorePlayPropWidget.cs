@@ -121,6 +121,19 @@ namespace GameLogic
             RefreshDes();
         }
 
+        protected override void OnClose()
+        {
+            _levelVersion++;
+            if (_corePlayGamePlay != null)
+            {
+                _corePlayGamePlay.OnSelectionChanged -= OnSelectionChanged;
+                _corePlayGamePlay.OnLevelLoaded -= OnAdLevelLoaded;
+                _corePlayGamePlay = null;
+            }
+            StopIconSwitch();
+            base.OnClose();
+        }
+
         protected override void OnDestroy()
         {
             _isDestroyed = true;
@@ -167,7 +180,7 @@ namespace GameLogic
 
         private void RefreshResetIcon(bool animate)
         {
-            if (_propType != PropType.Reset || _isDestroyed || _iconImage == null) return;
+            if (_propType != PropType.Reset || _isDestroyed || OwnerWindow?.IsOpen != true || _iconImage == null) return;
             var target = _corePlayGamePlay != null && _corePlayGamePlay.SelectedStrokeIndices.Count > 0
                 ? _clearIcon : _selectAllIcon;
             RefreshDes();
@@ -380,7 +393,7 @@ namespace GameLogic
         /// <summary>刷新数量/金币/广告三档显示与按钮置灰</summary>
         private void RefreshDisplay()
         {
-            if (_isDestroyed) return;
+            if (_isDestroyed || OwnerWindow?.IsOpen != true) return;
             // Reset 为免费功能，不展示或消耗数量、金币、广告。
             if (_propType == PropType.Reset)
             {

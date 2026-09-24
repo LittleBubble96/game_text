@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
@@ -17,6 +18,44 @@ namespace GameLogic
         private System.Action<UIWindow> _prepareCallback;
 
         private bool _isCreate = false;
+        public virtual bool CacheOnClose => true;
+        public bool IsOpen { get; private set; }
+        public int OpenVersion { get; private set; }
+        private CancellationTokenSource _closeSource;
+        protected CancellationToken CloseToken => _closeSource?.Token ?? new CancellationToken(true);
+        internal Exception LoadError { get; private set; }
+
+        private void BeginOpen()
+        {
+            _closeSource?.Cancel();
+            _closeSource?.Dispose();
+            _closeSource = new CancellationTokenSource();
+            IsOpen = true;
+            OpenVersion++;
+            _onOutAnimationComplete = null;
+            IsAnimating = false;
+            CancelHideToCloseTimer();
+            if (_panel != null) _panel.SetActive(true);
+        }
+
+        internal void InternalClose()
+        {
+            if (!IsOpen) return;
+            IsOpen = false;
+            OpenVersion++;
+            _prepareCallback = null;
+            _onOutAnimationComplete = null;
+            IsAnimating = false;
+            CancelHideToCloseTimer();
+            _closeSource?.Cancel();
+            _closeSource?.Dispose();
+            _closeSource = null;
+            if (_isCreate) InternalWindowClosed();
+            Visible = false;
+            if (_panel != null) _panel.SetActive(false);
+            _userDatas = null;
+        }
+
 
         private GameObject _panel;
 
@@ -146,7 +185,7 @@ namespace GameLogic
             {
                 if (_canvas != null)
                 {
-                    return _canvas.gameObject.layer == UIModule.WINDOW_SHOW_LAYER;
+                    return IsOpen && _panel.activeSelf && _canvas.gameObject.layer == UIModule.WINDOW_SHOW_LAYER;
                 }
                 else
                 {
@@ -306,7 +345,7 @@ namespace GameLogic
 
         internal void TryInvoke(System.Action<UIWindow> prepareCallback, System.Object[] userDatas)
         {
-            CancelHideToCloseTimer();
+            if (!IsOpen || IsPrepare) BeginOpen();
             base._userDatas = userDatas;
             if (IsPrepare)
             {
@@ -320,25 +359,36 @@ namespace GameLogic
 
         internal async UniTaskVoid InternalLoad(string location, Action<UIWindow> prepareCallback, bool isAsync, System.Object[] userDatas)
         {
+            BeginOpen();
             _prepareCallback = prepareCallback;
             this._userDatas = userDatas;
-            if (!FromResources)
+            try
             {
-                if (isAsync)
+                if (!FromResources)
                 {
-                    var uiInstance = await UIModule.Resource.LoadGameObjectAsync(location, parent: UIModule.UIRoot);
-                    Handle_Completed(uiInstance);
+                    if (isAsync)
+                    {
+                        var uiInstance = await UIModule.Resource.LoadGameObjectAsync(location, parent: UIModule.UIRoot);
+                        Handle_Completed(uiInstance);
+                    }
+                    else
+                    {
+                        var uiInstance = UIModule.Resource.LoadGameObject(location, parent: UIModule.UIRoot);
+                        Handle_Completed(uiInstance);
+                    }
                 }
                 else
                 {
-                    var uiInstance = UIModule.Resource.LoadGameObject(location, parent: UIModule.UIRoot);
-                    Handle_Completed(uiInstance);
+                    GameObject panel = Object.Instantiate(Resources.Load<GameObject>(location), UIModule.UIRoot);
+                    Handle_Completed(panel);
                 }
             }
-            else
+            catch (Exception error)
             {
-                GameObject panel = Object.Instantiate(Resources.Load<GameObject>(location), UIModule.UIRoot);
-                Handle_Completed(panel);
+                LoadError = error;
+                IsLoadDone = true;
+                if (_panel != null) _panel.SetActive(false);
+                Log.Error($"[UI] {WindowName} 加载失败: {error}");
             }
         }
 
@@ -365,7 +415,7 @@ namespace GameLogic
 
         internal bool InternalUpdate()
         {
-            if (!IsPrepare || !Visible)
+            if (!IsOpen || !IsPrepare || !Visible)
             {
                 return false;
             }
@@ -436,6 +486,9 @@ namespace GameLogic
 
         internal void InternalDestroy(bool isShutDown = false)
         {
+            if (IsDestroyed) return;
+            InternalClose();
+            bool wasCreated = _isCreate;
             _isCreate = false;
 
             RemoveAllUIEvent();
@@ -450,7 +503,7 @@ namespace GameLogic
             // 注销回调函数
             _prepareCallback = null;
 
-            OnDestroy();
+            if (wasCreated) OnDestroy();
 
             // 销毁面板对象
             if (_panel != null)
@@ -473,10 +526,7 @@ namespace GameLogic
         /// <param name="panel">面板资源实例。</param>
         private void Handle_Completed(GameObject panel)
         {
-            if (panel == null)
-            {
-                return;
-            }
+            if (panel == null) throw new Exception($"UI asset not found: {AssetName}");
 
             IsLoadDone = true;
             
@@ -508,7 +558,8 @@ namespace GameLogic
 
             // 通知UI管理器
             IsPrepare = true;
-            _prepareCallback?.Invoke(this);
+            if (IsOpen) _prepareCallback?.Invoke(this);
+            else _panel.SetActive(false);
         }
         
         protected virtual void Hide()

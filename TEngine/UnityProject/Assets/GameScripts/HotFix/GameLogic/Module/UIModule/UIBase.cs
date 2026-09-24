@@ -186,6 +186,25 @@ namespace GameLogic
             _hasOverrideUpdate = false;
         }
 
+        /// <summary>每次窗口关闭都会执行；缓存复用时不执行 OnDestroy。</summary>
+        protected virtual void OnClose() { }
+
+        internal void InternalWindowClosed()
+        {
+            OnClose();
+            foreach (var child in ListChild) child.InternalWindowClosed();
+        }
+
+        private bool CanReceiveUIEvent
+        {
+            get
+            {
+                UIBase root = this;
+                while (root.Parent != null) root = root.Parent;
+                return !(root is UIWindow window) || window.IsOpen;
+            }
+        }
+
         internal void CallDestroy()
         {
             OnDestroy();
@@ -305,27 +324,27 @@ namespace GameLogic
 
         public void AddUIEvent(int eventType, Action handler)
         {
-            EventMgr.AddEvent(eventType, handler);
+            EventMgr.AddEvent(eventType, () => { if (CanReceiveUIEvent) handler(); });
         }
 
         protected void AddUIEvent<T>(int eventType, Action<T> handler)
         {
-            EventMgr.AddEvent(eventType, handler);
+            EventMgr.AddEvent<T>(eventType, (a) => { if (CanReceiveUIEvent) handler(a); });
         }
 
         protected void AddUIEvent<T, U>(int eventType, Action<T, U> handler)
         {
-            EventMgr.AddEvent(eventType, handler);
+            EventMgr.AddEvent<T, U>(eventType, (a, b) => { if (CanReceiveUIEvent) handler(a, b); });
         }
 
         protected void AddUIEvent<T, U, V>(int eventType, Action<T, U, V> handler)
         {
-            EventMgr.AddEvent(eventType, handler);
+            EventMgr.AddEvent<T, U, V>(eventType, (a, b, c) => { if (CanReceiveUIEvent) handler(a, b, c); });
         }
 
         protected void AddUIEvent<T, U, V, W>(int eventType, Action<T, U, V, W> handler)
         {
-            EventMgr.AddEvent(eventType, handler);
+            EventMgr.AddEvent<T, U, V, W>(eventType, (a, b, c, d) => { if (CanReceiveUIEvent) handler(a, b, c, d); });
         }
 
         protected void RemoveAllUIEvent()

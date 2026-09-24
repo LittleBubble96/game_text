@@ -59,12 +59,12 @@ namespace GameLogic
 
         protected override void OnInAnimation()
         {
-            _animation.PlayAnimWithDelayAnimLen(_showAnim, base.OnInAnimation).Forget();
+            _animation.PlayAnimWithDelayAnimLen(_showAnim, base.OnInAnimation, CloseToken).Forget();
         }
 
         protected override void OnOutAnimation()
         {
-            _animation.PlayAnimWithDelayAnimLen(_hideAnim, base.OnOutAnimation).Forget();
+            _animation.PlayAnimWithDelayAnimLen(_hideAnim, base.OnOutAnimation, CloseToken).Forget();
         }
 
         private void OnMusicVolumeChanged(float value)
