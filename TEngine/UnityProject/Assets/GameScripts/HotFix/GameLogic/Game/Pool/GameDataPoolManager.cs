@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameLogic;
 using TEngine;
@@ -14,19 +15,40 @@ namespace GameLogic
         /// 释放对象。
         /// </summary>
         /// <param name="isShutdown">是否是关闭对象池时触发。</param>
-        protected override void Release(bool isShutdown){}
+        protected override void Release(bool isShutdown)
+        {
+            // 实例上的 AssetsReference 在 OnDestroy 中归还资源引用；不要重复 UnloadAsset。
+            var obj = Target is Component component ? component.gameObject : Target as GameObject;
+            if (obj == null) return;
+            obj.SetActive(false);
+            Object.Destroy(obj);
+        }
     
+        internal void DiscardUnregistered()
+        {
+            Release(false);
+            MemoryPool.Release(this);
+        }
+
         /// <summary>
         /// 创建Actor对象（异步加载资源，对象池冷启动时使用）。
         /// </summary>
         /// <param name="actorName">对象名称。</param>
         /// <param name="target">对象持有实例。</param>
         /// <returns></returns>
-        public static async UniTask<PoolObjectItem> CreateComponentAsync<T>(string resPath) where T : MonoBehaviour
+        public static async UniTask<PoolObjectItem> CreateComponentAsync<T>(string resPath, Transform parent = null) where T : MonoBehaviour
         {
             var gameObjectItem = MemoryPool.Acquire<PoolObjectItem>();
+            // 先完成一次激活，再移入隐藏池。Unity 对从未激活的对象不保证调用
+            // OnDestroy，直接在 inactive 父节点下创建会漏掉 AssetsReference 的归还。
             var itemObj = await GameModule.Resource.LoadGameObjectAsync(resPath);
+            if (itemObj == null)
+            {
+                MemoryPool.Release(gameObjectItem);
+                throw new InvalidOperationException($"对象池资源加载失败: {resPath}");
+            }
             var target = itemObj.GetOrAddComponent<T>();
+            if (parent != null) itemObj.transform.SetParent(parent, false);
             gameObjectItem.Initialize(resPath, target);
             return gameObjectItem;
         }
@@ -48,6 +70,9 @@ namespace GameLogic
     {
         private Transform _poolTransform;
         private IObjectPoolModule _poolModule;
+        private readonly HashSet<string> _warmingPools = new HashSet<string>();
+        private readonly HashSet<string> _ownedPools = new HashSet<string>();
+        private bool _released;
 
         protected override void OnInit()
         {
@@ -67,21 +92,31 @@ namespace GameLogic
         
         public async UniTask RegisterComponentPoolAsync<T>(string resPath, int capacity = 10) where T : MonoBehaviour
         {
-            IObjectPool<PoolObjectItem> _pool = null;
-            if (!_poolModule.HasObjectPool<PoolObjectItem>(resPath))
+            // 同一个池的并发预热串行化；可补充已存在的池，而非只处理首次创建。
+            while (_warmingPools.Contains(resPath)) await UniTask.Yield();
+            if (_released) return;
+            _warmingPools.Add(resPath);
+            try
             {
-                _pool = _poolModule.CreateSingleSpawnObjectPool<PoolObjectItem>(resPath, capacity);
-
-                for (int i = 0; i < capacity; i++)
+                var pool = GetAndCreateObjectPool(resPath, capacity);
+                pool.Capacity = Math.Max(pool.Capacity, capacity);
+                while (pool.Count < capacity)
                 {
-                    var ret = await PoolObjectItem.CreateComponentAsync<T>(resPath);
-                    _pool.Register(ret, false);
-                    var obj = ret.Target as T;
-                    obj.transform.SetParent(_poolTransform);
+                    var item = await PoolObjectItem.CreateComponentAsync<T>(resPath, _poolTransform);
+                    if (_released || !_poolModule.HasObjectPool<PoolObjectItem>(resPath) ||
+                        !ReferenceEquals(pool, _poolModule.GetObjectPool<PoolObjectItem>(resPath)))
+                    {
+                        item.DiscardUnregistered();
+                        return;
+                    }
+                    pool.Register(item, false);
+                    // 每帧最多预热一个对象，避免缓存命中时实例化集中在同一帧。
+                    await UniTask.Yield();
                 }
             }
+            finally { _warmingPools.Remove(resPath); }
         }
-        
+
         public void UnRegisterComponentPool(string resPath)
         {
             if (_poolModule.HasObjectPool<PoolObjectItem>(resPath))
@@ -96,6 +131,7 @@ namespace GameLogic
             if (!_poolModule.HasObjectPool<PoolObjectItem>(resPath))
             {
                 _pool = _poolModule.CreateSingleSpawnObjectPool<PoolObjectItem>(resPath, capacity);
+                _ownedPools.Add(resPath);
 
                 for (int i = 0; i < capacity; i++)
                 {
@@ -125,6 +161,7 @@ namespace GameLogic
             else
             {
                 _pool = _poolModule.CreateSingleSpawnObjectPool<PoolObjectItem>(typeName, capacity);
+                _ownedPools.Add(typeName);
             }
 
             return _pool;
@@ -156,7 +193,7 @@ namespace GameLogic
             }
 
             var obj = ret.Target as T;
-            obj.transform.SetParent(parent);
+            obj.transform.SetParent(parent, false);
             return obj;
         }
 
@@ -219,8 +256,12 @@ namespace GameLogic
         protected override void OnRelease()
         {
             base.OnRelease();
-            _poolModule.Release();
-            Object.Destroy(_poolTransform);
+            _released = true;
+            // 只释放本管理器创建的池，不关闭资源/UI 等模块共享的整个对象池模块。
+            foreach (var name in _ownedPools)
+                if (_poolModule.HasObjectPool<PoolObjectItem>(name)) _poolModule.DestroyObjectPool<PoolObjectItem>(name);
+            _ownedPools.Clear();
+            if (_poolTransform != null) Object.Destroy(_poolTransform.gameObject);
         }
         
     }

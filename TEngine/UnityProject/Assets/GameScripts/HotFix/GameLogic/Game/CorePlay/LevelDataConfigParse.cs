@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using System.Threading;
+using YooAsset;
 using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using TEngine;
@@ -16,6 +18,13 @@ namespace GameLogic.GamePlay.CorePlay
 
         private TextLevelDataScriptableObject _levelDataAsset;
         private TextGraphicDataScriptableObject _graphicDataAsset;
+        private readonly Dictionary<string, string> _characterChunks = new Dictionary<string, string>();
+        private readonly Dictionary<string, AssetHandle> _chunkHandles = new Dictionary<string, AssetHandle>();
+        private readonly LinkedList<string> _chunkLru = new LinkedList<string>();
+        private readonly SemaphoreSlim _graphicLoadGate = new SemaphoreSlim(1, 1);
+        private const int MaxCachedChunks = 2;
+        private bool _released;
+        private TextGraphicData _activeGraphicData;
 
         /// <summary>所有关卡数据</summary>
         public List<TextLevelData> AllLevels { get; private set; }
@@ -91,16 +100,77 @@ namespace GameLogic.GamePlay.CorePlay
         private void BuildGraphicDataMap()
         {
             GraphicDataMap = new Dictionary<string, TextGraphicData>();
-            if (_graphicDataAsset == null || _graphicDataAsset.TextGraphicDataList == null) return;
+            _characterChunks.Clear();
+            if (_graphicDataAsset == null) return;
+            // 兼容尚未拆分的旧配置，新的主文件只含地址索引。
+            if (_graphicDataAsset.TextGraphicDataList != null)
+                foreach (var data in _graphicDataAsset.TextGraphicDataList)
+                    if (data != null && !string.IsNullOrEmpty(data.character)) GraphicDataMap[data.character] = data;
+            foreach (var entry in _graphicDataAsset.GraphicChunks)
+                foreach (char character in entry.characters)
+                    _characterChunks.Add(character.ToString(), entry.resourceName);
+        }
 
-            foreach (var gd in _graphicDataAsset.TextGraphicDataList)
+        /// <summary>按需读取所在分片，保留最近两个分片。并发请求串行化，避免重复加载。</summary>
+        public async UniTask<TextGraphicData> GetGraphicDataAsync(string character)
+        {
+            if (_released || string.IsNullOrEmpty(character)) return null;
+            await _graphicLoadGate.WaitAsync();
+            try
             {
-                if (gd != null && !string.IsNullOrEmpty(gd.character))
+                if (_released) return null;
+                if (GraphicDataMap.TryGetValue(character, out var cached))
                 {
-                    GraphicDataMap[gd.character] = gd;
+                    if (_characterChunks.TryGetValue(character, out var cachedName)) TouchChunk(cachedName);
+                    return cached;
+                }
+                if (!_characterChunks.TryGetValue(character, out var name)) return null;
+                var handle = GameModule.Resource.LoadAssetAsyncHandle<TextGraphicDataScriptableObject>(name);
+                bool retained = false;
+                try
+                {
+                    await handle.ToUniTask();
+                    if (_released) return null;
+                    var chunk = handle.AssetObject as TextGraphicDataScriptableObject;
+                    if (chunk == null || chunk.TextGraphicDataList == null) return null;
+                    _chunkHandles.Add(name, handle);
+                    retained = true;
+                    foreach (var data in chunk.TextGraphicDataList) GraphicDataMap[data.character] = data;
+                    TouchChunk(name);
+                    while (_chunkLru.Count > MaxCachedChunks) EvictChunk(_chunkLru.First.Value);
+                    return GetGraphicData(character);
+                }
+                finally
+                {
+                    if (!retained) handle.Dispose();
                 }
             }
-            Log.Info($"加载了 {GraphicDataMap.Count} 个字形数据");
+            finally { _graphicLoadGate.Release(); }
+        }
+
+        private void TouchChunk(string name)
+        {
+            _chunkLru.Remove(name);
+            _chunkLru.AddLast(name);
+        }
+
+        private void EvictChunk(string name)
+        {
+            if (!_chunkHandles.TryGetValue(name, out var handle)) return;
+            var chunk = handle.AssetObject as TextGraphicDataScriptableObject;
+            if (chunk != null && chunk.TextGraphicDataList != null)
+                foreach (var data in chunk.TextGraphicDataList) GraphicDataMap.Remove(data.character);
+            _chunkHandles.Remove(name);
+            _chunkLru.Remove(name);
+            handle.Dispose();
+        }
+
+        public void ReleaseGraphicCache()
+        {
+            _released = true;
+            _activeGraphicData = null;
+            while (_chunkLru.Count > 0) EvictChunk(_chunkLru.First.Value);
+            GraphicDataMap?.Clear();
         }
 
         /// <summary>根据关卡名称获取关卡数据</summary>
@@ -129,9 +199,13 @@ namespace GameLogic.GamePlay.CorePlay
             return name;
         }
 
-        /// <summary>获取字符的图形数据</summary>
+        // 当前已显示的字保留一份托管数据引用，快速跳关的旧请求不能影响全选。
+        public void SetActiveGraphicData(TextGraphicData data) => _activeGraphicData = data;
+
+        /// <summary>获取已加载字符的图形数据；冷加载使用 GetGraphicDataAsync。</summary>
         public TextGraphicData GetGraphicData(string character)
         {
+            if (_activeGraphicData != null && _activeGraphicData.character == character) return _activeGraphicData;
             if (GraphicDataMap == null || string.IsNullOrEmpty(character))
                 return null;
             GraphicDataMap.TryGetValue(character, out var data);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -103,14 +103,14 @@ namespace Launcher
             return m_uiMapDict.GetValueOrDefault(uiName);
         }
 
-        public static void HideAllUI()
+        public static void HideAllUI(float loadUpdateDelay = 0.5f)
         {
             foreach (var ui in m_uiMapDict.Values)
             {
                 float delay = 0;
                 if (ui is LoadUpdateUI) //防止异步黑屏
                 {
-                    delay = 0.5f;
+                    delay = Mathf.Max(0f, loadUpdateDelay);
                 }
                 else
                 {

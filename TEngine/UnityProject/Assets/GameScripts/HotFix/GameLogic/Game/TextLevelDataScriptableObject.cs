@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameLogic.Data;
@@ -186,9 +186,9 @@ public class TextLevelEditorWindow : EditorWindow
                 _levelCharacters.Add(levelData.baseCharacter);
             }
         }
-        if (_graphicDataAsset != null && _graphicDataAsset.TextGraphicDataList != null)
+        if (_graphicDataAsset != null)
         {
-            foreach (var gd in _graphicDataAsset.TextGraphicDataList)
+            foreach (var gd in _graphicDataAsset.GetAllGraphicDataEditor())
             {
                 if (gd == null || string.IsNullOrEmpty(gd.character)) continue;
                 if (_levelCharacters.Contains(gd.character))
@@ -1399,7 +1399,7 @@ public class TextLevelEditorWindow : EditorWindow
             return;
         }
 
-        var gd = _graphicDataAsset.TextGraphicDataList.Find(x => x.character == ch);
+        var gd = _graphicDataAsset.GetAllGraphicDataEditor().Find(x => x.character == ch);
         if (gd == null)
         {
             EditorUtility.DisplayDialog("错误", $"字符 '{ch}' 在图形数据中未找到", "确定");

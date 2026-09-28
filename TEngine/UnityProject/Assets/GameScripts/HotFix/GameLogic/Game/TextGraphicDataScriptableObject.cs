@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using hyjiacan.py4n;
 using UnityEngine;
@@ -9,6 +9,8 @@ namespace GameLogic.Data
     {
         [SerializeField]
         public List<TextGraphicData> TextGraphicDataList;
+        // 索引只保存地址和字符，不直接引用分片，避免加载索引时连带加载全部字形。
+        public List<GraphicChunkEntry> GraphicChunks = new List<GraphicChunkEntry>();
         [SerializeField] private float _pixelScale = 0.002f; // 缩放因子，将 0~1000 坐标缩小到合适大小
         [SerializeField] private int _curveSegments = 10; // 贝塞尔曲线采样点数
 
@@ -31,9 +33,119 @@ namespace GameLogic.Data
             Debug.Log($"TextGraphicDataScriptableObject 已创建: {AssetPath}");
         }
 
+        public List<TextGraphicData> GetAllGraphicDataEditor()
+        {
+            var result = new List<TextGraphicData>();
+            if (TextGraphicDataList != null) result.AddRange(TextGraphicDataList);
+            foreach (var entry in GraphicChunks)
+            {
+                var chunk = UnityEditor.AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(ChunkPath(entry.resourceName));
+                if (chunk == null) throw new InvalidOperationException($"找不到字形分片: {entry.resourceName}");
+                if (chunk.TextGraphicDataList != null) result.AddRange(chunk.TextGraphicDataList);
+            }
+            return result;
+        }
+
+        private static string ChunkPath(string name) => $"{AssetDir}/Graphics/{name}/{name}.asset";
+
+        private void StoreGraphicEditor(TextGraphicData data)
+        {
+            var target = this;
+            GraphicChunkEntry entry = null;
+            if (GraphicChunks.Count > 0)
+            {
+                entry = GraphicChunks.Find(x => x.characters.Contains(data.character));
+                if (entry == null)
+                {
+                    // 尚未配置关卡的字也单独存放，不让主索引重新膨胀。
+                    const string extra = "TextGraphics_Unassigned";
+                    entry = GraphicChunks.Find(x => x.resourceName == extra);
+                    if (entry == null)
+                    {
+                        entry = new GraphicChunkEntry { resourceName = extra, characters = "" };
+                        GraphicChunks.Add(entry);
+                    }
+                }
+                string path = ChunkPath(entry.resourceName);
+                target = UnityEditor.AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(path);
+                if (target == null)
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+                    UnityEditor.AssetDatabase.Refresh();
+                    target = CreateInstance<TextGraphicDataScriptableObject>();
+                    target._pixelScale = _pixelScale;
+                    target._curveSegments = _curveSegments;
+                    UnityEditor.AssetDatabase.CreateAsset(target, path);
+                }
+                if (!entry.characters.Contains(data.character)) entry.characters += data.character;
+            }
+            if (target.TextGraphicDataList == null) target.TextGraphicDataList = new List<TextGraphicData>();
+            int index = target.TextGraphicDataList.FindIndex(x => x.character == data.character);
+            if (index < 0) target.TextGraphicDataList.Add(data);
+            else target.TextGraphicDataList[index] = data;
+            UnityEditor.EditorUtility.SetDirty(target);
+            UnityEditor.EditorUtility.SetDirty(this);
+        }
+
+        [UnityEditor.MenuItem("Tools/关卡/按25关重建字形分片")]
+        public static void RebuildGraphicChunksEditor()
+        {
+            var manifest = UnityEditor.AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(AssetPath);
+            var levels = UnityEditor.AssetDatabase.LoadAssetAtPath<TextLevelDataScriptableObject>($"{AssetDir}/TextLevelDataScriptableObject.asset");
+            if (manifest == null || levels == null) throw new InvalidOperationException("缺少字形或关卡配置");
+            var graphics = manifest.GetAllGraphicDataEditor();
+            var owners = new Dictionary<string, int>();
+            foreach (var level in levels.levelDataList)
+            {
+                if (!int.TryParse(level.levelName.Replace("Level_", ""), out int id) || id < 1) continue;
+                if (!owners.TryGetValue(level.baseCharacter, out int previous) || id < previous)
+                    owners[level.baseCharacter] = id;
+            }
+            var groups = new SortedDictionary<string, List<TextGraphicData>>();
+            foreach (var graphic in graphics)
+            {
+                string name = "TextGraphics_Unassigned";
+                if (owners.TryGetValue(graphic.character, out int id))
+                {
+                    int first = (id - 1) / 25 * 25 + 1;
+                    name = $"TextGraphics_{first:D3}_{first + 24:D3}";
+                }
+                if (!groups.TryGetValue(name, out var items)) groups[name] = items = new List<TextGraphicData>();
+                items.Add(graphic);
+            }
+            var oldEntries = new List<GraphicChunkEntry>(manifest.GraphicChunks);
+            var newEntries = new List<GraphicChunkEntry>();
+            foreach (var group in groups)
+            {
+                string path = ChunkPath(group.Key);
+                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path));
+                UnityEditor.AssetDatabase.Refresh();
+                var chunk = UnityEditor.AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(path);
+                if (chunk == null)
+                {
+                    chunk = CreateInstance<TextGraphicDataScriptableObject>();
+                    UnityEditor.AssetDatabase.CreateAsset(chunk, path);
+                }
+                chunk.TextGraphicDataList = group.Value;
+                chunk._pixelScale = manifest._pixelScale;
+                chunk._curveSegments = manifest._curveSegments;
+                string characters = "";
+                foreach (var graphic in group.Value) characters += graphic.character;
+                newEntries.Add(new GraphicChunkEntry { resourceName = group.Key, characters = characters });
+                UnityEditor.EditorUtility.SetDirty(chunk);
+            }
+            manifest.TextGraphicDataList = new List<TextGraphicData>();
+            manifest.GraphicChunks = newEntries;
+            UnityEditor.EditorUtility.SetDirty(manifest);
+            UnityEditor.AssetDatabase.SaveAssets();
+            foreach (var old in oldEntries)
+                if (!groups.ContainsKey(old.resourceName)) UnityEditor.AssetDatabase.DeleteAsset(ChunkPath(old.resourceName));
+            Debug.Log($"字形分片完成: {graphics.Count} 字 / {groups.Count} 个分片");
+        }
+
         public bool CheckHasCharacter(string input)
         {
-            foreach (var t in TextGraphicDataList)
+            foreach (var t in GetAllGraphicDataEditor())
             {
                 if (t != null && t.character == input)
                 {
@@ -65,11 +177,10 @@ namespace GameLogic.Data
 
         public void ReGenerate()
         {
-            if (TextGraphicDataList == null || TextGraphicDataList.Count == 0)
-                return;
-
-            var chars = new List<string>(TextGraphicDataList.Count);
-            foreach (var t in TextGraphicDataList)
+            var allGraphics = GetAllGraphicDataEditor();
+            if (allGraphics.Count == 0) return;
+            var chars = new List<string>(allGraphics.Count);
+            foreach (var t in allGraphics)
             {
                 if (t != null)
                     chars.Add(t.character);
@@ -102,22 +213,7 @@ namespace GameLogic.Data
                 return $"Character '{input}' not found in graphics data.";
             }
 
-            if (TextGraphicDataList == null)
-            {
-                TextGraphicDataList = new List<TextGraphicData>();
-            }
-
-            int findIndex = TextGraphicDataList.FindIndex(g => g.character == input);
-            if (findIndex == -1)
-            {
-                TextGraphicDataList.Add(graphicData);
-            }
-            else
-            {
-                TextGraphicDataList[findIndex] = graphicData;
-            }
-
-            UnityEditor.EditorUtility.SetDirty(this);
+            StoreGraphicEditor(graphicData);
             //保存
             UnityEditor.AssetDatabase.SaveAssets();
             return string.Empty;
@@ -293,6 +389,13 @@ namespace GameLogic.Data
 
     }
     
+    [Serializable]
+    public class GraphicChunkEntry
+    {
+        public string resourceName;
+        public string characters;
+    }
+
     // 以下类定义应与 JSON 结构匹配
     [System.Serializable]
     public class TextGraphicConfigData

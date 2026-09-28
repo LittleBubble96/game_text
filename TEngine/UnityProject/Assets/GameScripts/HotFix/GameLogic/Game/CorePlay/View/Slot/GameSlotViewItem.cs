@@ -19,10 +19,25 @@ namespace GameLogic.GamePlay.CorePlay.View
         public bool IsFilled { get; private set; }
 
         private Sequence _sequence;
+        private Sequence _putSequence;
+
+        private void StopAnimations()
+        {
+            _sequence?.Kill();
+            _putSequence?.Kill();
+            _sequence = null;
+            _putSequence = null;
+        }
+
+        private void OnDisable() => StopAnimations();
+        private void OnDestroy() => StopAnimations();
 
         /// <summary>显示空状态：只显示背景，不显示内容</summary>
         public void ShowEmptyState()
         {
+            StopAnimations();
+            root.transform.localScale = Vector3.one;
+            contentRoot.localPosition = Vector3.zero;
             IsFilled = false;
             contentRoot.gameObject.SetActive(false);
             if (content != null) content.text = "";
@@ -61,11 +76,12 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void PlayPutAnimation()
         {
+            StopAnimations();
             contentRoot.transform.localPosition = new Vector3(-0.5f, -2, 0);
             content.color = new Color(content.color.r, content.color.g, content.color.b, 0);
             contentTone.color = new Color(content.color.r, content.color.g, content.color.b, 0);
             contentBg.color = new Color(contentBg.color.r, contentBg.color.g, contentBg.color.b, 0);
-            Sequence sequence = DOTween.Sequence();
+            Sequence sequence = _putSequence = DOTween.Sequence();
             sequence.Append(contentRoot.transform.DOLocalMove(Vector3.zero, 0.25f).SetEase(Ease.OutCubic));
             sequence.Join(content.DOColor(new Color(content.color.r, content.color.g, content.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             sequence.Join(contentTone.DOColor(new Color(content.color.r, content.color.g, content.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
@@ -92,7 +108,6 @@ namespace GameLogic.GamePlay.CorePlay.View
             _sequence.Append(content.DOColor(new Color(content.color.r, content.color.g, content.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(contentTone.DOColor(new Color(content.color.r, content.color.g, content.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(contentBg.DOColor(new Color(contentBg.color.r, contentBg.color.g, contentBg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
-            _sequence.Join(bg.DOColor(new Color(bg.color.r, bg.color.g, bg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(bg.DOColor(new Color(bg.color.r, bg.color.g, bg.color.b, 1f), 0.2f).SetEase(Ease.OutCubic));
             _sequence.Join(root.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutCubic));
             _sequence.OnKill(() =>

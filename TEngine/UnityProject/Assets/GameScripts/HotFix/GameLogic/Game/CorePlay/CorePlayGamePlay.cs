@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameLogic.Data;
@@ -21,6 +21,7 @@ namespace GameLogic.GamePlay.CorePlay
         private HashSet<int> _foundAnswerIndices = new HashSet<int>();
         private bool _isGameRunning;
         private string _completionMethod = "manual";
+        private readonly StrokeAnswerLookup _answerLookup = new StrokeAnswerLookup();
 
         // ================ 事件 ================
 
@@ -140,6 +141,7 @@ namespace GameLogic.GamePlay.CorePlay
             // 验证成功后再提交状态，失败时保留原关卡和答案进度。
             _currentLevelId = levelId;
             _currentLevelData = levelData;
+            _answerLookup.Build(levelData.answers);
             _selectedStrokeIndices.Clear();
             _foundAnswerIndices.Clear();
 
@@ -244,52 +246,30 @@ namespace GameLogic.GamePlay.CorePlay
                 return;
             }
 
-            // 将选中的笔画索引排序以便比较
-            List<int> selectedSorted = _selectedStrokeIndices.OrderBy(i => i).ToList();
+            int selectedCount = _selectedStrokeIndices.Count;
+            var matches = _answerLookup.Find(_selectedStrokeIndices);
             _selectedStrokeIndices.Clear();
             OnSelectionChanged?.Invoke();
-            // 遍历所有答案，检查是否匹配
-            for (int ansIdx = 0; ansIdx < _currentLevelData.answers.Count; ansIdx++)
+            if (matches != null)
             {
-                // 已找到的答案跳过
-                if (_foundAnswerIndices.Contains(ansIdx)) continue;
-
-                LevelAnswer answer = _currentLevelData.answers[ansIdx];
-
-                // 检查该答案的每一组笔画组合
-                foreach (StrokeSet set in answer.strokeSets)
+                // 同一组合可能对应多个答案，保持配置顺序，优先匹配尚未找到的答案。
+                foreach (int ansIdx in matches)
                 {
-                    List<int> setSorted = set.strokeIndices.OrderBy(i => i).ToList();
-                    if (setSorted.SequenceEqual(selectedSorted))
-                    {
-                        // 匹配成功！
-                        BiMgr.AnswerSubmitted("correct", answer.answerCharacter, _foundAnswerIndices.Count + 1, selectedSorted.Count);
-                        OnAnswerFound(ansIdx, answer.answerCharacter);
-                        return;
-                    }
+                    if (_foundAnswerIndices.Contains(ansIdx)) continue;
+                    var answer = _currentLevelData.answers[ansIdx];
+                    BiMgr.AnswerSubmitted("correct", answer.answerCharacter, _foundAnswerIndices.Count + 1, selectedCount);
+                    OnAnswerFound(ansIdx, answer.answerCharacter);
+                    return;
                 }
-            }
 
-            // 检查是否选择了已经找到的答案（重复提交）
-            for (int ansIdx = 0; ansIdx < _currentLevelData.answers.Count; ansIdx++)
-            {
-                if (!_foundAnswerIndices.Contains(ansIdx)) continue;
-
-                LevelAnswer answer = _currentLevelData.answers[ansIdx];
-                foreach (StrokeSet set in answer.strokeSets)
-                {
-                    List<int> setSorted = set.strokeIndices.OrderBy(i => i).ToList();
-                    if (setSorted.SequenceEqual(selectedSorted))
-                    {
-                        BiMgr.AnswerSubmitted("duplicate", answer.answerCharacter, _foundAnswerIndices.Count, selectedSorted.Count);
-                        OnAnswerSubmitted?.Invoke(false, answer.answerCharacter, LocalizationHelper.GetLocalText(LanguageKey.game_tips3));
-                        return;
-                    }
-                }
+                var duplicate = _currentLevelData.answers[matches[0]];
+                BiMgr.AnswerSubmitted("duplicate", duplicate.answerCharacter, _foundAnswerIndices.Count, selectedCount);
+                OnAnswerSubmitted?.Invoke(false, duplicate.answerCharacter, LocalizationHelper.GetLocalText(LanguageKey.game_tips3));
+                return;
             }
 
             // 未匹配任何答案
-            BiMgr.AnswerSubmitted("wrong", "", _foundAnswerIndices.Count, selectedSorted.Count);
+            BiMgr.AnswerSubmitted("wrong", "", _foundAnswerIndices.Count, selectedCount);
             OnAnswerSubmitted?.Invoke(false, "", LocalizationHelper.GetLocalText(LanguageKey.game_tips4));
         }
 
@@ -512,4 +492,78 @@ namespace GameLogic.GamePlay.CorePlay
             Log.Error($"[CorePlayGamePlay] {msg}");
         }
     }
+}
+
+namespace GameLogic.GamePlay.CorePlay
+{
+    // BEGIN STROKE_ANSWER_LOOKUP
+    internal sealed class StrokeAnswerLookup
+    {
+        private readonly Dictionary<ulong, List<int>> _small = new Dictionary<ulong, List<int>>();
+        private readonly Dictionary<string, List<int>> _large = new Dictionary<string, List<int>>();
+
+        public void Build(List<LevelAnswer> answers)
+        {
+            _small.Clear();
+            _large.Clear();
+            for (int answerIndex = 0; answerIndex < answers.Count; answerIndex++)
+            {
+                foreach (var set in answers[answerIndex].strokeSets)
+                {
+                    // 重复索引的配置无法与玩家的 HashSet 相等，不把它错误地压成有效掩码。
+                    if (set.strokeIndices.Count == 0 ||
+                        new HashSet<int>(set.strokeIndices).Count != set.strokeIndices.Count) continue;
+                    if (TryMask(set.strokeIndices, out ulong mask)) Add(_small, mask, answerIndex);
+                    else Add(_large, CanonicalKey(set.strokeIndices), answerIndex);
+                }
+            }
+        }
+
+        public List<int> Find(HashSet<int> selection)
+        {
+            if (TryMask(selection, out ulong mask))
+                return _small.TryGetValue(mask, out var small) ? small : null;
+            return _large.TryGetValue(CanonicalKey(selection), out var large) ? large : null;
+        }
+
+        private static void Add<TKey>(Dictionary<TKey, List<int>> map, TKey key, int answerIndex)
+        {
+            if (!map.TryGetValue(key, out var matches))
+            {
+                matches = new List<int>();
+                map.Add(key, matches);
+            }
+            if (matches.Count == 0 || matches[matches.Count - 1] != answerIndex) matches.Add(answerIndex);
+        }
+
+        private static bool TryMask(List<int> indices, out ulong mask)
+        {
+            mask = 0;
+            foreach (int index in indices)
+            {
+                if (index < 0 || index >= 64) return false;
+                mask |= 1UL << index;
+            }
+            return true;
+        }
+
+        private static bool TryMask(HashSet<int> indices, out ulong mask)
+        {
+            mask = 0;
+            foreach (int index in indices)
+            {
+                if (index < 0 || index >= 64) return false;
+                mask |= 1UL << index;
+            }
+            return true;
+        }
+
+        private static string CanonicalKey(IEnumerable<int> indices)
+        {
+            var sorted = new List<int>(indices);
+            sorted.Sort();
+            return string.Join(",", sorted);
+        }
+    }
+    // END STROKE_ANSWER_LOOKUP
 }

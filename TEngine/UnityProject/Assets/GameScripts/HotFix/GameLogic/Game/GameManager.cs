@@ -60,6 +60,14 @@ namespace GameLogic
             // 从缓存同步初始关卡ID到 gameplay（避免 _currentLevelId 长期为 -1）
             int savedLevel = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelId ?? 1;
             _corePlayGamePlay?.InitLevelId(savedLevel);
+            var initialLevel = _cacheManager.CorePlayRestore.GetCachedLevelData() ??
+                _levelConfig.GetLevelDataByLevelId(savedLevel) ?? _levelConfig.GetLevelDataByLevelId(1);
+            if (initialLevel != null)
+            {
+                // Loading 阶段读取首关分片并预热答案槽。
+                await UniTask.WhenAll(_levelConfig.GetGraphicDataAsync(initialLevel.baseCharacter),
+                    GameSlotView.PrewarmAsync(initialLevel));
+            }
         }
 
         /// <summary>创建 MonoBehaviour 桥接，监听 Unity OnApplicationPause 并转发</summary>
@@ -311,6 +319,12 @@ namespace GameLogic
             _cacheManager.DeleteAll();
             CurrentGamePlay.LoadLevel(1);
             _corePlayView?.ClearAllHighlights();
+        }
+
+        protected override void OnRelease()
+        {
+            _levelConfig?.ReleaseGraphicCache();
+            base.OnRelease();
         }
 
         // ================ 公共接口 ================

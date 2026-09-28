@@ -1908,7 +1908,7 @@ MonoBehaviour:
   SpeedMultiplier: 1
   CurveScale: 36.4
   ForceChange: 0
-  AlwaysChange: 1
+  AlwaysChange: 0
 --- !u!1 &6888565588796680671
 GameObject:
   m_ObjectHideFlags: 0

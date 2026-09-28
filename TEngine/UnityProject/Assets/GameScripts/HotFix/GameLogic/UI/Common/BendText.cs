@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -14,7 +14,7 @@ public class BendText : MonoBehaviour
     public bool ForceChange = true;
     public bool AlwaysChange = false;
     float m_OldCurveScale;
-    AnimationCurve m_OldCurve;
+    Keyframe[] m_OldKeys;
 
     void Awake()
     {
@@ -28,6 +28,7 @@ public class BendText : MonoBehaviour
 
     void LateUpdate()
     {
+        if (m_TextComponent == null || VertexCurve == null) return;
         if (NeedChange() || AlwaysChange)
         {
             WarpText();
@@ -54,17 +55,19 @@ public class BendText : MonoBehaviour
             return true;
 
 
-        if (!m_OldCurve.Equals(VertexCurve))
-            return true;
+        if (m_OldKeys == null || m_OldKeys.Length != VertexCurve.length) return true;
+        for (int i = 0; i < m_OldKeys.Length; i++)
+        {
+            // 不使用 ValueType.Equals，避免每帧比较 Keyframe 时装箱。
+            var oldKey = m_OldKeys[i];
+            var key = VertexCurve[i];
+            if (oldKey.time != key.time || oldKey.value != key.value ||
+                oldKey.inTangent != key.inTangent || oldKey.outTangent != key.outTangent ||
+                oldKey.inWeight != key.inWeight || oldKey.outWeight != key.outWeight ||
+                oldKey.weightedMode != key.weightedMode) return true;
+        }
 
         return false;
-    }
-
-
-    private AnimationCurve CopyAnimationCurve(AnimationCurve curve)
-    {
-        AnimationCurve newCurve = new AnimationCurve(curve.keys);
-        return newCurve;
     }
 
 
@@ -78,7 +81,8 @@ public class BendText : MonoBehaviour
         VertexCurve.preWrapMode = WrapMode.Clamp;
         VertexCurve.postWrapMode = WrapMode.Clamp;
 
-        m_OldCurve = CopyAnimationCurve(VertexCurve);
+        // 仅在实际重建时保存关键帧，静止帧不创建曲线或数组。
+        m_OldKeys = VertexCurve.keys;
         m_OldCurveScale = CurveScale;
 
         //Mesh mesh = m_TextComponent.textInfo.meshInfo[0].mesh;
@@ -101,6 +105,8 @@ public class BendText : MonoBehaviour
         float boundsMaxX = m_TextComponent.bounds.max.x;  //textInfo.meshInfo[0].mesh.bounds.max.x;
 
 
+
+        if (Mathf.Approximately(boundsMinX, boundsMaxX)) return;
 
         for (int i = 0; i < characterCount; i++)
         {

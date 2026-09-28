@@ -304,7 +304,11 @@ namespace GameLogic.GamePlay.CorePlay.View
             _drawCharacter.CancelPendingDraw();
             _drawCharacter.gameObject.SetActive(false);
 
-            TextGraphicData graphicData = _levelConfig?.GetGraphicData(levelData.baseCharacter);
+            if (_levelConfig == null) return false;
+            // 保留本次读取结果，不在另一个 await 后重新查询可能已经被淘汰的缓存。
+            var (graphicData, _) = await UniTask.WhenAll(
+                _levelConfig.GetGraphicDataAsync(levelData.baseCharacter), GameSlotView.PrewarmAsync(levelData));
+            if (this == null || version != _renderVersion || !_isInitialized || _drawCharacter == null) return false;
             if (graphicData == null)
             {
                 Log.Error($"[CorePlayView] 未找到『{levelData.baseCharacter}』的字形数据");
@@ -316,6 +320,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             if (this == null || version != _renderVersion || !_isInitialized || _drawCharacter == null)
                 return false;
             if (!_drawCharacter.StrokeObjects.Any(stroke => stroke != null)) return false;
+            _levelConfig.SetActiveGraphicData(graphicData);
             _drawCharacter.gameObject.SetActive(true);
 
             // 更新 StrokeInputHandler 引用（Draw 会重建子物体）

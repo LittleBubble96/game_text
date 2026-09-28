@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using TEngine;
+using GameLogic.Data;
 using UnityEngine;
 
 namespace GameLogic.GamePlay.CorePlay.View
@@ -43,6 +44,14 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void CancelPendingInitialization() => _initVersion++;
 
+
+        public static async UniTask<bool> PrewarmAsync(TextLevelData level)
+        {
+            int count = level.answerCountMode == AnswerCountMode.FixedCount && level.requiredAnswerCount > 0
+                ? level.requiredAnswerCount : level.answers.Count;
+            await GameDataPoolManager.Instance.RegisterComponentPoolAsync<GameSlotViewItem>(GameSlotViewItem.ResPath, count);
+            return true;
+        }
 
         public void OnCreate(Transform tf)
         {

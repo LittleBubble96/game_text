@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Launcher
@@ -10,6 +10,7 @@ namespace Launcher
     {
         #region 脚本工具生成的代码
 
+        private int _startupPercent = -1;
         private Image m_imgBg;
         private RectTransform m_fill;
         private RectTransform m_bar;
@@ -34,6 +35,7 @@ namespace Launcher
         public override void OnInit(object param)
         {
             base.OnInit(param);
+            _startupPercent = -1;
             m_bar.gameObject.SetActive(true);
             m_textUpdateDesc.text = param?.ToString();
             RefreshProgress(0f);
@@ -43,6 +45,17 @@ namespace Launcher
         {
             m_bar.gameObject.SetActive(true);
             m_fill.sizeDelta = new Vector2(986 * progress , m_fill.sizeDelta.y);
+        }
+
+        // 启动阶段直接更新现有 UI，避免每帧 ShowUI/OnInit 将进度重置为零。
+        public void RefreshStartupProgress(float progress)
+        {
+            progress = Mathf.Clamp01(progress);
+            RefreshProgress(progress);
+            int percent = Mathf.FloorToInt(progress * 100f);
+            if (percent == _startupPercent) return;
+            _startupPercent = percent;
+            m_textUpdateDesc.text = string.Format(LoadText.Instance.Label_Load_Load_Progress, percent);
         }
 
         internal void RefreshVersion(string version)

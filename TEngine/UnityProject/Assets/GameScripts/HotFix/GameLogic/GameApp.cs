@@ -54,7 +54,8 @@ public partial class GameApp
         // 初始化 UI
         await GameModule.UI.ShowUIAsyncAwait<UITop>();
         Log.Warning("======= UITop Active Complete =======");
-        GameModule.UI.ShowUIAsync<UIHome>();
+        // 启动完成事件应在首页就绪后发送，进度条无需额外固定延迟兜底。
+        await GameModule.UI.ShowUIAsyncAwait<UIHome>();
         GMSingle.Instance.Activate();
         InitSetting();
         AudioSystem.Instance.PlayBgm(AudioDefine.game_Bgm ,0.4f);
