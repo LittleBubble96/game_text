@@ -211,6 +211,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0100000004000000
       - strokeIndices: 0700000008000000
+      - strokeIndices: 0100000007000000
+      - strokeIndices: 0100000008000000
+      - strokeIndices: 0400000007000000
+      - strokeIndices: 0400000008000000
     - answerCharacter: "\u53E3"
       strokeSets:
       - strokeIndices: 050000000600000008000000
@@ -232,6 +236,15 @@ MonoBehaviour:
     - answerCharacter: "\u767E"
       strokeSets:
       - strokeIndices: 010000000300000005000000060000000700000008000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 010000000400000007000000
+      - strokeIndices: 010000000400000008000000
+      - strokeIndices: 010000000700000008000000
+      - strokeIndices: 040000000700000008000000
+    - answerCharacter: "\u4E96"
+      strokeSets:
+      - strokeIndices: 01000000040000000700000008000000
     answerCountMode: 0
     requiredAnswerCount: 6
   - levelName: Level_8
