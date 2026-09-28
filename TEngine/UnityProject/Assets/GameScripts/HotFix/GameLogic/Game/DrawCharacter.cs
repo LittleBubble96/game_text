@@ -11,6 +11,57 @@ namespace GameLogic.View
     {
         private List<GameObject> _strokeObjects = new List<GameObject>();
         private Color _defaultStrokeColor = Color.white;
+        private readonly List<Mesh> _ownedMeshes = new List<Mesh>();
+        private readonly List<Material> _ownedMaterials = new List<Material>();
+        private readonly List<Vector2[]> _cachedPoints = new List<Vector2[]>();
+        private string _cachedCharacter;
+        private Vector2 _cachedOffset;
+        private bool _cachedIndices;
+        private bool _hasCachedGeometry;
+        private int _drawVersion;
+
+        public void CancelPendingDraw() => _drawVersion++;
+
+        private static void ReleaseObject(Object value)
+        {
+            if (value == null) return;
+            if (Application.isPlaying) Destroy(value);
+            else DestroyImmediate(value);
+        }
+
+        private void ReleaseGeometry()
+        {
+            foreach (var mesh in _ownedMeshes) ReleaseObject(mesh);
+            foreach (var material in _ownedMaterials) ReleaseObject(material);
+            _ownedMeshes.Clear();
+            _ownedMaterials.Clear();
+            _cachedPoints.Clear();
+            _hasCachedGeometry = false;
+        }
+
+        private void OnDestroy()
+        {
+            CancelPendingDraw();
+            ReleaseGeometry();
+        }
+
+        private bool CanReuse(TextGraphicData data, bool showIndices)
+        {
+            if (!_hasCachedGeometry || _cachedCharacter != data.character ||
+                !_cachedOffset.Equals(PositionOffset) || _cachedIndices != showIndices ||
+                _cachedPoints.Count != data.strokes.Count || _strokeObjects.Count != data.strokes.Count)
+                return false;
+            for (int i = 0; i < data.strokes.Count; i++)
+            {
+                var points = data.strokes[i].points;
+                var cached = _cachedPoints[i];
+                if (points.Count != cached.Length || (points.Count >= 3 && _strokeObjects[i] == null))
+                    return false;
+                for (int j = 0; j < points.Count; j++)
+                    if (!points[j].Equals(cached[j])) return false;
+            }
+            return true;
+        }
 
         /// <summary>笔画材质模板资源名（AddressByFileName 规则，放 AssetRaw/Materials 下）。
         /// 用材质资源而非 Shader.Find，确保打包后 shader 引用被静态收集、运行时不会丢失。</summary>
@@ -37,11 +88,15 @@ namespace GameLogic.View
         /// </summary>
         public void Clear()
         {
+            CancelPendingDraw();
+            ReleaseGeometry();
             _strokeObjects.Clear();
             int childCount = transform.childCount;
             for (int i = childCount - 1; i >= 0; i--)
             {
-                DestroyImmediate(transform.GetChild(i).gameObject);
+                var child = transform.GetChild(i).gameObject;
+                child.SetActive(false);
+                ReleaseObject(child);
             }
         }
 
@@ -51,21 +106,41 @@ namespace GameLogic.View
         /// </summary>
         public async UniTask DrawAsync(TextGraphicData data, bool showStrokeIndices = false)
         {
+            CancelPendingDraw();
+            if (CanReuse(data, showStrokeIndices))
+            {
+                ResetAllStrokeColors();
+                foreach (var stroke in _strokeObjects)
+                {
+                    if (stroke == null) continue;
+                    stroke.transform.localPosition = Vector3.zero;
+                    stroke.SetActive(true);
+                }
+                return;
+            }
             Clear();
-            _strokeObjects = new List<GameObject>();
+            int version = _drawVersion;
 
             Material template = await GetStrokeMaterialTemplateAsync();
+            if (this == null || version != _drawVersion) return;
+            if (template == null) return;
 
             for (int i = 0; i < data.strokes.Count; i++)
             {
                 int strokeIndex = i;
                 List<Vector2> points = data.strokes[i].points;
 
-                if (points.Count < 3) continue;
+                _cachedPoints.Add(points.ToArray());
+                if (points.Count < 3)
+                {
+                    // 保留原始笔画索引，避免后续笔画选中错位。
+                    _strokeObjects.Add(null);
+                    continue;
+                }
 
                 // 1. 创建笔画物体
                 GameObject strokeObj = new GameObject($"Stroke_{strokeIndex}");
-                strokeObj.transform.SetParent(transform);
+                strokeObj.transform.SetParent(transform, false);
                 strokeObj.transform.localPosition = Vector3.zero;
                 _strokeObjects.Add(strokeObj);
 
@@ -75,11 +150,13 @@ namespace GameLogic.View
 
                 // 3. 默认材质：克隆材质模板（保留逐笔画独立着色），shader 引用随模板资源打包进包
                 Material mat = new Material(template);
+                _ownedMaterials.Add(mat);
                 mat.color = _defaultStrokeColor;
                 mr.sharedMaterial = mat;
 
                 // 4. 生成实心Mesh（应用位置偏移）
                 Mesh mesh = new Mesh();
+                _ownedMeshes.Add(mesh);
                 List<Vector3> verts = new List<Vector3>();
                 foreach (var p in points) verts.Add(new Vector3(p.x + PositionOffset.x, p.y + PositionOffset.y, 0));
                 Triangulator tr = new Triangulator(points.ToArray());
@@ -97,7 +174,7 @@ namespace GameLogic.View
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
 
-                mf.mesh = mesh;
+                mf.sharedMesh = mesh;
 
                 // 5. 添加2D碰撞器（应用位置偏移）
                 PolygonCollider2D collider = strokeObj.AddComponent<PolygonCollider2D>();
@@ -112,6 +189,10 @@ namespace GameLogic.View
                     AddStrokeIndexLabel(strokeObj, strokeIndex, points);
                 }
             }
+            _cachedCharacter = data.character;
+            _cachedOffset = PositionOffset;
+            _cachedIndices = showStrokeIndices;
+            _hasCachedGeometry = true;
         }
 
         /// <summary>

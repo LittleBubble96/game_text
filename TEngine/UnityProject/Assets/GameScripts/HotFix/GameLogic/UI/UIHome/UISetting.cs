@@ -18,6 +18,7 @@ namespace GameLogic
         private RTLTextMeshPro _settingSfxTmp;
         private RTLTextMeshPro _settingNotificationTmp;
         private RTLTextMeshPro _settingLanguageTmp;
+        private RTLTextMeshPro _gameVersionTmp;
 
         private Slider _musicVolume;
         private Slider _soundVolume;
@@ -42,6 +43,7 @@ namespace GameLogic
             _settingSfxTmp = FindChildComponent<RTLTextMeshPro>("Panel/Sfx Txt");
             _settingNotificationTmp = FindChildComponent<RTLTextMeshPro>("Panel/Notification Txt");
             _settingLanguageTmp = FindChildComponent<RTLTextMeshPro>("Panel/Language Txt");
+            _gameVersionTmp = FindChildComponent<RTLTextMeshPro>("Panel/gameVersionTxt");
             _dropdown = FindChildComponent<TMP_Dropdown>("Panel/Dropdown");
             
             _musicVolume =FindChildComponent<Slider>("Panel/MusicSlider");
@@ -106,6 +108,7 @@ namespace GameLogic
             _settingSfxTmp.text = LocalizationHelper.GetLocalText(LanguageKey.setting_sfx);
             _settingNotificationTmp.text = LocalizationHelper.GetLocalText(LanguageKey.setting_notify);
             _settingLanguageTmp.text = LocalizationHelper.GetLocalText(LanguageKey.setting_language);
+            _gameVersionTmp.text = string.Format(LocalizationHelper.GetLocalText(LanguageKey.setting_version), GameModule.Resource.ApplicableGameVersion);
         }
 
         /// <summary>

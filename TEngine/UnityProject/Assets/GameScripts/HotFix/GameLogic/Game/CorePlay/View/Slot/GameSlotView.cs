@@ -39,6 +39,9 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private SlotViewLayoutData _currentLayoutData;
         private bool _hasLayoutData;
+        private int _initVersion;
+
+        public void CancelPendingInitialization() => _initVersion++;
 
 
         public void OnCreate(Transform tf)
@@ -50,6 +53,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void OnDestroy()
         {
+            CancelPendingInitialization();
             GameEvent.RemoveEventListener<SlotViewLayoutData>(EventDefine.Event_SlotLayoutUpdate, OnLayoutUpdate);
             GameEvent.RemoveEventListener<bool, string, string>(EventDefine.Event_AnswerSubmitted, OnAnswerSubmitted);
             RecycleSlotView();
@@ -72,11 +76,17 @@ namespace GameLogic.GamePlay.CorePlay.View
         //游戏开始 初始化slot（异步：对象池冷启动时需加载资源，逐个 await 分配）
         public async UniTask InitSlotViewAsync(int count)
         {
+            int version = ++_initVersion;
             RecycleSlotView();
             for (int i = 0; i < count; i++)
             {
                 GameSlotViewItem viewItem = await GameDataPoolManager.Instance.AllocateComponentAsync<GameSlotViewItem>(
                     GameSlotViewItem.ResPath, _slotRoot);
+                if (version != _initVersion || _slotRoot == null)
+                {
+                    GameDataPoolManager.Instance.RecycleComponent<GameSlotViewItem>(viewItem, GameSlotViewItem.ResPath);
+                    return;
+                }
                 viewItem.transform.localScale = Vector3.zero;
                 viewItem.ShowEmptyState();
                 _slotItems.Add(viewItem);

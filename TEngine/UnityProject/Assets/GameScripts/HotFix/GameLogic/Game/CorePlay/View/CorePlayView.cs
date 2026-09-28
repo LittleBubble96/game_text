@@ -36,6 +36,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         private DrawCharacter _drawCharacter;
         private StrokeInputHandler _strokeInputHandler;
         private bool _isInitialized;
+        private int _renderVersion;
         public bool GuideReady { get; private set; }
         public DrawCharacter GuideCharacter => _drawCharacter;
 
@@ -78,6 +79,9 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
         public void Initialize(IGamePlay gamePlay, LevelDataConfigParse levelConfig)
         {
+            _renderVersion++;
+            _drawCharacter?.CancelPendingDraw();
+            _gameSlotView?.CancelPendingInitialization();
             GuideReady = false;
             // 如果已初始化，先反注册所有事件，避免重复注册
             if (_isInitialized)
@@ -132,25 +136,27 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void CreateDrawCharacter()
         {
-            // 复用幂等：新建前若仍持有上一局 DrawCharacter，即时销毁旧的并置 null，
-            // 避免延迟 Destroy 未落帧时新旧并存。不清空整个 CharacterRoot，防止并发渲染
-            // 互相清掉对方刚建的 DrawCharacter。
+            // 视图生命周期内保留当前字，等渲染完成后再显示。
             if (_drawCharacter != null)
             {
-                DestroyImmediate(_drawCharacter.gameObject);
-                _drawCharacter = null;
+                _drawCharacter.gameObject.SetActive(false);
+                return;
             }
 
             var dcGo = new GameObject("DrawCharacter");
-            dcGo.transform.SetParent(_gameViewRoot.CharacterRoot);
+            dcGo.transform.SetParent(_gameViewRoot.CharacterRoot, false);
             _drawCharacter = dcGo.AddComponent<DrawCharacter>();
             _drawCharacter.DefaultStrokeColor = _defaultStrokeColor;
             dcGo.transform.localPosition = Vector3.zero;
             dcGo.transform.localScale = Vector3.one;
+            dcGo.SetActive(false);
         }
 
         private void CreateStrokeInputHandler()
         {
+            if (_strokeInputHandler == null)
+                _strokeInputHandler = GetComponent<StrokeInputHandler>();
+            if (_strokeInputHandler != null) _strokeInputHandler.enabled = false;
             Camera cam = Camera.main;
             if (cam == null)
             {
@@ -162,12 +168,16 @@ namespace GameLogic.GamePlay.CorePlay.View
                 }
             }
 
-            _strokeInputHandler = gameObject.AddComponent<StrokeInputHandler>();
+            if (_strokeInputHandler == null)
+                _strokeInputHandler = gameObject.AddComponent<StrokeInputHandler>();
+            _strokeInputHandler.enabled = false;
             _strokeInputHandler.Initialize(_drawCharacter, cam, OnStrokeClicked);
         }
 
         private void OnDestroy()
         {
+            _renderVersion++;
+            _drawCharacter?.CancelPendingDraw();
             RemoveEventListeners();
 
             _gameSlotView?.OnDestroy();
@@ -248,7 +258,8 @@ namespace GameLogic.GamePlay.CorePlay.View
         {
             ClearTipHighlight();
             GuideReady = false;
-            await RenderLevelAsync(levelData);
+            int version = ++_renderVersion;
+            if (!await RenderLevelAsync(levelData, version)) return;
 
             // 初始化 slot 视图（答案数量）
             int requiredCount = (_gamePlay as CorePlayGamePlay)?.GetRequiredAnswerCount() ?? levelData.answers.Count;
@@ -256,6 +267,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             {
                 await _gameSlotView.InitSlotViewAsync(requiredCount);
             }
+            if (this == null || version != _renderVersion || !_isInitialized) return;
 
             // 恢复已找到的答案（须等 slot 分配完成）
             if (_gamePlay is CorePlayGamePlay corePlay)
@@ -267,25 +279,44 @@ namespace GameLogic.GamePlay.CorePlay.View
                 }
             }
             GuideReady = _drawCharacter != null && _drawCharacter.StrokeObjects.Count > 0;
+            if (_strokeInputHandler != null) _strokeInputHandler.enabled = GuideReady;
         }
 
         /// <summary>渲染关卡：解析数据并绘制笔画</summary>
         public async UniTask RenderLevelAsync(TextLevelData levelData)
         {
+            int version = ++_renderVersion;
+            if (!await RenderLevelAsync(levelData, version)) return;
+            if (this == null || version != _renderVersion || !_isInitialized) return;
+            GuideReady = _drawCharacter.StrokeObjects.Any(stroke => stroke != null);
+            if (_strokeInputHandler != null) _strokeInputHandler.enabled = GuideReady;
+        }
+
+        private async UniTask<bool> RenderLevelAsync(TextLevelData levelData, int version)
+        {
+            _gameSlotView?.CancelPendingInitialization();
+            GuideReady = false;
+            if (_strokeInputHandler != null) _strokeInputHandler.enabled = false;
             if (_drawCharacter == null)
             {
                 CreateDrawCharacter();
             }
+            _drawCharacter.CancelPendingDraw();
+            _drawCharacter.gameObject.SetActive(false);
 
             TextGraphicData graphicData = _levelConfig?.GetGraphicData(levelData.baseCharacter);
             if (graphicData == null)
             {
                 Log.Error($"[CorePlayView] 未找到『{levelData.baseCharacter}』的字形数据");
-                return;
+                return false;
             }
 
             _drawCharacter.PositionOffset = levelData.positionOffset;
             await _drawCharacter.DrawAsync(graphicData, showStrokeIndices: false);
+            if (this == null || version != _renderVersion || !_isInitialized || _drawCharacter == null)
+                return false;
+            if (!_drawCharacter.StrokeObjects.Any(stroke => stroke != null)) return false;
+            _drawCharacter.gameObject.SetActive(true);
 
             // 更新 StrokeInputHandler 引用（Draw 会重建子物体）
             if (_strokeInputHandler != null)
@@ -297,6 +328,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             ApplyCharacterScale();
 
             Log.Info($"[CorePlayView] 渲染关卡: 『{levelData.baseCharacter}』, {graphicData.strokes.Count} 笔画");
+            return true;
         }
 
         // ================ 笔画点击（来自 StrokeInputHandler 的射线检测） ================
@@ -462,16 +494,21 @@ namespace GameLogic.GamePlay.CorePlay.View
             _gameViewRoot?.OnEnterGameAnim();
         }
 
-        /// <summary>退出游戏动画：背景淡出 + 销毁 DrawCharacter</summary>
+        /// <summary>退出游戏动画：背景淡出，隐藏并保留当前字的笔画。</summary>
         public void OnEndGameAnim()
         {
-            ClearTipHighlight();
+            _renderVersion++;
+            _gameSlotView?.CancelPendingInitialization();
+            GuideReady = false;
+            if (_strokeInputHandler != null) _strokeInputHandler.enabled = false;
+            ClearAllHighlights();
+            RemoveEventListeners();
+            _isInitialized = false;
             _gameViewRoot?.OnEndGameAnim();
-            // 即时销毁，避免延迟 Destroy 与后续 CreateDrawCharacter 同帧新建产生竞态，导致笔画叠加
             if (_drawCharacter != null)
             {
-                DestroyImmediate(_drawCharacter.gameObject);
-                _drawCharacter = null;
+                _drawCharacter.CancelPendingDraw();
+                _drawCharacter.gameObject.SetActive(false);
             }
         }
 

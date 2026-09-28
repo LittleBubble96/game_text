@@ -16,7 +16,7 @@ namespace GameLogic
     {
         private enum Step { Waiting, Stroke, Submit, Finish }
         private static UIGuide _active;
-        public static bool BlocksGameplayInput => _active != null && _active._step != Step.Finish;
+        public static bool BlocksGameplayInput => _active != null;// && _active._step != Step.Finish;
         private RectTransform _handRoot, _tipAnchor, _submit;
         private RTLTextMeshPro _description;
         private CorePlayGamePlay _game;
@@ -220,8 +220,8 @@ namespace GameLogic
             UpdateSorting();
             if (_step == Step.Finish)
             {
-                float alpha = .65f * (1 - Mathf.Clamp01((Time.unscaledTime - _finishTime) / .35f));
-                _mask.color = new Color(0, 0, 0, alpha);
+                // float alpha = .65f * (1 - Mathf.Clamp01((Time.unscaledTime - _finishTime) / .35f));
+                // _mask.color = new Color(0, 0, 0, alpha);
                 if (Time.unscaledTime - _finishTime > 2.5f) CloseGuide();
                 return;
             }
