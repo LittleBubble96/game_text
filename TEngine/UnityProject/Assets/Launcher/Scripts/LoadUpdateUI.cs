@@ -43,8 +43,14 @@ namespace Launcher
 
         internal void RefreshProgress(float progress)
         {
+            progress = Mathf.Clamp01(progress);
             m_bar.gameObject.SetActive(true);
-            m_fill.sizeDelta = new Vector2(986 * progress , m_fill.sizeDelta.y);
+            // 用锚点适配进度条实际宽度，并保留两侧各 12 的边框。
+            m_fill.anchorMin = new Vector2(0f, 0.5f);
+            m_fill.anchorMax = new Vector2(progress, 0.5f);
+            m_fill.anchoredPosition = new Vector2(12f, 0f);
+            m_fill.sizeDelta = new Vector2(-24f * progress, m_fill.sizeDelta.y);
+            m_fill.gameObject.SetActive(progress > 0f);
         }
 
         // 启动阶段直接更新现有 UI，避免每帧 ShowUI/OnInit 将进度重置为零。

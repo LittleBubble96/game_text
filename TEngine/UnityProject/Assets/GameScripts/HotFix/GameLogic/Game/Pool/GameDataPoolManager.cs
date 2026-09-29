@@ -17,8 +17,13 @@ namespace GameLogic
         /// <param name="isShutdown">是否是关闭对象池时触发。</param>
         protected override void Release(bool isShutdown)
         {
+            // Target 是 object；已销毁的 Unity 组件仍能通过类型匹配。
+            // 必须先用 Unity 的判空检查，再访问 gameObject（退出时 UI 可能已先销毁）。
+            var target = Target as Object;
+            if (target == null) return;
+
             // 实例上的 AssetsReference 在 OnDestroy 中归还资源引用；不要重复 UnloadAsset。
-            var obj = Target is Component component ? component.gameObject : Target as GameObject;
+            var obj = target is Component component ? component.gameObject : target as GameObject;
             if (obj == null) return;
             obj.SetActive(false);
             Object.Destroy(obj);

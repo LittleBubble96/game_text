@@ -187,6 +187,10 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>移除所有事件监听，防止重复注册或泄漏</summary>
         private void RemoveEventListeners()
         {
+            // 退出关卡后 OnDestroy 仍会调用；未初始化或已注销时无需再次移除。A
+            if (!_isInitialized) return;
+            _isInitialized = false;
+
             if (_gamePlay != null)
             {
                 _gamePlay.OnLevelCompleted -= OnLevelCompleted;
@@ -508,7 +512,6 @@ namespace GameLogic.GamePlay.CorePlay.View
             if (_strokeInputHandler != null) _strokeInputHandler.enabled = false;
             ClearAllHighlights();
             RemoveEventListeners();
-            _isInitialized = false;
             _gameViewRoot?.OnEndGameAnim();
             if (_drawCharacter != null)
             {

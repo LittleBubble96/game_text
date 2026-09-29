@@ -31912,6 +31912,6 @@ MonoBehaviour:
       - {x: 3.1448002, y: 1.5886401}
       - {x: 3.1674001, y: 1.5765601}
       - {x: 3.1920002, y: 1.5640001}
+  GraphicChunks: []
   _pixelScale: 0.004
   _curveSegments: 10
-  GraphicChunks: []

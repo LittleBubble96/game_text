@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using Cysharp.Threading.Tasks;
 using GameConfig;
 using GameLogic.Data;
@@ -10,6 +11,7 @@ using GameLogic.GamePlay.CorePlay.View;
 using GameLogic.View;
 using TEngine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Object = UnityEngine.Object;
 
 namespace GameLogic
@@ -20,6 +22,8 @@ namespace GameLogic
     public class GameManager : Singleton<GameManager>
     {
         private CorePlayView _corePlayView;
+        private const int FinishDelayMilliseconds = 700;
+        private CancellationTokenSource _finishDelayCancellation;
 
         // ================ 内部模块 ================
 
@@ -209,12 +213,42 @@ namespace GameLogic
             }
 
             Log.Info($"[GameManager] 游戏通关! 关卡: {levelId}");
-            // 弹出结算界面（奖励仍按已通关的 levelId 查配置，用于展示数量）
-            GameModule.UI.ShowUIAsync<UIFinish>(levelId);
+            // 数据立即保存，结算展示稍后进行，给最后一个答案留出入槽动画时间。
+            ShowFinishAfterAnimationAsync(levelId).Forget();
+        }
+
+        private async UniTask ShowFinishAfterAnimationAsync(int levelId)
+        {
+            if (_finishDelayCancellation != null) return;
+            var cancellation = _finishDelayCancellation = new CancellationTokenSource();
+            var eventSystem = EventSystem.current;
+            bool restoreEventSystem = eventSystem != null && eventSystem.enabled;
+            using (UIInteractionLock.Acquire())
+            {
+                // 同时拦截普通 Button 等未接入交互锁的 UI 输入。
+                if (restoreEventSystem) eventSystem.enabled = false;
+                try
+                {
+                    await UniTask.Delay(FinishDelayMilliseconds, ignoreTimeScale: true,
+                        cancellationToken: cancellation.Token);
+                    await GameModule.UI.ShowUIAsyncAwait<UIFinish>(levelId);
+                }
+                catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                {
+                    // 返回主页或释放管理器时取消等待，不再弹出旧关卡结算。
+                }
+                finally
+                {
+                    if (restoreEventSystem && eventSystem != null) eventSystem.enabled = true;
+                    if (ReferenceEquals(_finishDelayCancellation, cancellation))
+                        _finishDelayCancellation = null;
+                    cancellation.Dispose();
+                }
+            }
         }
 
         /// <summary>
-        /// 按 levelId 查关卡奖励配置并发放到数据层（金币/提示道具）。
+        /// 按 levelId 查关卡奖励配置并发放到数据层（金币及各类道具）。
         /// 仅在通关时调用一次，与推进存档一起完成；结算界面只读配置用于展示。
         /// </summary>
         private void GrantLevelReward(int levelId)
@@ -222,10 +256,28 @@ namespace GameLogic
             var rewardMap = GetLevelRewardMap(levelId);
             if (rewardMap == null || rewardMap.Count == 0) return;
 
-            if (rewardMap.TryGetValue(ItemId.Coin, out int coinCount) && coinCount > 0)
-                PropDefine.AddCoin(coinCount, "level_reward");
-            if (rewardMap.TryGetValue(ItemId.TipProp, out int tipCount) && tipCount > 0)
-                PropDefine.AddTip(tipCount, "level_reward");
+            foreach (var reward in rewardMap)
+            {
+                if (reward.Value <= 0) continue;
+                switch (reward.Key)
+                {
+                    case ItemId.Coin:
+                        PropDefine.AddCoin(reward.Value, "level_reward");
+                        break;
+                    case ItemId.TipProp:
+                        PropDefine.AddTip(reward.Value, "level_reward");
+                        break;
+                    case ItemId.ResetProp:
+                        PropDefine.AddReset(reward.Value, "level_reward");
+                        break;
+                    case ItemId.NextProp:
+                        PropDefine.AddNext(reward.Value, "level_reward");
+                        break;
+                    default:
+                        Log.Error($"[GameManager] 关卡 {levelId} 的奖励道具 {reward.Key} 尚未支持发放");
+                        break;
+                }
+            }
         }
 
         /// <summary>查询关卡奖励映射（itemId -> 数量），无奖励返回 null</summary>
@@ -273,6 +325,7 @@ namespace GameLogic
         /// <summary>返回主界面</summary>
         public void ReturnToHome()
         {
+            _finishDelayCancellation?.Cancel();
             BiMgr.LeaveLevelForHome(_corePlayGamePlay.FoundAnswerIndices.Count);
             SaveGameProgress();
             _corePlayView?.ClearAllHighlights();
@@ -323,6 +376,7 @@ namespace GameLogic
 
         protected override void OnRelease()
         {
+            _finishDelayCancellation?.Cancel();
             _levelConfig?.ReleaseGraphicCache();
             base.OnRelease();
         }

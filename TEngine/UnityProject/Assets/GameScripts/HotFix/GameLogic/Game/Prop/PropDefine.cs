@@ -242,5 +242,7 @@ namespace GameLogic
     {
         public const int Coin = 10000;
         public const int TipProp = 10001;
+        public const int ResetProp = 10002;
+        public const int NextProp = 10003;
     }
 }
