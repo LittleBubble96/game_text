@@ -1,4 +1,5 @@
-﻿using System;
+using GameSDK;
+using System;
 using Cysharp.Threading.Tasks;
 using Launcher;
 using TEngine;
@@ -30,12 +31,14 @@ namespace Procedure
 
         private async UniTaskVoid InitPackage(ProcedureOwner procedureOwner)
         {
+            StartupTelemetry.Start(2);
             try
             {
                 var initializationOperation = await _resourceModule.InitPackage(_resourceModule.DefaultPackageName);
 
                 if (initializationOperation.Status == EOperationStatus.Succeed)
                 {
+                    StartupTelemetry.Success(2);
                     //热更新阶段文本初始化
                     LoadText.Instance.InitConfigData(null);
 
@@ -73,6 +76,7 @@ namespace Procedure
                     // 打开启动UI。
                     LauncherMgr.ShowUI<LoadUpdateUI>();
 
+                    StartupTelemetry.Fail(2, "package_init_failed", initializationOperation.Error);
                     Log.Error($"{initializationOperation.Error}");
 
                     // 打开启动UI。
@@ -91,6 +95,7 @@ namespace Procedure
 
         private void OnInitPackageFailed(ProcedureOwner procedureOwner, string message)
         {
+            StartupTelemetry.Fail(2, "package_init_exception", message);
             // 打开启动UI。
             LauncherMgr.ShowUI<LoadUpdateUI>();
 

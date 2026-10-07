@@ -1,4 +1,5 @@
-﻿using System.Collections;
+using GameSDK;
+using System.Collections;
 using Launcher;
 using TEngine;
 using UnityEngine;
@@ -74,16 +75,20 @@ namespace Procedure
             LauncherMgr.ShowUI<LoadUpdateUI>($"更新清单文件...");
 
             // 1. 获取资源清单的版本信息
-            var operation1 = _resourceModule.RequestPackageVersionAsync();
+            // 版本文件地址固定，每次启动都需要检查最新版本，不能复用网络缓存。
+            StartupTelemetry.Start(3);
+            var operation1 = _resourceModule.RequestPackageVersionAsync(appendTimeTicks: true);
             yield return operation1;
             if (operation1.Status != EOperationStatus.Succeed)
             {
+                StartupTelemetry.Fail(3, "version_failed", operation1.Error);
                 OnInitResourcesError(procedureOwner, operation1.Error);
                 yield break;
             }
 
             var packageVersion = operation1.PackageVersion;
             _resourceModule.PackageVersion = packageVersion;
+            StartupTelemetry.ResourceVersion = packageVersion;
 
             if (Utility.PlayerPrefs.HasKey("GAME_VERSION"))
             {
@@ -93,14 +98,18 @@ namespace Procedure
             Log.Info($"Init resource package version : {packageVersion}");
 
             // 2. 传入的版本信息更新资源清单
+            StartupTelemetry.Success(3);
+            StartupTelemetry.Start(4);
             var operation2 = _resourceModule.UpdatePackageManifestAsync(packageVersion);
             yield return operation2;
             if (operation2.Status != EOperationStatus.Succeed)
             {
+                StartupTelemetry.Fail(4, "manifest_failed", operation2.Error);
                 OnInitResourcesError(procedureOwner, operation2.Error);
                 yield break;
             }
 
+            StartupTelemetry.Success(4);
             _initResourcesComplete = true;
         }
 
@@ -150,6 +159,7 @@ namespace Procedure
                 }
 
                 _resourceModule.PackageVersion = packageVersion;
+                StartupTelemetry.ResourceVersion = packageVersion;
 
                 if (Settings.UpdateSetting.UpdateNotice == UpdateNotice.Notice)
                 {

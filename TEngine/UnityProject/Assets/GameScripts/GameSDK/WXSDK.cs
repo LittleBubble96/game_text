@@ -2,10 +2,61 @@
 using System.Collections.Generic;
 using WeChatWASM;
 
-namespace GameLogic
+namespace GameSDK
 {
     public class WXSDK : ISdk
     {
+        private bool _nativeReady;
+        private int _loginAttempt;
+        [Serializable]
+        private sealed class OpenIdResponse { public string openid; }
+
+        public void Login(Action<string> onSuccess, Action<string> onFailure)
+        {
+            int attempt = ++_loginAttempt;
+            Action login = () => WX.Login(new LoginOption {
+                success = result =>
+                {
+                    if (attempt != _loginAttempt) return;
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(result.code)) { onFailure("empty_login_code"); return; }
+                        WXBase.cloud.Init(new ICloudConfig { env = "cloud1-d8gh27cku5807f11b", traceUser = true });
+                        WXBase.cloud.CallFunction(new CallFunctionParam {
+                            name = "getOpenid", data = new {},
+                            success = response =>
+                            {
+                                if (attempt != _loginAttempt) return;
+                                try
+                                {
+                                    var user = UnityEngine.JsonUtility.FromJson<OpenIdResponse>(response.result);
+                                    if (user == null || string.IsNullOrWhiteSpace(user.openid)) { onFailure("empty_openid"); return; }
+                                    onSuccess(user.openid);
+                                    // 只保存本次会话接受的身份；旧尝试的迟到回调不能覆盖它。
+                                    if (SDK.IsLoggedIn)
+                                    {
+                                        PlayerPrefs.SetString(PlayerPrefsOpenIdKey, SDK.OpenId);
+                                        PlayerPrefs.Save();
+                                    }
+                                }
+                                catch (Exception e) { onFailure(e.Message); }
+                            },
+                            fail = error => { if (attempt == _loginAttempt) onFailure("cloud: " + error.errMsg); }
+                        });
+                    }
+                    catch (Exception e) { onFailure(e.Message); }
+                },
+                fail = error => { if (attempt == _loginAttempt) onFailure("login: " + error.errMsg); }
+            });
+            if (_nativeReady) { login(); return; }
+            WXBase.InitSDK(_ =>
+            {
+                if (attempt != _loginAttempt) return;
+                _nativeReady = true;
+                try { login(); } catch (Exception e) { onFailure(e.Message); }
+            });
+        }
+
         public IRewardedVideoAd CreateRewardedVideoAd(string adId, Action onLoaded,
             Action<int ,string> onError, Action<bool> onClosed)
         {
@@ -70,7 +121,7 @@ namespace GameLogic
         
         public string GetOpenId()
         {
-            return PlayerPrefs.GetString(PlayerPrefsOpenIdKey , "");
+            return SDK.OpenId;
         }
 
         public void ShareAppMessage(string title)

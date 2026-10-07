@@ -1,4 +1,5 @@
-﻿using System;
+using GameSDK;
+using System;
 using Cysharp.Threading.Tasks;
 using Launcher;
 using TEngine;
@@ -37,16 +38,17 @@ namespace Procedure
 
         protected override void OnEnter(ProcedureOwner procedureOwner)
         {
+            StartupTelemetry.Start(6);
             _procedureOwner = procedureOwner;
 
             Log.Info("开始下载更新文件！");
 
             LauncherMgr.ShowUI<LoadUpdateUI>("开始下载更新文件...");
 
-            BeginDownload().Forget();
+            BeginDownload().Forget(e => StartupTelemetry.Fail(6, "download_exception", e.Message));
         }
 
-        private async UniTaskVoid BeginDownload()
+        private async UniTask BeginDownload()
         {
             var downloader = _resourceModule.Downloader;
 
@@ -58,13 +60,21 @@ namespace Procedure
 
             // 检测下载结果
             if (downloader.Status != EOperationStatus.Succeed)
+            {
+                StartupTelemetry.Fail(6, "download_failed", downloader.Error);
                 return;
+            }
+            StartupTelemetry.Success(6, new System.Collections.Generic.Dictionary<string, string> {
+                { "download_count", downloader.TotalDownloadCount.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                { "download_bytes", downloader.TotalDownloadBytes.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+            });
 
             ChangeState<ProcedureDownloadOver>(_procedureOwner);
         }
 
         private void OnDownloadErrorCallback(DownloadErrorData downloadErrorData)
         {
+            StartupTelemetry.Fail(6, "download_failed", downloadErrorData.FileName);
             LauncherMgr.ShowMessageBox($"Failed to download file : {downloadErrorData.FileName}",
                 () => { ChangeState<ProcedureCreateDownloader>(_procedureOwner); }, UnityEngine.Application.Quit);
         }

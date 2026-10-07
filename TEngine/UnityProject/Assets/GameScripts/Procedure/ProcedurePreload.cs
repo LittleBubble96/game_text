@@ -1,4 +1,5 @@
-﻿using System;
+using GameSDK;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -44,6 +45,11 @@ namespace Procedure
         {
             base.OnEnter(procedureOwner);
 
+            StartupTelemetry.Skip(4, "use_local_version");
+            StartupTelemetry.Skip(5, "download_not_required");
+            StartupTelemetry.Skip(6, "download_not_required");
+            StartupTelemetry.Skip(7, "cache_cleanup_disabled");
+            StartupTelemetry.Start(8);
             _loadedFlag.Clear();
 
             LauncherMgr.ShowUI<LoadUpdateUI>(Utility.Text.Format(LoadText.Instance.Label_Load_Load_Progress, 0));
@@ -51,7 +57,7 @@ namespace Procedure
             GameEvent.Send("UILoadUpdate.RefreshVersion");
 
             PreloadResources();
-            RequestShaderWarmUp().Forget();
+            RequestShaderWarmUp().Forget(e => StartupTelemetry.Fail(8, "shader_exception", e.Message));
         }
 
         protected override void OnUpdate(ProcedureOwner procedureOwner, float elapseSeconds, float realElapseSeconds)
@@ -106,7 +112,7 @@ namespace Procedure
             ChangeProcedureToLoadAssembly();
         }
         
-        private async UniTaskVoid RequestShaderWarmUp()
+        private async UniTask RequestShaderWarmUp()
         {
             _isShaderLoadComplete = false;
             // await UniTask.DelayFrame(1);
@@ -116,6 +122,7 @@ namespace Procedure
             ShaderVariantCollection shaderVariantCollection = shaderVariantCollectionRequest.asset as ShaderVariantCollection;
             if (shaderVariantCollection == null)
             {
+                StartupTelemetry.Fail(8, "shader_missing", "MyShaderVariants");
                 Log.Warning($"Load shaderVariantCollection failed.");
                 return;
             }
@@ -185,6 +192,7 @@ namespace Procedure
 
         private void OnPreLoadAssetFailure(string assetName, LoadResourceStatus status, string errormessage, object userdata)
         {
+            StartupTelemetry.Fail(8, "preload_failed", errormessage);
             Log.Warning("Can not preload asset from '{0}' with error message '{1}'.", assetName, errormessage);
             _loadedFlag[assetName] = true;
         }
@@ -197,6 +205,7 @@ namespace Procedure
 
         private void ChangeProcedureToLoadAssembly()
         {
+            StartupTelemetry.Success(8);
             ChangeState<ProcedureLoadAssembly>(_procedureOwner);
         }
     }

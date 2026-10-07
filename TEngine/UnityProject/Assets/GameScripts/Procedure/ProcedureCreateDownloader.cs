@@ -1,4 +1,5 @@
-﻿using System;
+using GameSDK;
+using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using Launcher;
@@ -29,23 +30,29 @@ namespace Procedure
 
         protected override void OnEnter(ProcedureOwner procedureOwner)
         {
+            StartupTelemetry.Start(5);
             _procedureOwner = procedureOwner;
 
             Log.Info("创建补丁下载器");
 
             LauncherMgr.ShowUI<LoadUpdateUI>($"创建补丁下载器...");
 
-            CreateDownloader().Forget();
+            CreateDownloader().Forget(e => StartupTelemetry.Fail(5, "downloader_exception", e.Message));
         }
 
-        private async UniTaskVoid CreateDownloader()
+        private async UniTask CreateDownloader()
         {
             await UniTask.Delay(TimeSpan.FromSeconds(0.5f));
 
             _downloader = _resourceModule.CreateResourceDownloader();
 
+            StartupTelemetry.Success(5, new System.Collections.Generic.Dictionary<string, string> {
+                { "download_count", _downloader.TotalDownloadCount.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                { "download_bytes", _downloader.TotalDownloadBytes.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+            });
             if (_downloader.TotalDownloadCount == 0)
             {
+                StartupTelemetry.Skip(6, "no_patch");
                 Log.Info("Not found any download files !");
                 ChangeState<ProcedureDownloadOver>(_procedureOwner);
             }

@@ -1,4 +1,5 @@
-﻿using System;
+using GameSDK;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,10 +45,11 @@ namespace Procedure
             base.OnEnter(procedureOwner);
             Log.Debug("HybridCLR ProcedureLoadAssembly OnEnter");
             _procedureOwner = procedureOwner;
-            LoadAssembly().Forget();
+            StartupTelemetry.Start(9);
+            LoadAssembly().Forget(e => StartupTelemetry.Fail(9, "assembly_exception", e.Message));
         }
 
-        private async UniTaskVoid LoadAssembly()
+        private async UniTask LoadAssembly()
         {
             _loadAssemblyComplete = false;
             _hotfixAssemblyList = new List<Assembly>();
@@ -129,6 +131,7 @@ namespace Procedure
 #endif
             if (_mainLogicAssembly == null)
             {
+                StartupTelemetry.Fail(9, "assembly_missing", _setting.LogicMainDllName);
                 Log.Fatal($"Main logic assembly missing. Please check \'ENABLE_HYBRIDCLR\' is defined in Player Settings And check the file of {_setting.LogicMainDllName}.bytes is exits.");
                 return;
             }
@@ -136,16 +139,21 @@ namespace Procedure
             var appType = _mainLogicAssembly.GetType("GameApp");
             if (appType == null)
             {
+                StartupTelemetry.Fail(9, "type_missing", "GameApp");
                 Log.Fatal($"Main logic type 'GameMain' missing.");
                 return;
             }
             var entryMethod = appType.GetMethod("Entrance");
             if (entryMethod == null)
             {
+                StartupTelemetry.Fail(9, "entry_missing", "Entrance");
                 Log.Fatal($"Main logic entry method 'Entrance' missing.");
                 return;
             }
             object[] objects = new object[] { new object[] { _hotfixAssemblyList } };
+            if (_failureAssetCount > 0 || _failureMetadataAssetCount > 0)
+                StartupTelemetry.Fail(9, "assembly_load_failed", "Assembly or metadata load failed");
+            else StartupTelemetry.Success(9);
             entryMethod.Invoke(appType, objects);
         }
 
@@ -187,6 +195,8 @@ namespace Procedure
             _loadAssetCount--;
             if (textAsset == null)
             {
+                _failureAssetCount++;
+                StartupTelemetry.Fail(9, "assembly_asset_missing", "Hotfix assembly asset is null");
                 Log.Warning($"Load Assembly failed.");
                 return;
             }
@@ -262,6 +272,8 @@ namespace Procedure
             _loadMetadataAssetCount--;
             if (null == textAsset)
             {
+                _failureMetadataAssetCount++;
+                StartupTelemetry.Fail(9, "metadata_missing", "AOT metadata asset is null");
                 Log.Debug($"LoadMetadataAssetSuccess:Load Metadata failed.");
                 return;
             }
@@ -274,13 +286,19 @@ namespace Procedure
 #if ENABLE_HYBRIDCLR
                     // 加载assembly对应的dll，会自动为它hook。一旦Aot泛型函数的native函数不存在，用解释器版本代码
                     HomologousImageMode mode = HomologousImageMode.SuperSet;
-                    LoadImageErrorCode err = (LoadImageErrorCode)HybridCLR.RuntimeApi.LoadMetadataForAOTAssembly(dllBytes,mode); 
+                    LoadImageErrorCode err = (LoadImageErrorCode)HybridCLR.RuntimeApi.LoadMetadataForAOTAssembly(dllBytes,mode);
+                    if ((int)err != 0)
+                    {
+                        _failureMetadataAssetCount++;
+                        StartupTelemetry.Fail(9, "metadata_load_failed", err.ToString());
+                    }
                     Log.Warning($"LoadMetadataForAOTAssembly:{assetName}. mode:{mode} ret:{err}");
 #endif
             }
             catch (Exception e)
             {
                 _failureMetadataAssetCount++;
+                StartupTelemetry.Fail(9, "metadata_exception", e.Message);
                 Log.Fatal(e.Message);
                 throw;
             }

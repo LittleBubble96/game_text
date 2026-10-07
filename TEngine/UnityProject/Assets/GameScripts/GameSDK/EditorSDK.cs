@@ -1,9 +1,11 @@
 ﻿using TEngine;
 
-namespace GameLogic
+namespace GameSDK
 {
     public class EditorSDK : ISdk
     {
+        public void Login(System.Action<string> onSuccess, System.Action<string> onFailure) => onSuccess("Editor");
+
         public IRewardedVideoAd CreateRewardedVideoAd(string adId, System.Action onLoaded,
             System.Action<int ,string> onError, System.Action<bool> onClosed)
         {

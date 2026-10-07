@@ -320,11 +320,11 @@ namespace TEngine
         /// <summary>
         /// 异步更新最新包的版本。
         /// </summary>
-        /// <param name="appendTimeTicks">请求URL是否需要带时间戳。</param>
+        /// <param name="appendTimeTicks">请求URL是否需要带时间戳。默认开启，避免缓存固定地址的版本文件。</param>
         /// <param name="timeout">超时时间。</param>
         /// <param name="customPackageName">指定资源包的名称。不传使用默认资源包</param>
         /// <returns>请求远端包裹的最新版本操作句柄。</returns>
-        RequestPackageVersionOperation RequestPackageVersionAsync(bool appendTimeTicks = false, int timeout = 60, string customPackageName = "");
+        RequestPackageVersionOperation RequestPackageVersionAsync(bool appendTimeTicks = true, int timeout = 60, string customPackageName = "");
 
         /// <summary>
         /// 向网络端请求并更新清单

@@ -19,22 +19,22 @@ public partial class TbLanguage
     
     public TbLanguage(ByteBuf _buf)
     {
-        _dataMap = new System.Collections.Generic.Dictionary<int, language.ConfLanguage>();
-        _dataList = new System.Collections.Generic.List<language.ConfLanguage>();
-        
-        for(int n = _buf.ReadSize() ; n > 0 ; --n)
+        int n = _buf.ReadSize();
+        _dataMap = new System.Collections.Generic.Dictionary<int, language.ConfLanguage>(n);
+        _dataList = new System.Collections.Generic.List<language.ConfLanguage>(n);
+        for(int i = n ; i > 0 ; --i)
         {
             language.ConfLanguage _v;
-            _v = language.ConfLanguage.DeserializeConfLanguage(_buf);
+            _v = global::GameConfig.language.ConfLanguage.DeserializeConfLanguage(_buf);
             _dataList.Add(_v);
             _dataMap.Add(_v.Id, _v);
         }
     }
 
-    public System.Collections.Generic.Dictionary<int, language.ConfLanguage> DataMap => _dataMap;
-    public System.Collections.Generic.List<language.ConfLanguage> DataList => _dataList;
+    public System.Collections.Generic.IReadOnlyDictionary<int, language.ConfLanguage> DataMap => _dataMap;
+    public System.Collections.Generic.IReadOnlyList<language.ConfLanguage> DataList => _dataList;
 
-    public language.ConfLanguage GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : null;
+    public language.ConfLanguage GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
     public language.ConfLanguage Get(int key) => _dataMap[key];
     public language.ConfLanguage this[int key] => _dataMap[key];
 

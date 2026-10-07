@@ -1,18 +1,19 @@
+using GameSDK;
 using System;
 using System.Collections.Generic;
 using TEngine;
 
 namespace GameLogic
 {
-    /// <summary>BI 统一入口。先调用 SDK.InitSdk；本类不主动触发业务埋点。</summary>
+    /// <summary>热更业务 BI 入口，统一交由常驻 SDK 管理登录门禁与缓存。</summary>
     public static partial class BiMgr
     {
         public static bool Enabled { get; set; } = true;
 
         /// <summary>
         /// 参数复制后转发，null 值按空字符串处理。
-        /// true 仅代表平台调用未抛异常（编辑器为日志输出），不代表服务端接收成功。
-        /// 未初始化、不支持的平台或上报失败返回 false，不缓存、不重试。
+        /// true 表示 SDK 本地已接收，可能等待登录或补发，不代表服务端接收成功。
+        /// SDK 负责缓存和有限重试，参数无效或队列已满时返回 false。
         /// </summary>
         public static bool ReportEvent(string eventId, Dictionary<string, string> data = null)
         {
@@ -40,7 +41,7 @@ namespace GameLogic
                 }
 
                 if (SDK.ReportEvent(eventId, payload)) return true;
-                Log.Warning($"[BI] {eventId} 未上报：SDK 未初始化或当前平台不支持。");
+                Log.Warning($"[BI] {eventId} 未接收：参数无效或 SDK 缓存已满。");
                 return false;
             }
             catch (Exception exception)

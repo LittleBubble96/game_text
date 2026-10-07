@@ -29,8 +29,8 @@ MonoBehaviour:
   - System.dll
   - System.Core.dll
   - TEngine.Runtime.dll
-  - YooAsset.dll
   - UniTask.dll
+  - YooAsset.dll
   - UnityEngine.CoreModule.dll
   outputLinkFile: HybridCLRGenerate/link.xml
   outputAOTGenericReferenceFile: HybridCLRGenerate/AOTGenericReferences.cs

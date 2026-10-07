@@ -12,6 +12,7 @@ using GameLogic.View;
 using TEngine;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using YooAsset;
 using Object = UnityEngine.Object;
 
 namespace GameLogic
@@ -22,8 +23,24 @@ namespace GameLogic
     public class GameManager : Singleton<GameManager>
     {
         private CorePlayView _corePlayView;
+        // 仅持有资源引用，不提前实例化窗口，避免触发引导/结算的业务回调。
+        private readonly Dictionary<string, AssetHandle> _uiPreloadHandles = new Dictionary<string, AssetHandle>();
+        private bool _released;
         private const int FinishDelayMilliseconds = 700;
         private CancellationTokenSource _finishDelayCancellation;
+        private readonly LevelCompletionReward _completionReward = new LevelCompletionReward();
+        public int CompletionRewardVersion => _completionReward.Version;
+
+        public bool CanClaimDoubleReward(int levelId, int version) => _completionReward.CanClaim(levelId, version);
+        public bool IsDoubleRewardClaimed(int levelId, int version) => _completionReward.HasClaimed(levelId, version);
+
+        /// <summary>只由完整观看广告的结算回调调用，奖励使用通关时的快照。</summary>
+        public bool TryClaimDoubleReward(int levelId, int version, bool adCompleted)
+        {
+            if (!_completionReward.TryClaim(levelId, version, adCompleted, out var rewards)) return false;
+            GrantRewardMap(levelId, rewards, "level_reward_double_ad");
+            return true;
+        }
 
         // ================ 内部模块 ================
 
@@ -64,6 +81,7 @@ namespace GameLogic
             // 从缓存同步初始关卡ID到 gameplay（避免 _currentLevelId 长期为 -1）
             int savedLevel = _cacheManager?.CorePlayRestore?.SaveData?.currentLevelId ?? 1;
             _corePlayGamePlay?.InitLevelId(savedLevel);
+            PreloadGameplayUI(savedLevel);
             var initialLevel = _cacheManager.CorePlayRestore.GetCachedLevelData() ??
                 _levelConfig.GetLevelDataByLevelId(savedLevel) ?? _levelConfig.GetLevelDataByLevelId(1);
             if (initialLevel != null)
@@ -73,6 +91,36 @@ namespace GameLogic
                     GameSlotView.PrewarmAsync(initialLevel));
             }
         }
+
+        private void PreloadUIAsset(string location)
+        {
+            if (_released) return;
+            if (_uiPreloadHandles.TryGetValue(location, out var existing))
+            {
+                if (existing.Status != EOperationStatus.Failed) return;
+                existing.Dispose();
+                _uiPreloadHandles.Remove(location);
+            }
+            try
+            {
+                _uiPreloadHandles.Add(location, GameModule.Resource.LoadAssetAsyncHandle<GameObject>(location));
+            }
+            catch (Exception exception)
+            {
+                // 预加载是可选优化；失败时仍由正式打开窗口的流程加载。
+                Log.Warning($"[GameManager] UI 预加载未启动: {location}, {exception.Message}");
+            }
+        }
+
+        private void PreloadGameplayUI(int levelId)
+        {
+            PreloadUIAsset("UICorePlay");
+            PreloadUIAsset("GameViewRoot");
+            if (levelId == 1 && !FirstLevelGuideCompleted) PreloadUIAsset("UIGuide");
+        }
+
+        /// <summary>首页就绪后预读结算资源，不阻塞启动，也不触发结算埋点或奖励逻辑。</summary>
+        public void PreloadFinishUI() => PreloadUIAsset("UIFinish");
 
         /// <summary>创建 MonoBehaviour 桥接，监听 Unity OnApplicationPause 并转发</summary>
         private void CreateAppPauseBridge()
@@ -157,6 +205,10 @@ namespace GameLogic
             // 防御：检查关卡ID是否有效
             if (_levelConfig.GetLevelNameByLevelId(startLevelId) == null)
                 startLevelId = 1;
+
+            // 重置存档、GM 跳关、首次预加载失败时也走同一入口。
+            PreloadGameplayUI(startLevelId);
+            PreloadFinishUI();
 
             var restoredAnswers = _cacheManager.CorePlayRestore.GetFoundAnswers();
             var cachedLevelData = _cacheManager.CorePlayRestore.GetCachedLevelData();
@@ -254,6 +306,12 @@ namespace GameLogic
         private void GrantLevelReward(int levelId)
         {
             var rewardMap = GetLevelRewardMap(levelId);
+            _completionReward.Begin(levelId, rewardMap);
+            GrantRewardMap(levelId, rewardMap, "level_reward");
+        }
+
+        private void GrantRewardMap(int levelId, Dictionary<int, int> rewardMap, string source)
+        {
             if (rewardMap == null || rewardMap.Count == 0) return;
 
             foreach (var reward in rewardMap)
@@ -262,16 +320,16 @@ namespace GameLogic
                 switch (reward.Key)
                 {
                     case ItemId.Coin:
-                        PropDefine.AddCoin(reward.Value, "level_reward");
+                        PropDefine.AddCoin(reward.Value, source);
                         break;
                     case ItemId.TipProp:
-                        PropDefine.AddTip(reward.Value, "level_reward");
+                        PropDefine.AddTip(reward.Value, source);
                         break;
                     case ItemId.ResetProp:
-                        PropDefine.AddReset(reward.Value, "level_reward");
+                        PropDefine.AddReset(reward.Value, source);
                         break;
                     case ItemId.NextProp:
-                        PropDefine.AddNext(reward.Value, "level_reward");
+                        PropDefine.AddNext(reward.Value, source);
                         break;
                     default:
                         Log.Error($"[GameManager] 关卡 {levelId} 的奖励道具 {reward.Key} 尚未支持发放");
@@ -376,6 +434,9 @@ namespace GameLogic
 
         protected override void OnRelease()
         {
+            _released = true;
+            foreach (var handle in _uiPreloadHandles.Values) handle.Dispose();
+            _uiPreloadHandles.Clear();
             _finishDelayCancellation?.Cancel();
             _levelConfig?.ReleaseGraphicCache();
             base.OnRelease();

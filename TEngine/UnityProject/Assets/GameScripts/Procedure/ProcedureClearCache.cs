@@ -1,4 +1,5 @@
-﻿using Launcher;
+using GameSDK;
+using Launcher;
 using TEngine;
 using ProcedureOwner = TEngine.IFsm<TEngine.IProcedureModule>;
 
@@ -15,6 +16,7 @@ namespace Procedure
 
         protected override void OnEnter(ProcedureOwner procedureOwner)
         {
+            StartupTelemetry.Start(7);
             _procedureOwner = procedureOwner;
             Log.Info("清理未使用的缓存文件！");
 
@@ -27,6 +29,8 @@ namespace Procedure
 
         private void Operation_Completed(YooAsset.AsyncOperationBase obj)
         {
+            if (obj.Status == YooAsset.EOperationStatus.Succeed) StartupTelemetry.Success(7);
+            else StartupTelemetry.Fail(7, "clear_cache_failed", obj.Error);
             LauncherMgr.ShowUI<LoadUpdateUI>($"清理完成 即将进入游戏...");
 
             ChangeState<ProcedurePreload>(_procedureOwner);

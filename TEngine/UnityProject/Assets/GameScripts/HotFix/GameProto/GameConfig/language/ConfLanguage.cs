@@ -67,6 +67,5 @@ public sealed partial class ConfLanguage : Luban.BeanBase
         + "}";
     }
 }
-
 }
 

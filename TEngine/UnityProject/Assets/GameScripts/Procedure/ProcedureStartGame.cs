@@ -1,3 +1,4 @@
+using GameSDK;
 using Launcher;
 using TEngine;
 using UnityEngine;
@@ -60,6 +61,7 @@ namespace Procedure
             _finished = true;
             GameEvent.RemoveEventListener(GameStartSuccessEvent, OnGameStartSuccessEvent);
             LauncherMgr.HideAllUI(0f);
+            StartupTelemetry.Complete();
         }
 
         private void OnGameStartSuccessEvent()

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameConfig;
 using GameLogic.Localization;
@@ -14,14 +14,21 @@ namespace GameLogic
     {
         private RTLTextMeshPro _nextBtnText;
         private RTLTextMeshPro _homeBtnText;
-        private RTLTextMeshPro _shareBtnText;
+        private RTLTextMeshPro _adBtnText;
         private RTLTextMeshPro _titleText;
         private RTLTextMeshPro _desText;
         private RTLTextMeshPro _rewardText;
 
         private XYButton _btnNext;
         private XYButton _btnHome;
-        private XYButton _btnShare;
+        private XYButton _btnAd;
+        private Graphic[] _adGraphics;
+        private Color[] _adOriginalColors;
+        private Transform _adRoot;
+        private Transform _adLoading;
+        private Transform _adSuccess;
+        private Transform _adSpinner;
+        private Animation _adSpinnerAnimation;
         private GameObject _btnNextGo;
 
         #region 奖励
@@ -47,25 +54,36 @@ namespace GameLogic
 
         /// <summary>是否有下一关</summary>
         private bool _hasNextLevel;
+        private bool _doubleRewardInFlight;
+        private bool _doubleRewardClaimed;
+        private int _rewardVersion;
 
         protected override void ScriptGenerator()
         {
             base.ScriptGenerator();
             _animation = transform.GetComponent<Animation>();
             _btnNext = CreateWidget<XYButton>("VictoryPanel/ButtonNext");
-            _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonBack");
-            _btnShare = CreateWidget<XYButton>("VictoryPanel/ButtonShare");
+            _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonHome");
+            _btnAd = CreateWidget<XYButton>("VictoryPanel/ButtonAd");
+            _adGraphics = _btnAd.gameObject.GetComponentsInChildren<Graphic>(true);
+            _adOriginalColors = new Color[_adGraphics.Length];
+            for (int i = 0; i < _adGraphics.Length; i++) _adOriginalColors[i] = _adGraphics[i].color;
+            _adRoot = FindChildComponent<Transform>("VictoryPanel/ButtonAd/adRoot");
+            _adLoading = FindChildComponent<Transform>("VictoryPanel/ButtonAd/adRoot/m_adLoadingRoot");
+            _adSuccess = FindChildComponent<Transform>("VictoryPanel/ButtonAd/adRoot/m_adSuccessRoot");
+            _adSpinner = FindChildComponent<Transform>("VictoryPanel/ButtonAd/adRoot/m_adLoadingRoot/loading");
+            if (_adSpinner != null) _adSpinnerAnimation = _adSpinner.GetComponent<Animation>();
 
             _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonNext/Text");
-            _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonBack/Text");
-            _shareBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonShare/Text");
+            _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonHome/Text");
+            _adBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonAd/Text");
             _titleText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/Title");
             _desText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/m_des");
             _rewardText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/RewardRoot/Reward");
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
-            _btnShare.OnAddListener(OnBtnShareClick);
+            _btnAd.OnAddListener(OnBtnDoubleRewardClick);
 
             _rewardRoot = FindChildComponent<RectTransform>("VictoryPanel/RewardRoot");
             _rewardItemCoinWidget = CreateWidget<RewardItemWidget>("VictoryPanel/RewardRoot/RewardBg/RewardCoinItem");
@@ -96,8 +114,62 @@ namespace GameLogic
 
             // 加载奖励数据（内部异步加载奖励图标，fire-and-forget）
             LoadRewardData();
-
+            _rewardVersion = GameManager.Instance.CompletionRewardVersion;
+            _doubleRewardInFlight = false;
+            _doubleRewardClaimed = GameManager.Instance.IsDoubleRewardClaimed(_completedLevelId, _rewardVersion);
+            if (_doubleRewardClaimed)
+            {
+                foreach (var key in new List<int>(_rewardMap.Keys)) _rewardMap[key] *= 2;
+                RefreshRewardWidgets();
+            }
+            AdSystem.StateChanged -= OnAdStateChanged;
+            AdSystem.StateChanged += OnAdStateChanged;
+            AdSystem.EnterPage(AdIds.DoubleReward);
+            RefreshDoubleRewardButton();
             RefreshText();
+        }
+
+        protected override void OnClose()
+        {
+            AdSystem.StateChanged -= OnAdStateChanged;
+            AdSystem.ExitPage(AdIds.DoubleReward);
+            base.OnClose();
+        }
+
+        protected override void OnDestroy()
+        {
+            AdSystem.StateChanged -= OnAdStateChanged;
+            AdSystem.ExitPage(AdIds.DoubleReward);
+            base.OnDestroy();
+        }
+
+        private void OnAdStateChanged(string adId)
+        {
+            if (IsOpen && adId == AdIds.DoubleReward) RefreshDoubleRewardButton();
+        }
+
+        private void RefreshDoubleRewardButton()
+        {
+            if (_btnAd == null) return;
+            bool isLoading = AdSystem.IsLoading(AdIds.DoubleReward);
+            bool isReady = AdSystem.IsAdAvailable(AdIds.DoubleReward);
+            // if (_adRoot != null) _adRoot.gameObject.SetActive(!_doubleRewardClaimed && (isLoading || isReady));
+            if (_adLoading != null) _adLoading.gameObject.SetActive(isLoading);
+            if (_adSuccess != null) _adSuccess.gameObject.SetActive(isReady);
+            _btnAd.Interactable = !_hasClaimedReward && !_doubleRewardClaimed && !_doubleRewardInFlight &&
+                !isLoading && isReady && GameManager.Instance.CanClaimDoubleReward(_completedLevelId, _rewardVersion);
+            for (int i = 0; i < _adGraphics.Length; i++)
+                if (_adGraphics[i] != null)
+                    _adGraphics[i].color = _doubleRewardClaimed ? _adOriginalColors[i] * Color.gray : _adOriginalColors[i];
+            RefreshDoubleRewardText();
+        }
+
+        protected override void OnUpdate()
+        {
+            if (_adSpinner != null && _adSpinner.gameObject.activeInHierarchy &&
+                AdSystem.IsLoading(AdIds.DoubleReward) &&
+                (_adSpinnerAnimation == null || !_adSpinnerAnimation.enabled))
+                _adSpinner.Rotate(0, 0, -240f * Time.unscaledDeltaTime);
         }
 
         protected override void OnInAnimation()
@@ -259,19 +331,48 @@ namespace GameLogic
         {
             _btnNext.Interactable = interactable;
             _btnHome.Interactable = interactable;
-            _btnShare.Interactable = interactable;
+            if (!interactable) _btnAd.Interactable = false;
+            else RefreshDoubleRewardButton();
         }
 
-        private void OnBtnShareClick()
+        private void OnBtnDoubleRewardClick()
         {
-            if (_hasClaimedReward) return;
+            if (_hasClaimedReward || _doubleRewardInFlight || _doubleRewardClaimed ||
+                !AdSystem.IsAdAvailable(AdIds.DoubleReward)) return;
+            ClaimDoubleRewardAsync().Forget();
+        }
 
-            BiMgr.ShareClicked("finish");
-            SDK.ShareAppMessage($"我已通过第{_completedLevelId}关，一起来挑战吧！");
+        private async UniTask ClaimDoubleRewardAsync()
+        {
+            int openVersion = OpenVersion;
+            int levelId = _completedLevelId;
+            int rewardVersion = _rewardVersion;
+            _doubleRewardInFlight = true;
+            SetButtonsInteractable(false);
+            try
+            {
+                bool completed = await AdSystem.ShowRewardedAdAsync(AdIds.DoubleReward);
+                if (!completed || !IsOpen || openVersion != OpenVersion || levelId != _completedLevelId) return;
+                if (!GameManager.Instance.TryClaimDoubleReward(levelId, rewardVersion, completed)) return;
+                _doubleRewardClaimed = true;
+                // 数据已经补发；结算展示与离场动画改为两份奖励，总金币为 20 + 20。
+                foreach (var key in new List<int>(_rewardMap.Keys)) _rewardMap[key] *= 2;
+                RefreshRewardWidgets();
+                // 顶部继续保持原值，离场时统一播放两份奖励的加币动画，避免显示重复累加。
+            }
+            finally
+            {
+                if (IsOpen && openVersion == OpenVersion)
+                {
+                    _doubleRewardInFlight = false;
+                    SetButtonsInteractable(!_hasClaimedReward);
+                }
+            }
         }
 
         private void OnBtnNextClick()
         {
+            if (_doubleRewardInFlight) return;
             BiMgr.FinishAction("next");
             if (_hasClaimedReward)
             {
@@ -291,6 +392,7 @@ namespace GameLogic
 
         private void OnBtnHomeClick()
         {
+            if (_doubleRewardInFlight) return;
             BiMgr.FinishAction("home");
             if (_hasClaimedReward)
             {
@@ -313,8 +415,14 @@ namespace GameLogic
             _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
             _titleText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_title);
             _desText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_des);
-            _shareBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_share);
+            RefreshDoubleRewardText();
             _rewardText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_reward);
+        }
+
+        private void RefreshDoubleRewardText()
+        {
+            _adBtnText.text = LocalizationHelper.GetLocalText(_doubleRewardClaimed
+                ? LanguageKey.finish_double_reward_claimed : LanguageKey.finish_double_reward);
         }
     }
 }

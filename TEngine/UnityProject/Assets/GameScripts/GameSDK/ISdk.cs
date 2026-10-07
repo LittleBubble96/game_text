@@ -1,7 +1,9 @@
-﻿namespace GameLogic
+﻿namespace GameSDK
 {
     public interface ISdk
     {
+        void Login(System.Action<string> onSuccess, System.Action<string> onFailure);
+
         IRewardedVideoAd CreateRewardedVideoAd(string adId, System.Action onLoaded,
             System.Action<int ,string> onError, System.Action<bool> onClosed);
 

@@ -19,6 +19,7 @@ namespace GameLogic.View
         private bool _cachedIndices;
         private bool _hasCachedGeometry;
         private int _drawVersion;
+        private const double DrawFrameBudgetSeconds = 0.003;
 
         public void CancelPendingDraw() => _drawVersion++;
 
@@ -125,12 +126,23 @@ namespace GameLogic.View
             if (this == null || version != _drawVersion) return;
             if (template == null) return;
 
+            double batchStart = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < data.strokes.Count; i++)
             {
+                // 异步加载之后的网格/碰撞体创建仍在主线程；按时间预算让出整帧。
+                // 每次恢复都检查版本，防止快速切关/退出后继续创建旧笔画。
+                if (Application.isPlaying && i > 0 &&
+                    Time.realtimeSinceStartupAsDouble - batchStart >= DrawFrameBudgetSeconds)
+                {
+                    await UniTask.NextFrame();
+                    if (this == null || version != _drawVersion) return;
+                    batchStart = Time.realtimeSinceStartupAsDouble;
+                }
                 int strokeIndex = i;
                 List<Vector2> points = data.strokes[i].points;
 
-                _cachedPoints.Add(points.ToArray());
+                Vector2[] sourcePoints = points.ToArray();
+                _cachedPoints.Add(sourcePoints);
                 if (points.Count < 3)
                 {
                     // 保留原始笔画索引，避免后续笔画选中错位。
@@ -157,20 +169,20 @@ namespace GameLogic.View
                 // 4. 生成实心Mesh（应用位置偏移）
                 Mesh mesh = new Mesh();
                 _ownedMeshes.Add(mesh);
-                List<Vector3> verts = new List<Vector3>();
-                foreach (var p in points) verts.Add(new Vector3(p.x + PositionOffset.x, p.y + PositionOffset.y, 0));
-                Triangulator tr = new Triangulator(points.ToArray());
+                Vector3[] verts = new Vector3[points.Count];
+                for (int p = 0; p < points.Count; p++)
+                    verts[p] = new Vector3(points[p].x + PositionOffset.x, points[p].y + PositionOffset.y, 0);
+                Triangulator tr = new Triangulator(sourcePoints);
                 int[] triangles = tr.Triangulate();
-                List<int> reversedTriangles = new List<int>();
                 for (int j = 0; j < triangles.Length; j += 3)
                 {
-                    reversedTriangles.Add(triangles[j]);
-                    reversedTriangles.Add(triangles[j + 2]);
-                    reversedTriangles.Add(triangles[j + 1]);
+                    int second = triangles[j + 1];
+                    triangles[j + 1] = triangles[j + 2];
+                    triangles[j + 2] = second;
                 }
 
-                mesh.vertices = verts.ToArray();
-                mesh.triangles = reversedTriangles.ToArray();
+                mesh.vertices = verts;
+                mesh.triangles = triangles;
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
 

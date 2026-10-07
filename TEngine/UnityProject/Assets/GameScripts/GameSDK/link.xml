@@ -1,0 +1,4 @@
+<linker>
+  <!-- Hotfix calls are invisible to the player linker. Keep the resident SDK API. -->
+  <assembly fullname="GameSDK" preserve="all" />
+</linker>

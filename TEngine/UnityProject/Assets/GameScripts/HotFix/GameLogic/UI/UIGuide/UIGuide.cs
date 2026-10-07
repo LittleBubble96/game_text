@@ -41,6 +41,10 @@ namespace GameLogic
         private Vector2 _handPosition;
         private bool _handPositioned;
         private Vector3 _strokePoint;
+        private bool _highlightDirty;
+        private Matrix4x4 _lastStrokeMatrix, _lastCameraMatrix, _lastProjection;
+        private Color _lastStrokeColor;
+        private MeshRenderer _strokeRenderer;
 
         protected override void ScriptGenerator()
         {
@@ -148,6 +152,8 @@ namespace GameLogic
             RestoreSubmitSorting();
             RestoreStroke(); _step = Step.Stroke;
             _stroke = _view.GuideCharacter.StrokeObjects[_selection[_strokeOffset]];
+            _strokeRenderer = _stroke.GetComponent<MeshRenderer>();
+            _highlightDirty = true;
             _originalLayer = _stroke.layer;
             _stroke.layer = LayerMask.NameToLayer("GuideHighlight");
             _strokePoint = StrokePoint();
@@ -252,10 +258,25 @@ namespace GameLogic
                 if (_texture != null) { _camera.targetTexture = null; _texture.Release(); Object.Destroy(_texture); }
                 _texture = new RenderTexture(width, height, 16, RenderTextureFormat.ARGB32);
                 _texture.Create(); _camera.targetTexture = _texture; _highlight.texture = _texture;
+                _highlightDirty = true;
             }
             _camera.transform.SetPositionAndRotation(_sourceCamera.transform.position, _sourceCamera.transform.rotation);
             _camera.projectionMatrix = _sourceCamera.projectionMatrix;
-            _camera.Render(); _highlight.enabled = true;
+            // 静止时复用高亮纹理；入场动画、相机/布局变化或笔画颜色变化时才重绘。
+            var strokeMatrix = _stroke.transform.localToWorldMatrix;
+            var cameraMatrix = _camera.worldToCameraMatrix;
+            var projection = _camera.projectionMatrix;
+            var strokeColor = _strokeRenderer != null && _strokeRenderer.sharedMaterial != null
+                ? _strokeRenderer.sharedMaterial.color : Color.white;
+            if (_highlightDirty || strokeMatrix != _lastStrokeMatrix || cameraMatrix != _lastCameraMatrix ||
+                projection != _lastProjection || strokeColor != _lastStrokeColor)
+            {
+                _camera.Render();
+                _lastStrokeMatrix = strokeMatrix; _lastCameraMatrix = cameraMatrix;
+                _lastProjection = projection; _lastStrokeColor = strokeColor;
+                _highlightDirty = false;
+            }
+            _highlight.enabled = true;
             SetRect(_highlight.rectTransform, rectTransform.rect);
         }
         private Vector3 StrokePoint()
@@ -290,6 +311,7 @@ namespace GameLogic
         {
             if (_stroke != null) _stroke.layer = _originalLayer;
             _stroke = null;
+            _strokeRenderer = null;
         }
         private void RaiseSubmit()
         {
@@ -336,7 +358,8 @@ namespace GameLogic
             if (_active == this) _active = null;
             if (_camera != null) { _camera.targetTexture = null; Object.Destroy(_camera.gameObject); }
             if (_texture != null) { _texture.Release(); Object.Destroy(_texture); }
-            _camera = null; _texture = null;
+            _highlight.texture = null;
+            _camera = null; _texture = null; _highlightDirty = true;
         }
         private void CloseGuide()
         {

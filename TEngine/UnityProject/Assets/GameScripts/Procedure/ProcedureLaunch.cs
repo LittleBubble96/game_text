@@ -1,7 +1,7 @@
-﻿using Launcher;
+using GameSDK;
+using Launcher;
 using TEngine;
 using UnityEngine;
-using WeChatWASM;
 using YooAsset;
 using ProcedureOwner = TEngine.IFsm<TEngine.IProcedureModule>;
 
@@ -26,6 +26,8 @@ namespace Procedure
         {
             base.OnEnter(procedureOwner);
             
+            SDK.InitializeAndLogin();
+            StartupTelemetry.Begin(Application.version, _resourceModule.PlayMode.ToString());
             //热更新UI初始化
             LauncherMgr.Initialize();
 
@@ -35,18 +37,13 @@ namespace Procedure
             // 声音配置：根据用户配置数据，设置即将使用的声音选项
             InitSoundSettings();
 
-#if UNITY_EDITOR
-            // Unity 编辑器里：跳过 WX 登录/分享/广告，直接进游戏
-            Log.Info("编辑器环境，跳过微信SDK");
-#elif UNITY_WEBGL
-            WxLogin();
-#endif
         }
 
         protected override void OnUpdate(ProcedureOwner procedureOwner, float elapseSeconds, float realElapseSeconds)
         {
             base.OnUpdate(procedureOwner, elapseSeconds, realElapseSeconds);
 
+            StartupTelemetry.Success(1);
             // 运行一帧即切换到 Splash 展示流程
             ChangeState<ProcedureSplash>(procedureOwner);
         }
@@ -100,63 +97,5 @@ namespace Procedure
             Log.Info("Init sound settings complete.");
         }
 
-        private void WxLogin()
-        {
-            string openid = PlayerPrefs.GetString("WX_openid", "");
-            if (!string.IsNullOrEmpty(openid))
-            {
-                Log.Info($"[WXLogin] has openId {openid}");
-                return;
-            }
-            Log.Info("[WXLogin] InitSDK Begin");
-            WXBase.InitSDK(_ =>
-            {
-                Log.Info("[WXLogin] InitSDK Success");
-                LoginOption option = new LoginOption
-                {
-                    success = (res) =>
-                    {
-                        Log.Info("[WXLogin] 登录成功: " + res.code);
-                        WXBase.cloud.Init(new ICloudConfig()
-                        {
-                            env = "cloud1-d8gh27cku5807f11b",
-                            traceUser = true
-                        });
-                        WXBase.cloud.CallFunction(new CallFunctionParam
-                        {
-                            name = "getOpenid",
-                            data = new {},
-                            success = (cloudResult) =>
-                            {
-                                Log.Info("[Cloud] 云函数返回: " + cloudResult.result);
-                                var r = JsonUtility.FromJson<OpenIdRet>(cloudResult.result);
-                                if (!string.IsNullOrEmpty(r.openid))
-                                {
-                                    PlayerPrefs.SetString("WX_openid", r.openid);
-                                    PlayerPrefs.Save();
-                                    Log.Info("[Cloud] openid 存好了: " + r.openid);
-                                }
-                            },
-                            fail = (cloudResult) =>
-                            {
-                                Log.Error("[Cloud] 云函数失败: " + cloudResult.errMsg);
-                            }
-                        });
-                    },
-                    fail = (res) =>
-                    {
-                        Log.Error("[WXLogin] 登录失败: " + res.errMsg);
-                    }
-                };
-                WX.Login(option);
-            });
-        }
-    }
-    
-    [System.Serializable]
-    public class OpenIdRet
-    {
-        public string openid;
-        public string appid;
     }
 }

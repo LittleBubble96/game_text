@@ -141,7 +141,7 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 1.0.8
+  bundleVersion: 1.0.10
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -798,7 +798,7 @@ PlayerSettings:
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
   scriptingDefineSymbols:
-    Android: ENABLE_LOG;TextMeshPro;DOTWEEN
+    Android: ENABLE_LOG;TextMeshPro;DOTWEEN;ENABLE_HYBRIDCLR
     EmbeddedLinux: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
     GameCoreScarlett: DOTWEEN
     GameCoreXboxOne: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
@@ -809,12 +809,12 @@ PlayerSettings:
     PS5: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
     QNX: TextMeshPro;DOTWEEN
     Stadia: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
-    Standalone: ENABLE_LOG;TextMeshPro;DOTWEEN
+    Standalone: ENABLE_LOG;TextMeshPro;DOTWEEN;ENABLE_HYBRIDCLR
     VisionOS: TextMeshPro;DOTWEEN
-    WebGL: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN;ENABLE_HYBRIDCLR;ENABLE_LOG
-    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG;DOTWEEN
+    WebGL: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN;ENABLE_LOG;ENABLE_HYBRIDCLR
+    Windows Store Apps: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;ENABLE_LOG;DOTWEEN;ENABLE_HYBRIDCLR
     XboxOne: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
-    iPhone: ENABLE_LOG;TextMeshPro;DOTWEEN
+    iPhone: ENABLE_LOG;TextMeshPro;DOTWEEN;ENABLE_HYBRIDCLR
     tvOS: UNITY_POST_PROCESSING_STACK_V2;TextMeshPro;DOTWEEN
   additionalCompilerArguments:
     WebGL: []
