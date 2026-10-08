@@ -189,9 +189,11 @@ namespace GameLogic
             // 快速连续操作时中断旧动画，始终以最新选择状态为准。
             StopIconSwitch();
             _resetIconTarget = target;
+            float targetScale = _corePlayGamePlay != null && _corePlayGamePlay.SelectedStrokeIndices.Count > 0 ? 1f : 0.8f;
             if (!animate || !_iconImage.gameObject.activeInHierarchy || _iconImage.sprite == target)
             {
                 _iconImage.sprite = target;
+                _iconImage.transform.localScale = _iconOriginalScale * targetScale;
                 return;
             }
 
@@ -199,7 +201,7 @@ namespace GameLogic
             _iconSwitchTween.SetUpdate(true);
             _iconSwitchTween.Append(_iconImage.transform.DOScale(Vector3.zero, 0.08f).SetEase(Ease.InQuad));
             _iconSwitchTween.AppendCallback(() => _iconImage.sprite = target);
-            _iconSwitchTween.Append(_iconImage.transform.DOScale(_iconOriginalScale, 0.14f).SetEase(Ease.OutBack));
+            _iconSwitchTween.Append(_iconImage.transform.DOScale(_iconOriginalScale * targetScale, 0.14f).SetEase(Ease.OutBack));
             _iconSwitchTween.OnComplete(() => _iconSwitchTween = null);
         }
 

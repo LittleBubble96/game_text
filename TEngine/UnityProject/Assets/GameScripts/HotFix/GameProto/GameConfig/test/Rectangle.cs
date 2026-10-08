@@ -53,5 +53,6 @@ public sealed partial class Rectangle : Shape
         + "}";
     }
 }
+
 }
 

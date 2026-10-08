@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 52 个 Key）。
+    /// 多语言 Key 常量类（共 53 个 Key）。
     /// </summary>
     public static class LanguageKey
     {

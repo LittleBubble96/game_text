@@ -979,7 +979,7 @@ public class TextLevelEditorWindow : EditorWindow
 
                 if (!_customTones.TryGetValue(answer.answerCharacter , out var tone))
                 {
-                    tone = Pinyin4Net.GetPinyin(answer.answerCharacter, PinyinFormat.WITH_TONE_MARK);
+                    tone = Pinyin4Net.GetPinyin(answer.answerCharacter, PinyinFormat.WITHOUT_TONE);
                 }
                 _levelDataAsset.characterToTone.Add(new TextToneData(answer.answerCharacter , tone));
                 answerHashSet.Add(answer.answerCharacter);

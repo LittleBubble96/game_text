@@ -17,7 +17,7 @@ public sealed partial class ConfReward : Luban.BeanBase
     public ConfReward(ByteBuf _buf) 
     {
         Id = _buf.ReadInt();
-        {int n0 = _buf.ReadSize(); Rewards = new System.Collections.Generic.Dictionary<int, int>(n0 * 3 / 2);for(var i0 = 0 ; i0 < n0 ; i0++) { int _k0;  _k0 = _buf.ReadInt(); int _v0;  _v0 = _buf.ReadInt();     Rewards.Add(_k0, _v0);}}
+        {int n0 = System.Math.Min(_buf.ReadSize(), _buf.Size);Rewards = new System.Collections.Generic.Dictionary<int, int>(n0 * 3 / 2);for(var i0 = 0 ; i0 < n0 ; i0++) { int _k0;  _k0 = _buf.ReadInt(); int _v0;  _v0 = _buf.ReadInt();     Rewards.Add(_k0, _v0);}}
     }
 
     public static ConfReward DeserializeConfReward(ByteBuf _buf)
@@ -46,5 +46,6 @@ public sealed partial class ConfReward : Luban.BeanBase
         + "}";
     }
 }
+
 }
 

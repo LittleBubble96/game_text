@@ -19,22 +19,22 @@ public partial class TbReward
     
     public TbReward(ByteBuf _buf)
     {
-        int n = _buf.ReadSize();
-        _dataMap = new System.Collections.Generic.Dictionary<int, reward.ConfReward>(n);
-        _dataList = new System.Collections.Generic.List<reward.ConfReward>(n);
-        for(int i = n ; i > 0 ; --i)
+        _dataMap = new System.Collections.Generic.Dictionary<int, reward.ConfReward>();
+        _dataList = new System.Collections.Generic.List<reward.ConfReward>();
+        
+        for(int n = _buf.ReadSize() ; n > 0 ; --n)
         {
             reward.ConfReward _v;
-            _v = global::GameConfig.reward.ConfReward.DeserializeConfReward(_buf);
+            _v = reward.ConfReward.DeserializeConfReward(_buf);
             _dataList.Add(_v);
             _dataMap.Add(_v.Id, _v);
         }
     }
 
-    public System.Collections.Generic.IReadOnlyDictionary<int, reward.ConfReward> DataMap => _dataMap;
-    public System.Collections.Generic.IReadOnlyList<reward.ConfReward> DataList => _dataList;
+    public System.Collections.Generic.Dictionary<int, reward.ConfReward> DataMap => _dataMap;
+    public System.Collections.Generic.List<reward.ConfReward> DataList => _dataList;
 
-    public reward.ConfReward GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    public reward.ConfReward GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : null;
     public reward.ConfReward Get(int key) => _dataMap[key];
     public reward.ConfReward this[int key] => _dataMap[key];
 

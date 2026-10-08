@@ -204,7 +204,8 @@ namespace GameLogic.GamePlay.CorePlay.View
             float totalHeight = rows * size + (rows - 1) * spacingY;
             float totalWidth = columns * size + (columns - 1) * spacingX;
             float centerY = (_currentLayoutData.Top.y + _currentLayoutData.Bottom.y) * 0.5f;
-            float offsetX = rows > 1 ? (availableWidth - totalWidth) * 0.5f : 0f;
+            float offsetX =  (availableWidth - totalWidth) * 0.5f ;
+            // float offsetX = rows > 1 ? (availableWidth - totalWidth) * 0.5f : 0f;
             float firstX = leftBound + offsetX + size * 0.5f;
             float firstY = centerY + (totalHeight - size) * 0.5f;
 

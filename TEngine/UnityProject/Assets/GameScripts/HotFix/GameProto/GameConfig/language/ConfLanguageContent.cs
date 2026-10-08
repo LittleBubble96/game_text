@@ -17,7 +17,7 @@ public sealed partial class ConfLanguageContent : Luban.BeanBase
     public ConfLanguageContent(ByteBuf _buf) 
     {
         Id = _buf.ReadString();
-        {int __n0 = _buf.ReadSize(); Value = new string[__n0];for(var __index0 = 0 ; __index0 < __n0 ; __index0++) { string __e0;__e0 = _buf.ReadString(); Value[__index0] = __e0;}}
+        {int __n0 = System.Math.Min(_buf.ReadSize(), _buf.Size);Value = new string[__n0];for(var __index0 = 0 ; __index0 < __n0 ; __index0++) { string __e0;__e0 = _buf.ReadString(); Value[__index0] = __e0;}}
     }
 
     public static ConfLanguageContent DeserializeConfLanguageContent(ByteBuf _buf)
@@ -49,5 +49,6 @@ public sealed partial class ConfLanguageContent : Luban.BeanBase
         + "}";
     }
 }
+
 }
 

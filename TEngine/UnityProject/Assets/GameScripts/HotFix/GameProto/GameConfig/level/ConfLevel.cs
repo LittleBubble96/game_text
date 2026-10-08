@@ -55,5 +55,6 @@ public sealed partial class ConfLevel : Luban.BeanBase
         + "}";
     }
 }
+
 }
 

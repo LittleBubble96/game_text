@@ -717,8 +717,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: No shares left today
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
-  m_sharedMaterial: {fileID: -6830314582723583146, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
+  m_sharedMaterial: {fileID: -5426056050981236882, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -742,17 +742,17 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
+  m_fontSize: 60
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 50
-  m_fontStyle: 0
+  m_fontSizeMax: 60
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -1
   m_wordSpacing: 0
   m_lineSpacing: 40
   m_lineSpacingMax: 0
@@ -1126,8 +1126,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Claim Coins
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 500bb390bf9df4941970e88943693a8b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
+  m_sharedMaterial: {fileID: -5426056050981236882, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1151,17 +1151,17 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 53.15
+  m_fontSize: 80
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 70
-  m_fontStyle: 0
+  m_fontSizeMax: 80
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 20.08
+  m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1265,8 +1265,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Share Now
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 500bb390bf9df4941970e88943693a8b, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
+  m_sharedMaterial: {fileID: -5426056050981236882, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1290,17 +1290,17 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 59.8
+  m_fontSize: 80
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 70
-  m_fontStyle: 0
+  m_fontSizeMax: 80
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 20.08
+  m_characterSpacing: 0
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1447,8 +1447,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 63, y: 674}
-  m_SizeDelta: {x: 420, y: 150}
+  m_AnchoredPosition: {x: 41, y: 674}
+  m_SizeDelta: {x: 500, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6888565588480728721
 CanvasRenderer:
@@ -1480,8 +1480,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Get Coins
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
-  m_sharedMaterial: {fileID: 2100000, guid: 919f376b50f8f484786503db674011dd, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 37bc5ee4ad4a19041bb645202b391e9c, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1505,13 +1505,13 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 84.9
+  m_fontSize: 120
   m_fontSizeBase: 100
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 100
-  m_fontStyle: 0
+  m_fontSizeMax: 120
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -1621,8 +1621,8 @@ MonoBehaviour:
 
 '
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
-  m_sharedMaterial: {fileID: -6830314582723583146, guid: 959c42624d0da7d4f9c6f727a39f3dfb, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
+  m_sharedMaterial: {fileID: -5426056050981236882, guid: 9b0943c4437d28f4ba439de2b6f5d094, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1646,17 +1646,17 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 50
+  m_fontSize: 60
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 50
-  m_fontStyle: 0
+  m_fontSizeMax: 60
+  m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
-  m_characterSpacing: 0
+  m_characterSpacing: -1
   m_wordSpacing: 0
   m_lineSpacing: 40
   m_lineSpacingMax: 0

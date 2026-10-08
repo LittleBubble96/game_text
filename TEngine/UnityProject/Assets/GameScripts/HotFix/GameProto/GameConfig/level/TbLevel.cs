@@ -19,22 +19,22 @@ public partial class TbLevel
     
     public TbLevel(ByteBuf _buf)
     {
-        int n = _buf.ReadSize();
-        _dataMap = new System.Collections.Generic.Dictionary<int, level.ConfLevel>(n);
-        _dataList = new System.Collections.Generic.List<level.ConfLevel>(n);
-        for(int i = n ; i > 0 ; --i)
+        _dataMap = new System.Collections.Generic.Dictionary<int, level.ConfLevel>();
+        _dataList = new System.Collections.Generic.List<level.ConfLevel>();
+        
+        for(int n = _buf.ReadSize() ; n > 0 ; --n)
         {
             level.ConfLevel _v;
-            _v = global::GameConfig.level.ConfLevel.DeserializeConfLevel(_buf);
+            _v = level.ConfLevel.DeserializeConfLevel(_buf);
             _dataList.Add(_v);
             _dataMap.Add(_v.Id, _v);
         }
     }
 
-    public System.Collections.Generic.IReadOnlyDictionary<int, level.ConfLevel> DataMap => _dataMap;
-    public System.Collections.Generic.IReadOnlyList<level.ConfLevel> DataList => _dataList;
+    public System.Collections.Generic.Dictionary<int, level.ConfLevel> DataMap => _dataMap;
+    public System.Collections.Generic.List<level.ConfLevel> DataList => _dataList;
 
-    public level.ConfLevel GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : default;
+    public level.ConfLevel GetOrDefault(int key) => _dataMap.TryGetValue(key, out var v) ? v : null;
     public level.ConfLevel Get(int key) => _dataMap[key];
     public level.ConfLevel this[int key] => _dataMap[key];
 

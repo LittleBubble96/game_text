@@ -49,5 +49,6 @@ public sealed partial class ItemExchange : Luban.BeanBase
         + "}";
     }
 }
+
 }
 

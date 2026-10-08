@@ -59,11 +59,11 @@ namespace GameLogic.GamePlay.CorePlay.View
             float currentScale = GetScreenHeight() / (float)GetScreenWidth();
             if (scaleNormal > currentScale)
             {
-                backGround.transform.localScale = (scaleNormal / currentScale) * Vector3.one * 0.65f;
+                backGround.transform.localScale = (scaleNormal / currentScale) * Vector3.one * 0.68f;
             }
             else
             {
-                backGround.transform.localScale = (currentScale / scaleNormal) * Vector3.one * 0.65f;
+                backGround.transform.localScale = (currentScale / scaleNormal) * Vector3.one * 0.68f;
             }
         }
         

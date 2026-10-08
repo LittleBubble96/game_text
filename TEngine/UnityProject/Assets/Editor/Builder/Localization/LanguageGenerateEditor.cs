@@ -235,7 +235,7 @@ namespace Builder
                     EnsureDirectory(levelDir);
 
                     // 关卡文字使用主游戏字体，优先匹配 AlibabaPuHuiTi-3-95-ExtraBold
-                    string levelFont = "AlibabaPuHuiTi-3-95-ExtraBold";
+                    string levelFont = "TaiWanQuanZiKuZhengKaiTi-2";
 
                     BuildFontAsset(levelFont, levelChars, levelDir, LevelSuffix);
                 }
