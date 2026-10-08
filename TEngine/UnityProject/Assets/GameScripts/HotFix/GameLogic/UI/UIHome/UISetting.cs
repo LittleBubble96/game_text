@@ -49,7 +49,7 @@ namespace GameLogic
             _musicVolume =FindChildComponent<Slider>("Panel/MusicSlider");
             _soundVolume = FindChildComponent<Slider>("Panel/SfxSlider");
 
-            _bgCloseBtn = CreateWidget<XYButton>("");
+            _bgCloseBtn = CreateWidget<XYButton>("closeBtn");
             _closeBtn = CreateWidget<XYButton>("Panel/Close");
             
             _musicVolume.onValueChanged.AddListener(OnMusicVolumeChanged);
