@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using GameSDK;
 using GameConfig;
 using GameLogic.Localization;
 using RTLTMPro;
@@ -14,6 +15,7 @@ namespace GameLogic
     {
         private RTLTextMeshPro _nextBtnText;
         private RTLTextMeshPro _homeBtnText;
+        private RTLTextMeshPro _shareBtnText;
         private RTLTextMeshPro _adBtnText;
         private RTLTextMeshPro _titleText;
         private RTLTextMeshPro _desText;
@@ -21,6 +23,7 @@ namespace GameLogic
 
         private XYButton _btnNext;
         private XYButton _btnHome;
+        private XYButton _btnShare;
         private XYButton _btnAd;
         private Graphic[] _adGraphics;
         private Color[] _adOriginalColors;
@@ -64,6 +67,7 @@ namespace GameLogic
             _animation = transform.GetComponent<Animation>();
             _btnNext = CreateWidget<XYButton>("VictoryPanel/ButtonNext");
             _btnHome = CreateWidget<XYButton>("VictoryPanel/ButtonHome");
+            _btnShare = CreateWidget<XYButton>("VictoryPanel/ButtonShare");
             _btnAd = CreateWidget<XYButton>("VictoryPanel/ButtonAd");
             _adGraphics = _btnAd.gameObject.GetComponentsInChildren<Graphic>(true);
             _adOriginalColors = new Color[_adGraphics.Length];
@@ -76,6 +80,7 @@ namespace GameLogic
 
             _nextBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonNext/Text");
             _homeBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonHome/Text");
+            _shareBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonShare/Text");
             _adBtnText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/ButtonAd/Text");
             _titleText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/Title");
             _desText = this.FindChildComponent<RTLTextMeshPro>("VictoryPanel/m_des");
@@ -83,6 +88,7 @@ namespace GameLogic
             _btnNextGo = _btnNext.gameObject;
             _btnNext.OnAddListener(OnBtnNextClick);
             _btnHome.OnAddListener(OnBtnHomeClick);
+            _btnShare.OnAddListener(OnBtnShareClick);
             _btnAd.OnAddListener(OnBtnDoubleRewardClick);
 
             _rewardRoot = FindChildComponent<RectTransform>("VictoryPanel/RewardRoot");
@@ -331,6 +337,7 @@ namespace GameLogic
         {
             _btnNext.Interactable = interactable;
             _btnHome.Interactable = interactable;
+            _btnShare.Interactable = interactable;
             if (!interactable) _btnAd.Interactable = false;
             else RefreshDoubleRewardButton();
         }
@@ -390,6 +397,15 @@ namespace GameLogic
             });
         }
 
+        private void OnBtnShareClick()
+        {
+            if (_doubleRewardInFlight || _hasClaimedReward) return;
+            // 分享不离开结算页，也不领取奖励；不占用 next/home 的离场埋点。
+            BiMgr.ShareClicked("finish");
+            SDK.ShareAppMessage(string.Format(
+                LocalizationHelper.GetLocalText(LanguageKey.finish_share_title), _completedLevelId));
+        }
+
         private void OnBtnHomeClick()
         {
             if (_doubleRewardInFlight) return;
@@ -412,7 +428,8 @@ namespace GameLogic
         private void RefreshText()
         {
             _nextBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.next_level_btn);
-            _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_btn);
+            _homeBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.back_home_btn);
+            _shareBtnText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_share);
             _titleText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_title);
             _desText.text = LocalizationHelper.GetLocalText(LanguageKey.finish_des);
             RefreshDoubleRewardText();
