@@ -212,11 +212,20 @@ namespace TEngine
                 string defaultHostServer = HostServerURL;
                 string fallbackHostServer = FallbackHostServerURL;
                 IRemoteServices remoteServices = new RemoteServices(defaultHostServer, fallbackHostServer);
-#if UNITY_WEBGL && WEIXINMINIGAME && !UNITY_EDITOR
+#if UNITY_WEBGL && WEIXINMINIGAME
                 Log.Info("=======================WEIXINMINIGAME=======================");
-                // 注意：如果有子目录，请修改此处！
-                string packageRoot = $"{WeChatWASM.WX.env.USER_DATA_PATH}/__GAME_FILE_CACHE";
-                createParameters.WebServerFileSystemParameters = WechatFileSystemCreater.CreateFileSystemParameters(packageRoot, remoteServices, webDecryptionServices);
+                if (Settings.UpdateSetting.WechatEmbedResources)
+                {
+                    // Version, manifest and bundles all come from the same player build. No CDN fallback.
+                    createParameters.WebServerFileSystemParameters = new FileSystemParameters(
+                        "YooAsset.EmbeddedResourceFileSystem, YooAsset", null);
+                }
+                else
+                {
+                    // 注意：如果有子目录，请修改此处！
+                    string packageRoot = $"{WeChatWASM.WX.env.USER_DATA_PATH}/__GAME_FILE_CACHE";
+                    createParameters.WebServerFileSystemParameters = WechatFileSystemCreater.CreateFileSystemParameters(packageRoot, remoteServices, webDecryptionServices);
+                }
 #else
                 Log.Info("=======================UNITY_WEBGL=======================");
                 if (LoadResWayWebGL == LoadResWayWebGL.Remote)

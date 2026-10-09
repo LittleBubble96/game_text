@@ -32,6 +32,7 @@ MonoBehaviour:
   ResDownLoadPath: https://xunzi.setworld.net
   FallbackResDownLoadPath: https://xunzi.setworld.net
   LoadResWayWebGL: 0
+  WechatEmbedResources: 1
   isAutoAssetCopeToBuildAddress: 0
   BuildAddress: ../../Builds/Unity_Data/StreamingAssets
   ReplaceAssetPathWithAddress: 0

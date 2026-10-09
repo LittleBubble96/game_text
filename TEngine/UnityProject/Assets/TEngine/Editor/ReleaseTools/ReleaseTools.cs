@@ -104,17 +104,36 @@ namespace TEngine
             config.OutputRoot = Application.dataPath + "/../Builds/WebGL";
             config.BuildPlayer = false;
             config.BuildMode = mode;
+            bool embedResources = Settings.UpdateSetting.WechatEmbedResources;
+            if (embedResources)
+            {
+                config.MinimalPackage = false;
+                config.BuildinFileCopyOption = EBuildinFileCopyOption.ClearAndCopyAll;
+                config.EncryptionType = EncryptionType.None;
+            }
             // config.MinimalPackage = true;
             BuildWithConfig(config, buildPlayer: false, postBuildCallback: () =>
             {
                 var wxConfig = WeChatWASM.UnityUtil.GetEditorConf();
                 // 缓存微信 CDN 原值：转换期间临时改成版本化地址，转换完恢复，保证配置文件不被污染
                 string originCdn = wxConfig.ProjectConf.CDN;
+                int originAssetLoadType = wxConfig.ProjectConf.assetLoadType;
+                bool originScriptOnly = wxConfig.CompileOptions.ScriptOnly;
+                EmbeddedPackageBuildScope embeddedPackage = null;
                 try
                 {
+                    if (embedResources)
+                    {
+                        wxConfig.CompileOptions.ScriptOnly = false;
+                        embeddedPackage = new EmbeddedPackageBuildScope(
+                            Path.Combine(AssetBundleBuilderHelper.GetStreamingAssetsRoot(), "DefaultPackage"), "DefaultPackage");
+                    }
+                    wxConfig.ProjectConf.assetLoadType = embedResources ? 1 : 0;
                     string versionedCdn = ApplyVersionedCdnToWxConfig();
                     if (WXConvertCore.DoExport() == WXConvertCore.WXExportError.SUCCEED)
                     {
+                        if (embedResources && wxConfig.ProjectConf.assetLoadType != 1)
+                            throw new InvalidOperationException("微信包内资源构建失败：SDK因体积或压缩问题回退到了CDN。请减少资源或关闭WechatEmbedResources后重新构建，勿发布本次产物。");
                         Debug.Log($"[Build] WebGL 转换为微信小游戏成功，CDN={versionedCdn}");
                         // 归档微信导出的 webgl 产物到 {项目名}/v{版本号}/
                         ArchiveWxExport();
@@ -128,8 +147,11 @@ namespace TEngine
                 {
                     // 恢复微信 CDN 原值，避免下次打包从已版本化的脏值重复累加
                     wxConfig.ProjectConf.CDN = originCdn;
+                    wxConfig.ProjectConf.assetLoadType = originAssetLoadType;
+                    wxConfig.CompileOptions.ScriptOnly = originScriptOnly;
                     EditorUtility.SetDirty(wxConfig);
                     AssetDatabase.SaveAssets();
+                    embeddedPackage?.Dispose();
                     Debug.Log($"[Build] 微信 CDN 已恢复原值: {originCdn}");
                 }
             });

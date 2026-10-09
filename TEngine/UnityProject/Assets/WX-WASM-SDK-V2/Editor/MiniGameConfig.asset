@@ -16,7 +16,7 @@ MonoBehaviour:
     projectName: "\u5BFB\u5B57\u5927\u5E08"
     Appid: wx308052a1ea617d67
     CDN: https://xunzi.setworld.net
-    assetLoadType: 0
+    assetLoadType: 1
     compressDataPackage: 1
     VideoUrl: 
     relativeDST: E:/xx/NewText/output

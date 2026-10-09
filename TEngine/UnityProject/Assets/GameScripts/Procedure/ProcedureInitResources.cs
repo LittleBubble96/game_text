@@ -71,11 +71,11 @@ namespace Procedure
         /// <remarks>YooAsset 需要保持编辑器、单机、联机模式流程一致。</remarks>
         private IEnumerator InitResources(ProcedureOwner procedureOwner)
         {
-            Log.Info("更新资源清单！！！");
-            LauncherMgr.ShowUI<LoadUpdateUI>($"更新清单文件...");
+            Log.Info("初始化资源清单");
+            LauncherMgr.ShowUI<LoadUpdateUI>("初始化资源中...");
 
             // 1. 获取资源清单的版本信息
-            // 版本文件地址固定，每次启动都需要检查最新版本，不能复用网络缓存。
+            // 文件系统决定来源：微信包内模式读随包版本；CDN模式查询远程版本且不复用网络缓存。
             StartupTelemetry.Start(3);
             var operation1 = _resourceModule.RequestPackageVersionAsync(appendTimeTicks: true);
             yield return operation1;

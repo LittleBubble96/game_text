@@ -112,6 +112,9 @@ namespace TEngine
         [Header("WebGL设置")]
         [SerializeField]
         private LoadResWayWebGL LoadResWayWebGL = LoadResWayWebGL.Remote;
+
+        [Tooltip("微信小游戏使用一键WebGL构建，将完整AB和清单嵌入Unity首包；关闭可恢复CDN资源模式。")]
+        public bool WechatEmbedResources = true;
         /// <summary>
         /// 是否自动你讲打包资源复制到打包后的StreamingAssets地址
         /// </summary>
