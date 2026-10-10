@@ -18,17 +18,17 @@ namespace TEngine
         /// <summary>
         /// 默认调试器漂浮框大小。
         /// </summary>
-        internal static readonly Rect DefaultIconRect = new Rect(10f, 10f, 60f, 60f);
+        internal static readonly Rect DefaultIconRect = new Rect(10f, 10f, 80f, 80f);
 
         /// <summary>
         /// 默认调试器窗口大小。
         /// </summary>
-        internal static readonly Rect DefaultWindowRect = new Rect(10f, 10f, 640f, 480f);
+        internal static readonly Rect DefaultWindowRect = new Rect(10f, 10f, 200f, 800f);
 
         /// <summary>
         /// 默认调试器窗口缩放比例。
         /// </summary>
-        internal static readonly float DefaultWindowScale = 1.5f;
+        internal static readonly float DefaultWindowScale = 1.8f;
 
         private static TextEditor s_TextEditor = null;
         private IDebuggerModule _debuggerModule = null;

@@ -956,8 +956,9 @@ public class TextLevelEditorWindow : EditorWindow
 
     private static readonly Dictionary<string, string> _customTones = new Dictionary<string, string>()
     {
-        { "丨", "gǔn" },
-        { "亖", "sì" },
+        { "丨", "gun" },
+        { "亖", "si" },
+        { "㐲", "dai"}
     };
 
 

@@ -1,0 +1,7 @@
+<Project>
+  <!-- CLI compilation before Unity refresh regenerates its csproj files. -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'GameLogic'">
+    <Compile Remove="Assets\GameScripts\HotFix\GameLogic\Game\TextDrawPoints.cs" />
+    <Compile Include="$(MSBuildProjectDirectory)\Assets\GameScripts\HotFix\GameLogic\Game\TextDrawPoints.cs" />
+  </ItemGroup>
+</Project>

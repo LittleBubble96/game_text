@@ -139,62 +139,37 @@ MonoBehaviour:
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_6
-    baseCharacter: "\u679C"
+    baseCharacter: "\u52AB"
     positionOffset: {x: -2, y: -1}
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
+      - strokeIndices: 00000000
       - strokeIndices: 02000000
-      - strokeIndices: 03000000
-      - strokeIndices: 04000000
     - answerCharacter: "\u4E8C"
       strokeSets:
-      - strokeIndices: 0200000003000000
-      - strokeIndices: 0200000004000000
-      - strokeIndices: 0300000004000000
-    - answerCharacter: "\u4E09"
-      strokeSets:
-      - strokeIndices: 020000000300000004000000
+      - strokeIndices: 0000000002000000
     - answerCharacter: "\u5341"
       strokeSets:
-      - strokeIndices: 0200000005000000
-      - strokeIndices: 0300000005000000
-      - strokeIndices: 0400000005000000
-    - answerCharacter: "\u516B"
+      - strokeIndices: 0000000001000000
+    - answerCharacter: "\u571F"
       strokeSets:
-      - strokeIndices: 0600000007000000
-    - answerCharacter: "\u53E3"
-      strokeSets:
-      - strokeIndices: 000000000100000003000000
-    - answerCharacter: "\u65E5"
-      strokeSets:
-      - strokeIndices: 00000000010000000200000003000000
-    - answerCharacter: "\u6728"
-      strokeSets:
-      - strokeIndices: 04000000050000000600000007000000
-    - answerCharacter: "\u7532"
-      strokeSets:
-      - strokeIndices: 0000000001000000020000000300000005000000
-    - answerCharacter: "\u672A"
-      strokeSets:
-      - strokeIndices: 0200000003000000050000000600000007000000
-      - strokeIndices: 0300000004000000050000000600000007000000
-      - strokeIndices: 0200000005000000060000000700000004000000
-    - answerCharacter: "\u65E6"
+      - strokeIndices: 000000000100000002000000
+    - answerCharacter: "\u53BB"
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000
-    - answerCharacter: "\u679C"
+    - answerCharacter: "\u529B"
       strokeSets:
-      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
-    - answerCharacter: "\u4E30"
+      - strokeIndices: 0500000006000000
+    - answerCharacter: "\u4E91"
       strokeSets:
-      - strokeIndices: 02000000030000000400000005000000
-    - answerCharacter: "\u8012"
+      - strokeIndices: 02000000000000000300000004000000
+    - answerCharacter: "\u52A8"
       strokeSets:
-      - strokeIndices: 020000000300000004000000050000000600000007000000
-    - answerCharacter: "\u53EA"
+      - strokeIndices: 000000000200000003000000040000000500000006000000
+    - answerCharacter: "\u52AB"
       strokeSets:
-      - strokeIndices: 0000000001000000030000000600000007000000
+      - strokeIndices: 00000000010000000200000003000000040000000500000006000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_7
@@ -748,37 +723,62 @@ MonoBehaviour:
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_19
-    baseCharacter: "\u52AB"
+    baseCharacter: "\u679C"
     positionOffset: {x: -2, y: -1}
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
-      - strokeIndices: 00000000
       - strokeIndices: 02000000
+      - strokeIndices: 03000000
+      - strokeIndices: 04000000
     - answerCharacter: "\u4E8C"
       strokeSets:
-      - strokeIndices: 0000000002000000
+      - strokeIndices: 0200000003000000
+      - strokeIndices: 0200000004000000
+      - strokeIndices: 0300000004000000
+    - answerCharacter: "\u4E09"
+      strokeSets:
+      - strokeIndices: 020000000300000004000000
     - answerCharacter: "\u5341"
       strokeSets:
-      - strokeIndices: 0000000001000000
-    - answerCharacter: "\u571F"
+      - strokeIndices: 0200000005000000
+      - strokeIndices: 0300000005000000
+      - strokeIndices: 0400000005000000
+    - answerCharacter: "\u516B"
       strokeSets:
-      - strokeIndices: 000000000100000002000000
-    - answerCharacter: "\u53BB"
+      - strokeIndices: 0600000007000000
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 000000000100000003000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000
+    - answerCharacter: "\u6728"
+      strokeSets:
+      - strokeIndices: 04000000050000000600000007000000
+    - answerCharacter: "\u7532"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000005000000
+    - answerCharacter: "\u672A"
+      strokeSets:
+      - strokeIndices: 0200000003000000050000000600000007000000
+      - strokeIndices: 0300000004000000050000000600000007000000
+      - strokeIndices: 0200000005000000060000000700000004000000
+    - answerCharacter: "\u65E6"
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000
-    - answerCharacter: "\u529B"
+    - answerCharacter: "\u679C"
       strokeSets:
-      - strokeIndices: 0500000006000000
-    - answerCharacter: "\u4E91"
+      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
+    - answerCharacter: "\u4E30"
       strokeSets:
-      - strokeIndices: 02000000000000000300000004000000
-    - answerCharacter: "\u52A8"
+      - strokeIndices: 02000000030000000400000005000000
+    - answerCharacter: "\u8012"
       strokeSets:
-      - strokeIndices: 000000000200000003000000040000000500000006000000
-    - answerCharacter: "\u52AB"
+      - strokeIndices: 020000000300000004000000050000000600000007000000
+    - answerCharacter: "\u53EA"
       strokeSets:
-      - strokeIndices: 00000000010000000200000003000000040000000500000006000000
+      - strokeIndices: 0000000001000000030000000600000007000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_20
@@ -6750,6 +6750,7 @@ MonoBehaviour:
     - answerCharacter: "\u53E3"
       strokeSets:
       - strokeIndices: 000000000100000009000000
+      - strokeIndices: 020000000300000004000000
     - answerCharacter: "\u4EBA"
       strokeSets:
       - strokeIndices: 0700000008000000
@@ -6815,6 +6816,7 @@ MonoBehaviour:
     - answerCharacter: "\u5DE5"
       strokeSets:
       - strokeIndices: 040000000500000008000000
+      - strokeIndices: 000000000200000004000000
     - answerCharacter: "\u4E0A"
       strokeSets:
       - strokeIndices: 050000000600000008000000
@@ -6919,9 +6921,6 @@ MonoBehaviour:
     - answerCharacter: "\u516B"
       strokeSets:
       - strokeIndices: 0400000005000000
-    - answerCharacter: "\u4E2B"
-      strokeSets:
-      - strokeIndices: 000000000100000003000000
     - answerCharacter: "\u7C73"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000
@@ -7002,6 +7001,12 @@ MonoBehaviour:
     - answerCharacter: "\u68A8"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 010000000200000007000000
+    - answerCharacter: "\u535C"
+      strokeSets:
+      - strokeIndices: 0200000004000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_116
@@ -7065,10 +7070,13 @@ MonoBehaviour:
       - strokeIndices: 050000000600000007000000
     - answerCharacter: "\u4E01"
       strokeSets:
-      - strokeIndices: 0600000007000000
+      - strokeIndices: 0700000005000000
     - answerCharacter: "\u5CD9"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u4E8D"
+      strokeSets:
+      - strokeIndices: 030000000500000007000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_118
@@ -7082,12 +7090,6 @@ MonoBehaviour:
     - answerCharacter: "\u4E8C"
       strokeSets:
       - strokeIndices: 0200000005000000
-    - answerCharacter: "\u5382"
-      strokeSets:
-      - strokeIndices: 0200000003000000
-    - answerCharacter: "\u5E7F"
-      strokeSets:
-      - strokeIndices: 000000000200000003000000
     - answerCharacter: "\u5C38"
       strokeSets:
       - strokeIndices: 010000000200000003000000
@@ -7100,9 +7102,6 @@ MonoBehaviour:
     - answerCharacter: "\u4E07"
       strokeSets:
       - strokeIndices: 050000000600000007000000
-    - answerCharacter: "\u5200"
-      strokeSets:
-      - strokeIndices: 0600000007000000
     - answerCharacter: "\u623F"
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
@@ -7122,15 +7121,13 @@ MonoBehaviour:
     - answerCharacter: "\u4E01"
       strokeSets:
       - strokeIndices: 0500000006000000
+      - strokeIndices: 0600000000000000
     - answerCharacter: "\u8279"
       strokeSets:
       - strokeIndices: 000000000100000002000000
     - answerCharacter: "\u4EBA"
       strokeSets:
       - strokeIndices: 0300000004000000
-    - answerCharacter: "\u6728"
-      strokeSets:
-      - strokeIndices: 05000000060000000700000008000000
     - answerCharacter: "\u5C0F"
       strokeSets:
       - strokeIndices: 060000000700000008000000
@@ -7140,6 +7137,13 @@ MonoBehaviour:
     - answerCharacter: "\u8336"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
+    - answerCharacter: "\u5341"
+      strokeSets:
+      - strokeIndices: 0100000000000000
+      - strokeIndices: 0000000002000000
+    - answerCharacter: "\u4E8E"
+      strokeSets:
+      - strokeIndices: 000000000500000006000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_120
@@ -7225,21 +7229,21 @@ MonoBehaviour:
     - answerCharacter: "\u7F8A"
       strokeSets:
       - strokeIndices: 0a0000000b0000000c0000000d0000000e0000000f000000
-    - answerCharacter: "\u738B"
-      strokeSets:
-      - strokeIndices: 0c0000000d0000000e0000000f000000
     - answerCharacter: "\u5E72"
       strokeSets:
       - strokeIndices: 0c0000000d0000000f000000
-    - answerCharacter: "\u571F"
-      strokeSets:
-      - strokeIndices: 0d0000000e0000000f000000
     - answerCharacter: "\u5341"
       strokeSets:
       - strokeIndices: 0d0000000f000000
     - answerCharacter: "\u7FB8"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000
+    - answerCharacter: "\u5170"
+      strokeSets:
+      - strokeIndices: 0a0000000b0000000c0000000d0000000e000000
+    - answerCharacter: "\u43CE"
+      strokeSets:
+      - strokeIndices: 06000000070000000800000009000000100000001100000012000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_121
@@ -8073,7 +8077,7 @@ MonoBehaviour:
       - strokeIndices: 000000000300000001000000
     - answerCharacter: "\u5DE5"
       strokeSets:
-      - strokeIndices: 000000000100000003000000
+      - strokeIndices: 000000000300000002000000
     - answerCharacter: "\u7403"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
@@ -8086,9 +8090,6 @@ MonoBehaviour:
       - strokeIndices: 04000000050000000a000000
     - answerCharacter: "\u5C0F"
       strokeSets:
-      - strokeIndices: 050000000600000008000000
-      - strokeIndices: 050000000700000008000000
-      - strokeIndices: 050000000600000009000000
       - strokeIndices: 050000000700000009000000
     - answerCharacter: "\u624D"
       strokeSets:
@@ -8347,6 +8348,7 @@ MonoBehaviour:
     - answerCharacter: "\u571F"
       strokeSets:
       - strokeIndices: 040000000500000007000000
+      - strokeIndices: 040000000500000006000000
     - answerCharacter: "\u65E5"
       strokeSets:
       - strokeIndices: 02000000030000000400000006000000
@@ -8374,7 +8376,7 @@ MonoBehaviour:
       - strokeIndices: 0400000005000000
     - answerCharacter: "\u4E11"
       strokeSets:
-      - strokeIndices: 03000000040000000500000006000000
+      - strokeIndices: 03000000040000000500000007000000
     - answerCharacter: "\u9C7C"
       strokeSets:
       - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
@@ -9148,6 +9150,14 @@ MonoBehaviour:
       - strokeIndices: 04000000090000000e0000000f000000
       - strokeIndices: 00000000090000000e00000011000000
       - strokeIndices: 04000000090000000e00000011000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 090000000c0000000e000000
+      - strokeIndices: 090000000d0000000e000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 000000000100000009000000
+      - strokeIndices: 040000000500000009000000
     answerCountMode: 0
     requiredAnswerCount: 11
   - levelName: Level_152
@@ -9188,6 +9198,7 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 000000000100000005000000
       - strokeIndices: 000000000400000005000000
+      - strokeIndices: 020000000400000005000000
     - answerCharacter: "\u5382"
       strokeSets:
       - strokeIndices: 0100000005000000
@@ -9516,6 +9527,8 @@ MonoBehaviour:
     - answerCharacter: "\u5170"
       strokeSets:
       - strokeIndices: 000000000100000002000000070000000b000000
+      - strokeIndices: 000000000100000002000000070000000a000000
+      - strokeIndices: 0000000001000000070000000a0000000b000000
     - answerCharacter: "\u4E9A"
       strokeSets:
       - strokeIndices: 020000000300000004000000050000000600000007000000
@@ -9546,10 +9559,10 @@ MonoBehaviour:
       - strokeIndices: 000000000200000005000000060000000700000008000000090000000a0000000b000000
     - answerCharacter: "\u5F53"
       strokeSets:
-      - strokeIndices: 000000000100000004000000090000000a0000000b000000
-    - answerCharacter: "\u5E76"
+      - strokeIndices: 04000000090000000a0000000b0000000500000006000000
+    - answerCharacter: "\u4E26"
       strokeSets:
-      - strokeIndices: 000000000100000002000000030000000400000007000000
+      - strokeIndices: 0000000001000000020000000300000004000000070000000500000006000000
     - answerCharacter: "\u4E00"
       strokeSets:
       - strokeIndices: 02000000
@@ -9597,7 +9610,7 @@ MonoBehaviour:
       - strokeIndices: 000000000100000002000000030000000400000005000000
     - answerCharacter: "\u5E72"
       strokeSets:
-      - strokeIndices: 070000000a0000000c000000
+      - strokeIndices: 0a0000000c0000000b000000
     - answerCharacter: "\u7ACB"
       strokeSets:
       - strokeIndices: 060000000700000008000000090000000a000000
@@ -9689,6 +9702,8 @@ MonoBehaviour:
       - strokeIndices: 0500000006000000070000000800000009000000
     - answerCharacter: "\u5E72"
       strokeSets:
+      - strokeIndices: 090000000a00000008000000
+      - strokeIndices: 07000000090000000a000000
       - strokeIndices: 03000000090000000a000000
     - answerCharacter: "\u4E98"
       strokeSets:
@@ -9701,13 +9716,15 @@ MonoBehaviour:
       - strokeIndices: 00000000010000000200000005000000060000000700000008000000
     - answerCharacter: "\u4E0A"
       strokeSets:
-      - strokeIndices: 040000000700000009000000
+      - strokeIndices: 070000000900000005000000
     - answerCharacter: "\u58EB"
       strokeSets:
       - strokeIndices: 030000000400000007000000
     - answerCharacter: "\u6C57"
       strokeSets:
       - strokeIndices: 00000000010000000200000003000000090000000a000000
+      - strokeIndices: 00000000010000000200000007000000090000000a000000
+      - strokeIndices: 000000000100000002000000090000000a00000008000000
     - answerCharacter: "\u80E1"
       strokeSets:
       - strokeIndices: 03000000040000000500000006000000080000000b0000000c0000000d0000000e000000
@@ -9803,7 +9820,7 @@ MonoBehaviour:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
     - answerCharacter: "\u4E0A"
       strokeSets:
-      - strokeIndices: 060000000800000009000000
+      - strokeIndices: 090000000100000005000000
     - answerCharacter: "\u72AC"
       strokeSets:
       - strokeIndices: 08000000090000000a0000000b000000
@@ -9898,6 +9915,7 @@ MonoBehaviour:
     - answerCharacter: "\u4ED5"
       strokeSets:
       - strokeIndices: 0100000002000000060000000700000008000000
+      - strokeIndices: 0100000002000000030000000400000005000000
     - answerCharacter: "\u4EC0"
       strokeSets:
       - strokeIndices: 01000000020000000600000007000000
@@ -9921,16 +9939,13 @@ MonoBehaviour:
       - strokeIndices: 01000000020000000600000008000000
     - answerCharacter: "\u4EE8"
       strokeSets:
-      - strokeIndices: 0100000002000000030000000500000008000000
+      - strokeIndices: 0100000002000000050000000800000006000000
+      - strokeIndices: 0100000002000000030000000500000006000000
+      - strokeIndices: 0200000001000000030000000800000005000000
+      - strokeIndices: 0100000002000000030000000600000008000000
     - answerCharacter: "\u8857"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b000000
-    - answerCharacter: "\u4EFB"
-      strokeSets:
-      - strokeIndices: 01000000020000000300000004000000050000000700000008000000
-    - answerCharacter: "\u58EC"
-      strokeSets:
-      - strokeIndices: 0300000004000000050000000700000008000000
     - answerCharacter: "\u4E00"
       strokeSets:
       - strokeIndices: 03000000
@@ -9954,6 +9969,12 @@ MonoBehaviour:
     - answerCharacter: "\u4E96"
       strokeSets:
       - strokeIndices: 03000000050000000600000008000000
+    - answerCharacter: "\u4EFC"
+      strokeSets:
+      - strokeIndices: 010000000200000005000000060000000700000008000000
+    - answerCharacter: "\u4EDC"
+      strokeSets:
+      - strokeIndices: 0100000002000000050000000700000008000000
     answerCountMode: 0
     requiredAnswerCount: 22
   - levelName: Level_166
@@ -9968,7 +9989,6 @@ MonoBehaviour:
       - strokeIndices: 090000000a0000000b000000
     - answerCharacter: "\u5341"
       strokeSets:
-      - strokeIndices: 0700000009000000
       - strokeIndices: 0800000009000000
     - answerCharacter: "\u5E72"
       strokeSets:
@@ -11077,6 +11097,10 @@ MonoBehaviour:
       - strokeIndices: 03000000040000000b000000
       - strokeIndices: 03000000070000000b000000
       - strokeIndices: 04000000070000000b000000
+    - answerCharacter: "\u8279"
+      strokeSets:
+      - strokeIndices: 030000000500000006000000
+      - strokeIndices: 040000000500000006000000
     answerCountMode: 0
     requiredAnswerCount: 19
   - levelName: Level_183
@@ -11407,9 +11431,10 @@ MonoBehaviour:
     - answerCharacter: "\u5DE5"
       strokeSets:
       - strokeIndices: 07000000090000000a000000
+      - strokeIndices: 05000000090000000a000000
     - answerCharacter: "\u738B"
       strokeSets:
-      - strokeIndices: 0500000006000000070000000a000000
+      - strokeIndices: 070000000a0000000800000009000000
       - strokeIndices: 0500000008000000090000000a000000
     - answerCharacter: "\u5410"
       strokeSets:
@@ -11536,6 +11561,10 @@ MonoBehaviour:
     - answerCharacter: "\u85A8"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000
+    - answerCharacter: "\u5DE5"
+      strokeSets:
+      - strokeIndices: 000000000600000007000000
+      - strokeIndices: 000000000500000007000000
     answerCountMode: 0
     requiredAnswerCount: 17
   - levelName: Level_190
@@ -14418,32 +14447,30 @@ MonoBehaviour:
     tone: wu
   - character: "\u52FA"
     tone: shao
-  - character: "\u7532"
-    tone: jia
-  - character: "\u672A"
-    tone: wei
-  - character: "\u65E6"
-    tone: dan
-  - character: "\u679C"
-    tone: guo
-  - character: "\u4E30"
-    tone: feng
-  - character: "\u8012"
-    tone: lei
-  - character: "\u53EA"
-    tone: zhi
-  - character: "\u7ACB"
+  - character: "\u53BB"
+    tone: qu
+  - character: "\u529B"
     tone: li
-  - character: "\u97F3"
-    tone: yin
-  - character: "\u767D"
-    tone: bai
-  - character: "\u5170"
-    tone: lan
-  - character: "\u767E"
-    tone: bai
-  - character: "\u4E96"
-    tone: "s\xEC"
+  - character: "\u4E91"
+    tone: yun
+  - character: "\u52A8"
+    tone: dong
+  - character: "\u52AB"
+    tone: jie
+  - character: "\u8BD9"
+    tone: hui
+  - character: "\u4EBA"
+    tone: ren
+  - character: "\u7070"
+    tone: hui
+  - character: "\u706B"
+    tone: huo
+  - character: "\u706D"
+    tone: mie
+  - character: "\u8BA4"
+    tone: ren
+  - character: "\u5927"
+    tone: da
   - character: "\u7389"
     tone: yu
   - character: "\u535C"
@@ -14472,8 +14499,6 @@ MonoBehaviour:
     tone: yuan
   - character: "\u5382"
     tone: chang
-  - character: "\u4EBA"
-    tone: ren
   - character: "\u91D1"
     tone: jin
   - character: "\u4E2A"
@@ -14498,6 +14523,10 @@ MonoBehaviour:
     tone: le
   - character: "\u9C7C"
     tone: yu
+  - character: "\u65E6"
+    tone: dan
+  - character: "\u767D"
+    tone: bai
   - character: "\u4E11"
     tone: chou
   - character: "\u520D"
@@ -14522,8 +14551,8 @@ MonoBehaviour:
     tone: zhu
   - character: "\u5408"
     tone: he
-  - character: "\u5927"
-    tone: da
+  - character: "\u4E96"
+    tone: si
   - character: "\u5929"
     tone: tian
   - character: "\u7F8E"
@@ -14532,18 +14561,22 @@ MonoBehaviour:
     tone: guan
   - character: "\u4E2B"
     tone: ya
+  - character: "\u5170"
+    tone: lan
   - character: "\u5355"
     tone: dan
-  - character: "\u53BB"
-    tone: qu
-  - character: "\u529B"
-    tone: li
-  - character: "\u4E91"
-    tone: yun
-  - character: "\u52A8"
-    tone: dong
-  - character: "\u52AB"
-    tone: jie
+  - character: "\u4E30"
+    tone: feng
+  - character: "\u7532"
+    tone: jia
+  - character: "\u672A"
+    tone: wei
+  - character: "\u679C"
+    tone: guo
+  - character: "\u8012"
+    tone: lei
+  - character: "\u53EA"
+    tone: zhi
   - character: "\u6CBD"
     tone: gu
   - character: "\u80E1"
@@ -14592,6 +14625,8 @@ MonoBehaviour:
     tone: ting
   - character: "\u539F"
     tone: yuan
+  - character: "\u767E"
+    tone: bai
   - character: "\u4E8D"
     tone: chu
   - character: "\u793A"
@@ -14664,6 +14699,8 @@ MonoBehaviour:
     tone: xiang
   - character: "\u5C38"
     tone: shi
+  - character: "\u7ACB"
+    tone: li
   - character: "\u8F9B"
     tone: xin
   - character: "\u8F9F"
@@ -14708,6 +14745,8 @@ MonoBehaviour:
     tone: zhong
   - character: "\u548C"
     tone: he
+  - character: "\u97F3"
+    tone: yin
   - character: "\u7AE0"
     tone: zhang
   - character: "\u4F5B"
@@ -14958,8 +14997,6 @@ MonoBehaviour:
     tone: mai
   - character: "\u4E70"
     tone: mai
-  - character: "\u8BA4"
-    tone: ren
   - character: "\u5EA7"
     tone: zuo
   - character: "\u5DEB"
@@ -14986,8 +15023,6 @@ MonoBehaviour:
     tone: juan
   - character: "\u592B"
     tone: fu
-  - character: "\u706B"
-    tone: huo
   - character: "\u5B6C"
     tone: nao
   - character: "\u4E0D"
@@ -15044,12 +15079,6 @@ MonoBehaviour:
     tone: hua
   - character: "\u4E56"
     tone: guai
-  - character: "\u8BD9"
-    tone: hui
-  - character: "\u7070"
-    tone: hui
-  - character: "\u706D"
-    tone: mie
   - character: "\u89E6"
     tone: chu
   - character: "\u80BF"
@@ -15120,8 +15149,8 @@ MonoBehaviour:
     tone: tu
   - character: "\u7740"
     tone: zhe
-  - character: "\u76EE\u770B"
-    tone: mu kan
+  - character: "\u770B"
+    tone: kan
   - character: "\u53F3"
     tone: you
   - character: "\u6709"
@@ -15515,7 +15544,7 @@ MonoBehaviour:
   - character: "\u4E47"
     tone: tuo
   - character: "\u3432"
-    tone: "\u3432"
+    tone: dai
   - character: "\u684C"
     tone: zhuo
   - character: "\u6772"
@@ -15600,7 +15629,7 @@ MonoBehaviour:
     tone: jin
   - character: "\u5F53"
     tone: dang
-  - character: "\u5E76"
+  - character: "\u4E26"
     tone: bing
   - character: "\u4F4D"
     tone: wei

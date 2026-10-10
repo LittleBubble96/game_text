@@ -305,7 +305,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 7696541953913300371, guid: e38c712e7904fdf42bd0458b769718dd, type: 3}
       propertyPath: activeWindow
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7696541955235861477, guid: e38c712e7904fdf42bd0458b769718dd, type: 3}
       propertyPath: playMode

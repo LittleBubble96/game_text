@@ -19,6 +19,25 @@ namespace GameLogic.Data
         private const string AssetDir = "Assets/AssetRaw/Configs/LevelConfigs";
         private const string TextResPath = "Assets/AssetArt/ConfigData/graphics.txt";
 
+        [UnityEditor.MenuItem("Tools/关卡/量化现有笔画坐标（保留asset）")]
+        public static void QuantizeExistingAssets()
+        {
+            int changed = 0;
+            foreach (string guid in UnityEditor.AssetDatabase.FindAssets("t:TextGraphicDataScriptableObject", new[] { AssetDir }))
+            {
+                var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextGraphicDataScriptableObject>(
+                    UnityEditor.AssetDatabase.GUIDToAssetPath(guid));
+                bool dirty = false;
+                if (asset.TextGraphicDataList == null) continue;
+                foreach (var graphic in asset.TextGraphicDataList)
+                    foreach (var stroke in graphic.strokes)
+                        if (stroke.Quantize()) { dirty = true; changed++; }
+                if (dirty) UnityEditor.EditorUtility.SetDirty(asset);
+            }
+            UnityEditor.AssetDatabase.SaveAssets();
+            Debug.Log($"笔画坐标量化完成：{changed} 笔。几何敏感或超范围笔画保留 float，笔画编号不变。");
+        }
+
         [NonSerialized] private Dictionary<string, TextGraphicConfigData> _configs;
         [NonSerialized] private Dictionary<string, TextGraphicData> _dataTexts;
 
@@ -414,14 +433,4 @@ namespace GameLogic.Data
         public List<TextDrawPoints> strokes;
     }
 
-    [System.Serializable]
-    public class TextDrawPoints
-    {
-        public TextDrawPoints(List<Vector2> points)
-        {
-            this.points = points;
-        }
-
-        public List<Vector2> points; // 按绘制顺序的所有点（可选，按需生成）
-    }
 }

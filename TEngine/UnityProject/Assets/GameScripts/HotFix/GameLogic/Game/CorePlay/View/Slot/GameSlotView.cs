@@ -34,6 +34,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         private List<GameSlotViewItem> _slotItems = new List<GameSlotViewItem>();
 
         private Transform _slotRoot;
+        private FlightStrokePool _flightPool;
 
         private const float _spacing = 0.06f;
         private const float _slotSize = 0.55f;
@@ -56,16 +57,17 @@ namespace GameLogic.GamePlay.CorePlay.View
         public void OnCreate(Transform tf)
         {
             _slotRoot = tf;
+            _flightPool = new FlightStrokePool(tf);
             GameEvent.AddEventListener<SlotViewLayoutData>(EventDefine.Event_SlotLayoutUpdate, OnLayoutUpdate);
-            GameEvent.AddEventListener<bool, string, string>(EventDefine.Event_AnswerSubmitted, OnAnswerSubmitted);
         }
 
         public void OnDestroy()
         {
             CancelPendingInitialization();
             GameEvent.RemoveEventListener<SlotViewLayoutData>(EventDefine.Event_SlotLayoutUpdate, OnLayoutUpdate);
-            GameEvent.RemoveEventListener<bool, string, string>(EventDefine.Event_AnswerSubmitted, OnAnswerSubmitted);
             RecycleSlotView();
+            _flightPool?.Dispose();
+            _flightPool = null;
         }
 
         /// <summary>
@@ -114,21 +116,14 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
         }
 
-        /// <summary>答案提交成功时，填充下一个空 slot</summary>
-        private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
-        {
-            if (!success || string.IsNullOrEmpty(answerCharacter)) return;
-            FillNextSlot(answerCharacter);
-        }
-
         /// <summary>填充下一个未填充的 slot（带动画）</summary>
-        private void FillNextSlot(string answerCharacter)
+        public void FillNextSlot(string answerCharacter, IReadOnlyList<GameObject> strokes = null)
         {
             foreach (var item in _slotItems)
             {
                 if (!item.IsFilled)
                 {
-                    item.SetContentAndPlay(answerCharacter);
+                    item.SetContentAndPlay(answerCharacter, strokes, _flightPool);
                     return;
                 }
             }
@@ -170,6 +165,12 @@ namespace GameLogic.GamePlay.CorePlay.View
             {
                 if (item != null) item.ShowEmptyState();
             }
+        }
+
+        public void CancelFlights()
+        {
+            foreach (var item in _slotItems)
+                if (item != null) item.CancelFlight();
         }
 
         private void RecycleSlotView()

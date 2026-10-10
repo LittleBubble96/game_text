@@ -34,6 +34,8 @@ namespace GameLogic.GamePlay.CorePlay.View
         private IGamePlay _gamePlay;
         private LevelDataConfigParse _levelConfig;
         private DrawCharacter _drawCharacter;
+        private readonly HashSet<int> _visibleSelection = new HashSet<int>();
+        private readonly List<GameObject> _submittedStrokes = new List<GameObject>();
         private StrokeInputHandler _strokeInputHandler;
         private bool _isInitialized;
         private int _renderVersion;
@@ -79,6 +81,7 @@ namespace GameLogic.GamePlay.CorePlay.View
         /// <summary>初始化视图，绑定数据层（通过 IGamePlay 接口）</summary>
         public void Initialize(IGamePlay gamePlay, LevelDataConfigParse levelConfig)
         {
+            _gameSlotView?.CancelFlights();
             _renderVersion++;
             _drawCharacter?.CancelPendingDraw();
             _gameSlotView?.CancelPendingInitialization();
@@ -298,6 +301,9 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private async UniTask<bool> RenderLevelAsync(TextLevelData levelData, int version)
         {
+            // 飞行网格与原字共享，在 DrawAsync 释放旧网格前归还所有飞行对象。
+            _gameSlotView?.CancelFlights();
+            _visibleSelection.Clear();
             _gameSlotView?.CancelPendingInitialization();
             GuideReady = false;
             if (_strokeInputHandler != null) _strokeInputHandler.enabled = false;
@@ -359,6 +365,16 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
         {
+            if (success && !string.IsNullOrEmpty(answerCharacter))
+            {
+                _submittedStrokes.Clear();
+                if (_drawCharacter != null)
+                    foreach (int index in _visibleSelection)
+                        if (index >= 0 && index < _drawCharacter.StrokeObjects.Count)
+                            _submittedStrokes.Add(_drawCharacter.StrokeObjects[index]);
+                _gameSlotView?.FillNextSlot(answerCharacter, _submittedStrokes);
+                _submittedStrokes.Clear();
+            }
             GameEvent.Send(EventDefine.Event_AnswerSubmitted, success, answerCharacter, message);
             ClearAllHighlights();
         }
@@ -372,6 +388,8 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         private void UpdateStrokeVisual(int strokeIndex, bool isSelected)
         {
+            if (isSelected) _visibleSelection.Add(strokeIndex);
+            else _visibleSelection.Remove(strokeIndex);
             if (_drawCharacter == null) return;
 
             var strokes = _drawCharacter.StrokeObjects;
@@ -404,6 +422,7 @@ namespace GameLogic.GamePlay.CorePlay.View
 
         public void ClearAllHighlights()
         {
+            _visibleSelection.Clear();
             if (_drawCharacter == null) return;
             _drawCharacter.ResetAllStrokeColors();
 

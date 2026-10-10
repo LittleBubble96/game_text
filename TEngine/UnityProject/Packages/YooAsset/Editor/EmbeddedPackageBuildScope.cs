@@ -61,7 +61,6 @@ namespace YooAsset.Editor
 
         public void Dispose()
         {
-            return;
             if (!_ownsDirectory) return;
             string expected = Path.GetFullPath(Path.Combine(Application.dataPath, "Resources", "EmbeddedYooAssets"));
             if (!string.Equals(Path.GetFullPath(AssetRoot), expected, StringComparison.OrdinalIgnoreCase))
