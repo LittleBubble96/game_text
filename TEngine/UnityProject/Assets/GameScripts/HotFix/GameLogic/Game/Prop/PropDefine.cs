@@ -26,7 +26,7 @@ namespace GameLogic
                 var cache = GameManager.Instance?.CacheManager?.CacheData;
                 if (cache != null && cache.gamePropData == null)
                 {
-                    cache.gamePropData = new GamePropData { tipCount = 3, coinCount = 0, resetCount = 1, nextCount = 1 };
+                    cache.gamePropData = new GamePropData { tipCount = 2, coinCount = 0, resetCount = 1, nextCount = 1 };
                 }
                 return cache?.gamePropData;
             }

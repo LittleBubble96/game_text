@@ -265,8 +265,8 @@ namespace GameLogic
                 return;
             }
 
-            // 获取随机未找到答案的一组笔画
-            List<int> strokeSet = _corePlayGamePlay.GetRandomUnfoundAnswerStrokeSet();
+            // 按配置顺序高亮第一个未找到答案的第一组笔画
+            List<int> strokeSet = _corePlayGamePlay.GetFirstUnfoundAnswerStrokeSet();
             if (strokeSet == null || strokeSet.Count == 0)
             {
                 BiMgr.PropUsed("tip", payment, cost, false, "invalid_answer_strokes");

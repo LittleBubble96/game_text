@@ -175,6 +175,7 @@ namespace GameLogic
 
             _corePlayGamePlay = new CorePlayGamePlay();
             _corePlayGamePlay.Initialize(_levelConfig);
+            _corePlayGamePlay.OnAnswerSubmitted += HandleAnswerSubmitted;
             CurrentGamePlay = _corePlayGamePlay;
 
             // 预加载笔画材质模板（loading 阶段异步，避免运行时 Draw 卡帧 + shader 随资源进包）
@@ -399,6 +400,13 @@ namespace GameLogic
 
         // ================ 存档管理 ================
 
+        private void HandleAnswerSubmitted(bool success, string answerCharacter, string message)
+        {
+            // 新答案立即落盘，不依赖退出/暂停回调；最后一个答案由通关流程推进并保存。
+            if (!success || _corePlayGamePlay == null || _corePlayGamePlay.IsLevelComplete()) return;
+            SaveGameProgress();
+        }
+
         public void SaveGameProgress()
         {
             if (_corePlayGamePlay == null || _cacheManager == null) return;
@@ -435,6 +443,8 @@ namespace GameLogic
         protected override void OnRelease()
         {
             _released = true;
+            if (_corePlayGamePlay != null)
+                _corePlayGamePlay.OnAnswerSubmitted -= HandleAnswerSubmitted;
             foreach (var handle in _uiPreloadHandles.Values) handle.Dispose();
             _uiPreloadHandles.Clear();
             _finishDelayCancellation?.Cancel();

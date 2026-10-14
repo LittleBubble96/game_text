@@ -46,7 +46,7 @@ namespace GameLogic.Data
                 gameSettingsData = new GameSettingsData();
 
             if (gamePropData == null)
-                gamePropData = new GamePropData { tipCount = 3, coinCount = 0, resetCount = 1, nextCount = 1 };
+                gamePropData = new GamePropData { tipCount = 2, coinCount = 0, resetCount = 1, nextCount = 1 };
 
             if (commonData == null)
             {
