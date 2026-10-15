@@ -65,6 +65,11 @@ namespace GameLogic.Data
         //位置偏移
         [Tooltip("位置偏移")] public Vector2 positionOffset = new Vector2(-2, -1);
 
+        [Tooltip("字形适配缩放至少为 1，再乘以此值"), Min(0.01f)] public float customScale = 1f;
+
+        // 兼容未保存此字段的旧关卡，并防止无效值让字形消失。
+        public float CustomScale => customScale > 0f && !float.IsInfinity(customScale) ? customScale : 1f;
+
         [Tooltip("所有可从基字中找到的答案")] public List<LevelAnswer> answers = new List<LevelAnswer>();
 
         [Tooltip("通关答案个数判定模式")] public AnswerCountMode answerCountMode = AnswerCountMode.AnswerCount;
@@ -355,6 +360,14 @@ public class TextLevelEditorWindow : EditorWindow
         EditorGUI.BeginChangeCheck();
         level.positionOffset = EditorGUILayout.Vector2Field("位置偏移", level.positionOffset);
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
+
+        EditorGUI.BeginChangeCheck();
+        float customScale = EditorGUILayout.FloatField(new GUIContent("自定义缩放", "最终缩放 = Max(适配缩放, 1) × 自定义缩放"), level.CustomScale);
+        if (EditorGUI.EndChangeCheck())
+        {
+            level.customScale = float.IsNaN(customScale) || float.IsInfinity(customScale) ? 1f : Mathf.Max(0.01f, customScale);
+            EditorUtility.SetDirty(_levelDataAsset);
+        }
 
         // 通关答案个数判定模式
         EditorGUI.BeginChangeCheck();
@@ -1435,6 +1448,9 @@ public class TextLevelEditorWindow : EditorWindow
         // 应用关卡的位置偏移
         TextLevelData currentLevel = _levelDataAsset.levelDataList[_selectedLevelIndex];
         drawer.PositionOffset = currentLevel.positionOffset;
+        drawer.CustomScale = currentLevel.CustomScale;
+        // 编辑场景没有运行时内容区布局，以 1 为基础预览自定义缩放。
+        drawer.transform.localScale = new Vector3(drawer.CustomScale, drawer.CustomScale, drawer.transform.localScale.z);
 
         // 编辑器预览不经过 loading 预加载，这里先确保材质模板就绪（静态缓存，幂等）
         await DrawCharacter.PreloadStrokeMaterialAsync();

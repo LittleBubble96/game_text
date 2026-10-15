@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -16,11 +16,9 @@ namespace GameLogic
     {
         // 核心字段
         private static Transform _instanceRoot = null;          // UI根节点变换组件
-        private bool _enableErrorLog = true;                    // 是否启用错误日志
         private Camera _uiCamera = null;                        // UI专用摄像机
         private readonly List<UIWindow> _uiStack = new List<UIWindow>(128); // 窗口堆栈
         private readonly Dictionary<string, UIWindow> _windowCache = new Dictionary<string, UIWindow>();
-        private ErrorLogger _errorLogger;                       // 错误日志记录器
 
         // 常量定义
         public const int LAYER_DEEP = 2000; 
@@ -67,46 +65,15 @@ namespace GameLogic
 
             _instanceRoot.gameObject.layer = LayerMask.NameToLayer("UI");
 
-        //     if (Debugger.Instance != null)
-        //     {
-        //         switch (Debugger.Instance.ActiveWindowType)
-        //         {
-        //             case DebuggerActiveWindowType.AlwaysOpen:
-        //                 _enableErrorLog = true;
-        //                 break;
-        //
-        //             case DebuggerActiveWindowType.OnlyOpenWhenDevelopment:
-        //                 _enableErrorLog = Debug.isDebugBuild;
-        //                 break;
-        //
-        //             case DebuggerActiveWindowType.OnlyOpenInEditor:
-        //                 _enableErrorLog = Application.isEditor;
-        //                 break;
-        //
-        //             default:
-        //                 _enableErrorLog = false;
-        //                 break;
-        //         }
-        //         if (_enableErrorLog)
-        //         {
-        //             _errorLogger = new ErrorLogger(this);
-        //         }   
-        //     }
         }
 
         /// <summary>
         /// 模块释放（自动调用）。
-        /// 1. 清理错误日志系统
-        /// 2. 关闭所有窗口
-        /// 3. 销毁UI根节点
+        /// 1. 关闭所有窗口
+        /// 2. 销毁UI根节点
         /// </summary>
         protected override void OnRelease()
         {
-            if (_errorLogger != null)
-            {
-                _errorLogger.Dispose();
-                _errorLogger = null;
-            }
             CloseAll(isShutDown:true);
             if (_instanceRoot != null && _instanceRoot.parent != null)
             {

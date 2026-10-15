@@ -39,8 +39,9 @@ namespace GameLogic.Data
         {
 #if UNITY_EDITOR
             return new WindowReadCacheFileSystem();
-#endif
+#else
             return new WeChatReadCacheFileSystem();
+#endif
         }
         
 

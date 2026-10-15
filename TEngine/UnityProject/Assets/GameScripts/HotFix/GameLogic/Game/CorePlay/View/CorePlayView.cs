@@ -163,12 +163,8 @@ namespace GameLogic.GamePlay.CorePlay.View
             Camera cam = Camera.main;
             if (cam == null)
             {
-                cam = Camera.main;
-                if (cam == null)
-                {
-                    Log.Error("[CorePlayView] 未找到 Camera，笔画点击将不生效");
-                    return;
-                }
+                Log.Error("[CorePlayView] 未找到 Camera，笔画点击将不生效");
+                return;
             }
 
             if (_strokeInputHandler == null)
@@ -255,6 +251,13 @@ namespace GameLogic.GamePlay.CorePlay.View
             {
                 _gameViewRoot.CharacterIkRoot.position = _layoutCenter;
             }
+
+            // 父节点仍按原逻辑适配布局；字形单独适配，不改变同级背景。
+            if (_hasLayoutCenter && _drawCharacter != null)
+            {
+                float contentHeight = _availableHeight * (1f - 2f * ViewDefine.CharacterVerticalPaddingRatio);
+                _drawCharacter.FitToWorldRect(_layoutCenter, _availableWidth, contentHeight);
+            }
         }
 
         // ================ 关卡渲染 ================
@@ -326,6 +329,7 @@ namespace GameLogic.GamePlay.CorePlay.View
             }
 
             _drawCharacter.PositionOffset = levelData.positionOffset;
+            _drawCharacter.CustomScale = levelData.CustomScale;
             await _drawCharacter.DrawAsync(graphicData, showStrokeIndices: false);
             if (this == null || version != _renderVersion || !_isInitialized || _drawCharacter == null)
                 return false;

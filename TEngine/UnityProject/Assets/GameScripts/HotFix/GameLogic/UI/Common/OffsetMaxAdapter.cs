@@ -215,31 +215,34 @@ namespace GameLogic.Platform.Adapter
             Rect safe = Screen.safeArea;
             // Log.Info($"OffsetMaxAdapter.GetSafeArea UNITY_EDITOR: safeArea={safe}, screen=({Screen.width},{Screen.height})");
             return safe;
-#endif
+#else
             WindowInfo windowInfo = WX.GetWindowInfo();
             SafeArea safeArea = windowInfo.safeArea;
             Rect safeWx = new Rect(0, 0, (float)safeArea.width, (float)safeArea.height);
             // Log.Info($"OffsetMaxAdapter.GetSafeArea WX: safeArea={safeWx}, screen=({safeArea.width},{safeArea.height}) " +
             //          $"windowWH:{windowInfo.windowWidth},{windowInfo.windowHeight} , ScreenWH:{windowInfo.screenWidth} ,{windowInfo.screenHeight}");
             return safeWx;
+#endif
         }
 
         private int GetScreenWidth()
         {
 #if UNITY_EDITOR
             return Screen.width;
-#endif
+#else
             WindowInfo windowInfo = WX.GetWindowInfo();
             return (int)windowInfo.screenWidth;
+#endif
         }
 
         private int GetScreenHeight()
         {
 #if UNITY_EDITOR
             return Screen.height;
-#endif
+#else
             WindowInfo windowInfo = WX.GetWindowInfo();
             return (int)windowInfo.screenHeight;
+#endif
         }
     }
 }

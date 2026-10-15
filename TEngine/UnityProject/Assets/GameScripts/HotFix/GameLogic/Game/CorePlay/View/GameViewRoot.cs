@@ -72,18 +72,20 @@ namespace GameLogic.GamePlay.CorePlay.View
         {
 #if UNITY_EDITOR
             return Screen.width;
-#endif
+#else
             WindowInfo windowInfo = WX.GetWindowInfo();
             return (int)windowInfo.screenWidth;
+#endif
         }
 
         private int GetScreenHeight()
         {
 #if UNITY_EDITOR
             return Screen.height;
-#endif
+#else
             WindowInfo windowInfo = WX.GetWindowInfo();
             return (int)windowInfo.screenHeight;
+#endif
         }
     }
 }

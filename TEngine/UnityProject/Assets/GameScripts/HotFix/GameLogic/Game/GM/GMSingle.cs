@@ -6,8 +6,6 @@ namespace GameLogic
 {
     public class GMSingle : MonoSingleton<GMSingle>
     {
-        // Start is called before the first frame update
-        float clickTime = 0f;
         CircleGestureDetector detector;
 
         protected override void OnInit()

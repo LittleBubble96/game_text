@@ -10,6 +10,7 @@ namespace GameLogic.View
     public class DrawCharacter : MonoBehaviour
     {
         private List<GameObject> _strokeObjects = new List<GameObject>();
+        private readonly List<MeshRenderer> _strokeRenderers = new List<MeshRenderer>();
         private Color _defaultStrokeColor = Color.white;
         private readonly List<Mesh> _ownedMeshes = new List<Mesh>();
         private readonly List<Material> _ownedMaterials = new List<Material>();
@@ -18,6 +19,8 @@ namespace GameLogic.View
         private Vector2 _cachedOffset;
         private bool _cachedIndices;
         private bool _hasCachedGeometry;
+        private Bounds _localStrokeBounds;
+        private bool _hasStrokeBounds;
         private int _drawVersion;
         private const double DrawFrameBudgetSeconds = 0.003;
 
@@ -36,8 +39,10 @@ namespace GameLogic.View
             foreach (var material in _ownedMaterials) ReleaseObject(material);
             _ownedMeshes.Clear();
             _ownedMaterials.Clear();
+            _strokeRenderers.Clear();
             _cachedPoints.Clear();
             _hasCachedGeometry = false;
+            _hasStrokeBounds = false;
         }
 
         private void OnDestroy()
@@ -84,6 +89,46 @@ namespace GameLogic.View
         /// </summary>
         public Vector2 PositionOffset { get; set; }
 
+        public float CustomScale { get; set; } = 1f;
+
+        /// <summary>保持字形原有位置，按内容区域的四侧边界等比缩放。</summary>
+        public void FitToWorldRect(Vector3 center, float width, float height)
+        {
+            if (!_hasCachedGeometry || !_hasStrokeBounds || width <= 0f || height <= 0f) return;
+
+            // 用单位缩放计算边界，保留父节点变换，重复适配不会累积缩放。
+            Matrix4x4 matrix = Matrix4x4.TRS(transform.localPosition, transform.localRotation, Vector3.one);
+            if (transform.parent != null) matrix = transform.parent.localToWorldMatrix * matrix;
+            Vector3 pivot = matrix.MultiplyPoint3x4(Vector3.zero);
+            Vector3 boundsOffset = matrix.MultiplyVector(_localStrokeBounds.center);
+            Vector3 x = matrix.MultiplyVector(new Vector3(_localStrokeBounds.extents.x, 0f, 0f));
+            Vector3 y = matrix.MultiplyVector(new Vector3(0f, _localStrokeBounds.extents.y, 0f));
+            float extentX = Mathf.Abs(x.x) + Mathf.Abs(y.x);
+            float extentY = Mathf.Abs(x.y) + Mathf.Abs(y.y);
+
+            float leftRoom = pivot.x - (center.x - width * 0.5f);
+            float rightRoom = center.x + width * 0.5f - pivot.x;
+            float bottomRoom = pivot.y - (center.y - height * 0.5f);
+            float topRoom = center.y + height * 0.5f - pivot.y;
+            // 缩放中心不在内容区内时，单靠缩放不能保证适配，保留当前状态。
+            if (leftRoom <= 0f || rightRoom <= 0f || bottomRoom <= 0f || topRoom <= 0f) return;
+
+            float scale = float.PositiveInfinity;
+            LimitScale(ref scale, leftRoom, extentX - boundsOffset.x);
+            LimitScale(ref scale, rightRoom, extentX + boundsOffset.x);
+            LimitScale(ref scale, bottomRoom, extentY - boundsOffset.y);
+            LimitScale(ref scale, topRoom, extentY + boundsOffset.y);
+            if (float.IsInfinity(scale) || float.IsNaN(scale) || scale <= 0f) return;
+            scale = Mathf.Max(scale, 1f) * CustomScale;
+            transform.localScale = new Vector3(scale, scale, transform.localScale.z);
+        }
+
+        private static void LimitScale(ref float scale, float available, float distance)
+        {
+            // 轮廓可能全部位于中心的一侧；另一侧没有向外延伸，不限制缩放。
+            if (distance > 0f) scale = Mathf.Min(scale, available / distance);
+        }
+
         /// <summary>
         /// 清除所有已绘制的笔画
         /// </summary>
@@ -126,6 +171,11 @@ namespace GameLogic.View
             if (this == null || version != _drawVersion) return;
             if (template == null) return;
 
+            // 生成顶点时同步累计边界，完成后一次性缓存包围盒。
+            float minX = float.PositiveInfinity;
+            float minY = float.PositiveInfinity;
+            float maxX = float.NegativeInfinity;
+            float maxY = float.NegativeInfinity;
             double batchStart = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < data.strokes.Count; i++)
             {
@@ -147,6 +197,15 @@ namespace GameLogic.View
                 {
                     // 保留原始笔画索引，避免后续笔画选中错位。
                     _strokeObjects.Add(null);
+                    _strokeRenderers.Add(null);
+                    continue;
+                }
+
+                if (!new Triangulator(sourcePoints).TryTriangulate(out int[] triangles))
+                {
+                    Log.Error($"[DrawCharacter] 字形『{data.character}』笔画 {strokeIndex} 无法完成三角剖分，请检查轮廓数据");
+                    _strokeObjects.Add(null);
+                    _strokeRenderers.Add(null);
                     continue;
                 }
 
@@ -159,6 +218,7 @@ namespace GameLogic.View
                 // 2. 组件
                 MeshFilter mf = strokeObj.AddComponent<MeshFilter>();
                 MeshRenderer mr = strokeObj.AddComponent<MeshRenderer>();
+                _strokeRenderers.Add(mr);
 
                 // 3. 默认材质：克隆材质模板（保留逐笔画独立着色），shader 引用随模板资源打包进包
                 Material mat = new Material(template);
@@ -171,9 +231,15 @@ namespace GameLogic.View
                 _ownedMeshes.Add(mesh);
                 Vector3[] verts = new Vector3[points.Count];
                 for (int p = 0; p < points.Count; p++)
-                    verts[p] = new Vector3(points[p].x + PositionOffset.x, points[p].y + PositionOffset.y, 0);
-                Triangulator tr = new Triangulator(sourcePoints);
-                int[] triangles = tr.Triangulate();
+                {
+                    float x = points[p].x + PositionOffset.x;
+                    float y = points[p].y + PositionOffset.y;
+                    verts[p] = new Vector3(x, y, 0f);
+                    minX = Mathf.Min(minX, x);
+                    minY = Mathf.Min(minY, y);
+                    maxX = Mathf.Max(maxX, x);
+                    maxY = Mathf.Max(maxY, y);
+                }
                 for (int j = 0; j < triangles.Length; j += 3)
                 {
                     int second = triangles[j + 1];
@@ -200,6 +266,12 @@ namespace GameLogic.View
                 {
                     AddStrokeIndexLabel(strokeObj, strokeIndex, points);
                 }
+            }
+            _hasStrokeBounds = minX <= maxX && minY <= maxY;
+            if (_hasStrokeBounds)
+            {
+                _localStrokeBounds.SetMinMax(
+                    new Vector3(minX, minY, 0f), new Vector3(maxX, maxY, 0f));
             }
             _cachedCharacter = data.character;
             _cachedOffset = PositionOffset;
@@ -279,31 +351,28 @@ namespace GameLogic.View
         private const float MinVertexDistance = 0.02f;
         private const int MaxColliderVertices = 200;
 
-        private Vector2[] SimplifyColliderPoints(List<Vector2> points)
+        private static Vector2[] SimplifyColliderPoints(List<Vector2> points)
         {
             if (points.Count < 3)
-                return new Vector2[0];
+                return System.Array.Empty<Vector2>();
 
-            List<Vector2> result = new List<Vector2>(points);
-            if (result.Count >= 3)
+            int count = points.Count;
+            Vector2 first = points[0];
+            Vector2 last = points[count - 1];
+            if (Mathf.Approximately(first.x, last.x) && Mathf.Approximately(first.y, last.y))
             {
-                Vector2 first = result[0];
-                Vector2 last = result[result.Count - 1];
-                if (Mathf.Approximately(first.x, last.x) && Mathf.Approximately(first.y, last.y))
-                {
-                    result.RemoveAt(result.Count - 1);
-                }
+                count--;
             }
 
-            List<Vector2> filtered = new List<Vector2>();
-            filtered.Add(result[0]);
+            List<Vector2> filtered = new List<Vector2>(count);
+            filtered.Add(points[0]);
             float sqrMinDist = MinVertexDistance * MinVertexDistance;
 
-            for (int i = 1; i < result.Count; i++)
+            for (int i = 1; i < count; i++)
             {
-                if ((result[i] - filtered[filtered.Count - 1]).sqrMagnitude >= sqrMinDist)
+                if ((points[i] - filtered[filtered.Count - 1]).sqrMagnitude >= sqrMinDist)
                 {
-                    filtered.Add(result[i]);
+                    filtered.Add(points[i]);
                 }
             }
 
@@ -317,17 +386,17 @@ namespace GameLogic.View
 
             if (filtered.Count > MaxColliderVertices)
             {
-                List<Vector2> sampled = new List<Vector2>(MaxColliderVertices);
+                Vector2[] sampled = new Vector2[MaxColliderVertices];
                 float step = (float)(filtered.Count - 1) / (MaxColliderVertices - 1);
                 for (int i = 0; i < MaxColliderVertices; i++)
                 {
                     int idx = Mathf.RoundToInt(i * step);
                     if (idx >= filtered.Count)
                         idx = filtered.Count - 1;
-                    sampled.Add(filtered[idx]);
+                    sampled[i] = filtered[idx];
                 }
 
-                filtered = sampled;
+                return sampled;
             }
 
             return filtered.ToArray();
@@ -343,7 +412,7 @@ namespace GameLogic.View
             if (index < 0 || index >= _strokeObjects.Count) return;
             GameObject strokeObj = _strokeObjects[index];
             if (strokeObj == null) return;
-            MeshRenderer mr = strokeObj.GetComponent<MeshRenderer>();
+            MeshRenderer mr = _strokeRenderers[index];
             if (mr != null && mr.sharedMaterial != null)
             {
                 mr.sharedMaterial.color = color;
@@ -355,10 +424,11 @@ namespace GameLogic.View
         /// </summary>
         public void ResetAllStrokeColors()
         {
-            foreach (var strokeObj in _strokeObjects)
+            for (int i = 0; i < _strokeObjects.Count; i++)
             {
+                var strokeObj = _strokeObjects[i];
                 if (strokeObj == null) continue;
-                MeshRenderer mr = strokeObj.GetComponent<MeshRenderer>();
+                MeshRenderer mr = _strokeRenderers[i];
                 if (mr != null && mr.sharedMaterial != null)
                 {
                     mr.sharedMaterial.color = _defaultStrokeColor;

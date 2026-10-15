@@ -19,10 +19,6 @@ public class BendText : MonoBehaviour
     void Awake()
     {
         m_TextComponent = gameObject.GetComponent<TMP_Text>();
-        if (AlwaysChange)
-        {
-            //Log.Error($"{gameObject.name} text wrap set to always change on awake");
-        }
     }
 
 

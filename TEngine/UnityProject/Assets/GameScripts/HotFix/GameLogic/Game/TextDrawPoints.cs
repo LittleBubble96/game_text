@@ -64,6 +64,7 @@ namespace GameLogic.Data
             // 防止细小坐标变化导致耳切算法丢失三角形。
             int[] before = new Triangulator(floatPoints.ToArray()).Triangulate();
             int[] after = new Triangulator(decoded.ToArray()).Triangulate();
+            if (before.Length == 0 || after.Length == 0) return false;
             double area = Area(floatPoints, before);
             if (before.Length != after.Length || Math.Abs(Area(decoded, after) - area) > Math.Max(0.0001, area * 0.001))
                 return false;

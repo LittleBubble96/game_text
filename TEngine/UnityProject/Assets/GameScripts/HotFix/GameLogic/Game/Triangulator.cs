@@ -1,124 +1,106 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+using System;
+using UnityEngine;
 
+/// <summary>简单多边形耳切剖分。输出逆时针三角形，索引始终指向原始点位。</summary>
 public class Triangulator
 {
-    private List<Vector2> m_points;
+    private readonly Vector2[] _points;
 
     public Triangulator(Vector2[] points)
     {
-        m_points = new List<Vector2>(points);
+        // 保留输入快照，重复调用不会修改点位或逐次删除闭合点。
+        _points = points == null ? Array.Empty<Vector2>() : (Vector2[])points.Clone();
     }
 
     public int[] Triangulate()
     {
-        // 如果首尾顶点相同（闭合多边形），移除最后一个重复顶点
-        int count = m_points.Count;
-        if (count >= 3)
-        {
-            Vector2 first = m_points[0];
-            Vector2 last = m_points[count - 1];
-            if (Mathf.Approximately(first.x, last.x) && Mathf.Approximately(first.y, last.y))
-            {
-                m_points.RemoveAt(count - 1);
-                count--;
-            }
-        }
-
-        if (count < 3)
-            return new int[0];
-
-        List<int> indices = new List<int>();
-
-        // 顶点索引数组
-        int[] V = new int[count];
-        for (int i = 0; i < count; i++)
-            V[i] = i;
-
-        int n = count;
-        int nv = n;
-
-        // 移除退化顶点数量
-        int countDeletions = 0;
-
-        // Ear Clipping 算法
-        for (int v = nv - 1; n > 3; )
-        {
-            // 如果遍历一圈后仍有3个顶点，直接添加最后的三角形
-            if (countDeletions >= n)
-            {
-                indices.Add(V[2]);
-                indices.Add(V[1]);
-                indices.Add(V[0]);
-                break;
-            }
-
-            int u = v;
-            if (n <= u) u = 0;
-            v = u + 1;
-            if (n <= v) v = 0;
-            int w = v + 1;
-            if (n <= w) w = 0;
-
-            if (Snip(u, v, w, n, V))
-            {
-                indices.Add(V[u]);
-                indices.Add(V[v]);
-                indices.Add(V[w]);
-
-                // 从V中移除V[v]
-                for (int s = v, t = v + 1; t < n; s++, t++)
-                    V[s] = V[t];
-                n--;
-                countDeletions = 0;
-            }
-            else
-            {
-                countDeletions++;
-            }
-        }
-
-        // 添加最后一个三角形
-        if (n == 3)
-        {
-            indices.Add(V[0]);
-            indices.Add(V[1]);
-            indices.Add(V[2]);
-        }
-
-        return indices.ToArray();
+        TryTriangulate(out var triangles);
+        return triangles;
     }
 
-    private bool Snip(int u, int v, int w, int n, int[] V)
+    /// <summary>无法完成剖分时返回 false 和空数组，不返回部分网格。</summary>
+    public bool TryTriangulate(out int[] triangles)
     {
-        Vector2 A = m_points[V[u]];
-        Vector2 B = m_points[V[v]];
-        Vector2 C = m_points[V[w]];
-        if (Mathf.Epsilon > (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x))
-            return false;
-
-        for (int p = 0; p < n; p++)
+        triangles = Array.Empty<int>();
+        if (_points.Length < 3) return false;
+        int[] vertices = new int[_points.Length];
+        int count = 0;
+        for (int i = 0; i < _points.Length; i++)
         {
-            if (p == u || p == v || p == w) continue;
-            Vector2 P = m_points[V[p]];
-            if (PointInTriangle(A, B, C, P)) return false;
+            var point = _points[i];
+            if (float.IsNaN(point.x) || float.IsNaN(point.y) ||
+                float.IsInfinity(point.x) || float.IsInfinity(point.y)) return false;
+            if (count == 0 || !SamePoint(_points[vertices[count - 1]], point)) vertices[count++] = i;
+        }
+        if (count > 1 && SamePoint(_points[vertices[0]], _points[vertices[count - 1]])) count--;
+        if (count < 3) return false;
+        double area = 0;
+        for (int i = 0, previous = count - 1; i < count; previous = i++)
+        {
+            var a = _points[vertices[previous]];
+            var b = _points[vertices[i]];
+            area += (double)a.x * b.y - (double)b.x * a.y;
+        }
+        if (area == 0) return false;
+        if (area < 0) Array.Reverse(vertices, 0, count);
+
+        // 双向索引环：剪去耳朵只更新两个链接，不搬移剩余索引。
+        int[] previousIndices = new int[count];
+        int[] nextIndices = new int[count];
+        for (int i = 0; i < count; i++)
+        {
+            previousIndices[i] = (i + count - 1) % count;
+            nextIndices[i] = (i + 1) % count;
+        }
+        int[] result = new int[(count - 2) * 3];
+        int written = 0, remaining = count, cursor = 0, rejected = 0;
+        while (remaining > 3)
+        {
+            int before = previousIndices[cursor], after = nextIndices[cursor];
+            if (IsEar(before, cursor, after, vertices, nextIndices))
+            {
+                result[written++] = vertices[before];
+                result[written++] = vertices[cursor];
+                result[written++] = vertices[after];
+                nextIndices[before] = after;
+                previousIndices[after] = before;
+                remaining--;
+                rejected = 0;
+            }
+            else if (++rejected >= remaining)
+            {
+                return false;
+            }
+            cursor = after;
+        }
+        int second = nextIndices[cursor], third = nextIndices[second];
+        if (Cross(_points[vertices[cursor]], _points[vertices[second]], _points[vertices[third]]) <= 0)
+            return false;
+        result[written++] = vertices[cursor];
+        result[written++] = vertices[second];
+        result[written] = vertices[third];
+        triangles = result;
+        return true;
+    }
+
+    private bool IsEar(int before, int current, int after, int[] vertices, int[] next)
+    {
+        Vector2 a = _points[vertices[before]], b = _points[vertices[current]], c = _points[vertices[after]];
+        if (Cross(a, b, c) <= 0) return false;
+        float minX = Math.Min(a.x, Math.Min(b.x, c.x)), maxX = Math.Max(a.x, Math.Max(b.x, c.x));
+        float minY = Math.Min(a.y, Math.Min(b.y, c.y)), maxY = Math.Max(a.y, Math.Max(b.y, c.y));
+        for (int i = next[after]; i != before; i = next[i])
+        {
+            Vector2 p = _points[vertices[i]];
+            if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) continue;
+            if (Cross(a, b, p) >= 0 && Cross(b, c, p) >= 0 && Cross(c, a, p) >= 0) return false;
         }
         return true;
     }
 
-    private bool PointInTriangle(Vector2 A, Vector2 B, Vector2 C, Vector2 P)
-    {
-        float ax = C.x - B.x, ay = C.y - B.y;
-        float bx = A.x - C.x, by = A.y - C.y;
-        float cx = B.x - A.x, cy = B.y - A.y;
-        float apx = P.x - A.x, apy = P.y - A.y;
-        float bpx = P.x - B.x, bpy = P.y - B.y;
-        float cpx = P.x - C.x, cpy = P.y - C.y;
+    private static double Cross(Vector2 a, Vector2 b, Vector2 c) =>
+        ((double)b.x - a.x) * ((double)c.y - a.y) - ((double)b.y - a.y) * ((double)c.x - a.x);
 
-        float aCross = ax * bpy - ay * bpx;
-        float bCross = bx * cpy - by * cpx;
-        float cCross = cx * apy - cy * apx;
-
-        return aCross >= 0 && bCross >= 0 && cCross >= 0;
-    }
+    private static bool SamePoint(Vector2 a, Vector2 b) =>
+        Mathf.Approximately(a.x, b.x) && Mathf.Approximately(a.y, b.y);
 }
