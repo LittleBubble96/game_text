@@ -65,7 +65,7 @@ namespace GameLogic.Data
         //位置偏移
         [Tooltip("位置偏移")] public Vector2 positionOffset = new Vector2(-2, -1);
 
-        [Tooltip("字形适配缩放至少为 1，再乘以此值"), Min(0.01f)] public float customScale = 1f;
+        [Tooltip("字形缩放直接使用此值，不随屏幕尺寸变化"), Min(0.01f)] public float customScale = 1.15f;
 
         // 兼容未保存此字段的旧关卡，并防止无效值让字形消失。
         public float CustomScale => customScale > 0f && !float.IsInfinity(customScale) ? customScale : 1f;
@@ -362,7 +362,7 @@ public class TextLevelEditorWindow : EditorWindow
         if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(_levelDataAsset);
 
         EditorGUI.BeginChangeCheck();
-        float customScale = EditorGUILayout.FloatField(new GUIContent("自定义缩放", "最终缩放 = Max(适配缩放, 1) × 自定义缩放"), level.CustomScale);
+        float customScale = EditorGUILayout.FloatField(new GUIContent("自定义缩放", "最终缩放 = 关卡配置缩放，不随屏幕尺寸变化"), level.CustomScale);
         if (EditorGUI.EndChangeCheck())
         {
             level.customScale = float.IsNaN(customScale) || float.IsInfinity(customScale) ? 1f : Mathf.Max(0.01f, customScale);

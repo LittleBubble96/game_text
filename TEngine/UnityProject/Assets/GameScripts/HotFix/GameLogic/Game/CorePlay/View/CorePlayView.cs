@@ -45,10 +45,10 @@ namespace GameLogic.GamePlay.CorePlay.View
         private GameViewRoot _gameViewRoot;
         private GameSlotView _gameSlotView;
 
-        // ================ Character 缩放（按 UI 可用区域限制 CharacterRoot） ================
-        /// <summary>UI 传来的可用世界宽度（Content Left→Right），<=0 表示尚未收到布局</summary>
+        // ================ Character 缩放与居中定位 ================
+        /// <summary>UI 传来的可用世界宽度，负数表示尚未收到布局。</summary>
         private float _availableWidth = -1f;
-        /// <summary>UI 传来的可用世界高度（Content Bottom→Top），<=0 表示尚未收到布局</summary>
+        /// <summary>UI 传来的可用世界高度，负数表示尚未收到布局。</summary>
         private float _availableHeight = -1f;
         /// <summary>可用区域中心（世界坐标，由 Left/Right/Top/Bottom 取中点），未收到布局前为 false</summary>
         private Vector3 _layoutCenter = Vector3.zero;
@@ -207,9 +207,9 @@ namespace GameLogic.GamePlay.CorePlay.View
             GameEvent.RemoveEventListener<ContentViewLayoutData>(EventDefine.Event_CharacterLayoutUpdate, OnCharacterLayoutUpdate);
         }
 
-        // ================ Character 缩放 ================
+        // ================ Character 缩放与居中定位 ================
 
-        /// <summary>UI 可用区域变更回调：缓存可用宽高与中心，并立即应用缩放与居中定位</summary>
+        /// <summary>UI 可用区域变更回调：缓存可用宽高与中心，并立即应用父节点缩放与居中定位</summary>
         private void OnCharacterLayoutUpdate(ContentViewLayoutData layout)
         {
             _availableWidth = layout.AvailableWidth;
@@ -222,41 +222,26 @@ namespace GameLogic.GamePlay.CorePlay.View
                 0f);
             _hasLayoutCenter = true;
 
-            ApplyCharacterScale();
+            ApplyCharacterLayout();
         }
 
-        /// <summary>
-        /// 按 UI 可用区域与 ViewDefine.CharacterWidth/Height 取最小缩放，设给 CharacterRoot；
-        /// 同时把 CharacterRoot 平移到可用区域中心，使字符在可用区内居中。
-        /// 时序兜底：可用尺寸未到(<0)或基字尺寸为 0 时跳过，待另一方就绪后再调本方法。
-        /// </summary>
-        private void ApplyCharacterScale()
+        /// <summary>按 UI 可用区域适配 CharacterIkRoot，并平移到可用区域中心。</summary>
+        private void ApplyCharacterLayout()
         {
-            if (_gameViewRoot == null || _gameViewRoot.CharacterRoot == null) return;
+            if (_gameViewRoot == null || _gameViewRoot.CharacterIkRoot == null) return;
 
             float charW = ViewDefine.CharacterWidth;
             float charH = ViewDefine.CharacterHeight;
             if (charW <= 0f || charH <= 0f) return;
             if (_availableWidth < 0f || _availableHeight < 0f) return;
 
-            // 可用 / 基字，取最小保证完整可见；钳制 1 不放大（仅缩放收边）
             float scaleW = _availableWidth / charW;
             float scaleH = _availableHeight / charH;
             float scale = Mathf.Min(scaleW, scaleH, 1f);
-
             _gameViewRoot.CharacterIkRoot.localScale = new Vector3(scale, scale, 1f);
-
-            // 居中定位：缩放围绕 CharacterRoot 锚点，故直接把 CharacterRoot 平移到可用区中心
             if (_hasLayoutCenter)
             {
                 _gameViewRoot.CharacterIkRoot.position = _layoutCenter;
-            }
-
-            // 父节点仍按原逻辑适配布局；字形单独适配，不改变同级背景。
-            if (_hasLayoutCenter && _drawCharacter != null)
-            {
-                float contentHeight = _availableHeight * (1f - 2f * ViewDefine.CharacterVerticalPaddingRatio);
-                _drawCharacter.FitToWorldRect(_layoutCenter, _availableWidth, contentHeight);
             }
         }
 
@@ -343,8 +328,8 @@ namespace GameLogic.GamePlay.CorePlay.View
                 _strokeInputHandler.Initialize(_drawCharacter, Camera.main, OnStrokeClicked);
             }
 
-            // 绘制完成后应用一次缩放（处理 UI 布局事件先于绘制到达的情况，此时用缓存可用尺寸）
-            ApplyCharacterScale();
+            // 绘制完成后应用父节点适配与居中布局（处理 UI 布局事件先于绘制到达的情况）
+            ApplyCharacterLayout();
 
             Log.Info($"[CorePlayView] 渲染关卡: 『{levelData.baseCharacter}』, {graphicData.strokes.Count} 笔画");
             return true;

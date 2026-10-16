@@ -16,7 +16,7 @@ MonoBehaviour:
   - levelName: Level_1
     baseCharacter: "\u5E72"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -36,7 +36,7 @@ MonoBehaviour:
   - levelName: Level_2
     baseCharacter: "\u738B"
     positionOffset: {x: -2, y: -1.1}
-    customScale: 1
+    customScale: 1.2
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -71,7 +71,7 @@ MonoBehaviour:
   - levelName: Level_3
     baseCharacter: "\u672C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -97,8 +97,8 @@ MonoBehaviour:
     requiredAnswerCount: 7
   - levelName: Level_4
     baseCharacter: "\u7530"
-    positionOffset: {x: -2, y: -1.2}
-    customScale: 1
+    positionOffset: {x: -2, y: -1.12}
+    customScale: 1.2
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -127,7 +127,7 @@ MonoBehaviour:
   - levelName: Level_5
     baseCharacter: "\u9E1F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9E1F"
       strokeSets:
@@ -146,7 +146,7 @@ MonoBehaviour:
   - levelName: Level_6
     baseCharacter: "\u52AB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -181,7 +181,7 @@ MonoBehaviour:
   - levelName: Level_7
     baseCharacter: "\u660E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -210,7 +210,7 @@ MonoBehaviour:
   - levelName: Level_8
     baseCharacter: "\u7389"
     positionOffset: {x: -2, y: -1.1}
-    customScale: 1
+    customScale: 1.2
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -254,7 +254,7 @@ MonoBehaviour:
   - levelName: Level_9
     baseCharacter: "\u674E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u674E"
       strokeSets:
@@ -286,7 +286,7 @@ MonoBehaviour:
   - levelName: Level_10
     baseCharacter: "\u514B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.06
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -330,7 +330,7 @@ MonoBehaviour:
   - levelName: Level_11
     baseCharacter: "\u91D1"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -380,7 +380,7 @@ MonoBehaviour:
   - levelName: Level_12
     baseCharacter: "\u8679"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -423,7 +423,7 @@ MonoBehaviour:
   - levelName: Level_13
     baseCharacter: "\u4EA9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -476,7 +476,7 @@ MonoBehaviour:
   - levelName: Level_14
     baseCharacter: "\u9C7C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9C7C"
       strokeSets:
@@ -529,7 +529,7 @@ MonoBehaviour:
   - levelName: Level_15
     baseCharacter: "\u5468"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5468"
       strokeSets:
@@ -574,7 +574,7 @@ MonoBehaviour:
   - levelName: Level_16
     baseCharacter: "\u7B54"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7B54"
       strokeSets:
@@ -614,7 +614,7 @@ MonoBehaviour:
   - levelName: Level_17
     baseCharacter: "\u7F8E"
     positionOffset: {x: -2, y: -0.9}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -686,7 +686,7 @@ MonoBehaviour:
   - levelName: Level_18
     baseCharacter: "\u5355"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.12
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -741,7 +741,7 @@ MonoBehaviour:
   - levelName: Level_19
     baseCharacter: "\u679C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.09
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -801,7 +801,7 @@ MonoBehaviour:
   - levelName: Level_20
     baseCharacter: "\u6E56"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -842,7 +842,7 @@ MonoBehaviour:
   - levelName: Level_21
     baseCharacter: "\u8C10"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8C10"
       strokeSets:
@@ -893,7 +893,7 @@ MonoBehaviour:
   - levelName: Level_22
     baseCharacter: "\u8239"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -919,7 +919,7 @@ MonoBehaviour:
   - levelName: Level_23
     baseCharacter: "\u6613"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -949,7 +949,7 @@ MonoBehaviour:
   - levelName: Level_24
     baseCharacter: "\u76F8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -999,7 +999,7 @@ MonoBehaviour:
   - levelName: Level_25
     baseCharacter: "\u539F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1059,7 +1059,7 @@ MonoBehaviour:
   - levelName: Level_26
     baseCharacter: "\u80FD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u80FD"
       strokeSets:
@@ -1086,7 +1086,7 @@ MonoBehaviour:
   - levelName: Level_27
     baseCharacter: "\u6069"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1132,7 +1132,7 @@ MonoBehaviour:
   - levelName: Level_28
     baseCharacter: "\u8349"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1208,7 +1208,7 @@ MonoBehaviour:
   - levelName: Level_29
     baseCharacter: "\u559D"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1251,7 +1251,7 @@ MonoBehaviour:
   - levelName: Level_30
     baseCharacter: "\u75F4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1312,7 +1312,7 @@ MonoBehaviour:
   - levelName: Level_31
     baseCharacter: "\u5531"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1378,7 +1378,7 @@ MonoBehaviour:
   - levelName: Level_32
     baseCharacter: "\u91CD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1487,7 +1487,7 @@ MonoBehaviour:
   - levelName: Level_33
     baseCharacter: "\u60F3"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1541,7 +1541,7 @@ MonoBehaviour:
   - levelName: Level_34
     baseCharacter: "\u58C1"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1629,7 +1629,7 @@ MonoBehaviour:
   - levelName: Level_35
     baseCharacter: "\u81ED"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u767D"
       strokeSets:
@@ -1699,7 +1699,7 @@ MonoBehaviour:
   - levelName: Level_36
     baseCharacter: "\u6811"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1740,7 +1740,7 @@ MonoBehaviour:
   - levelName: Level_37
     baseCharacter: "\u8042"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1799,7 +1799,7 @@ MonoBehaviour:
   - levelName: Level_38
     baseCharacter: "\u7A57"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1904,7 +1904,7 @@ MonoBehaviour:
   - levelName: Level_39
     baseCharacter: "\u7AE0"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -1985,7 +1985,7 @@ MonoBehaviour:
   - levelName: Level_40
     baseCharacter: "\u4F5B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4F5B"
       strokeSets:
@@ -2010,7 +2010,7 @@ MonoBehaviour:
   - levelName: Level_41
     baseCharacter: "\u64CD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2075,7 +2075,7 @@ MonoBehaviour:
   - levelName: Level_42
     baseCharacter: "\u6848"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2125,7 +2125,7 @@ MonoBehaviour:
   - levelName: Level_43
     baseCharacter: "\u7426"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2194,7 +2194,7 @@ MonoBehaviour:
   - levelName: Level_44
     baseCharacter: "\u9738"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2283,7 +2283,7 @@ MonoBehaviour:
   - levelName: Level_45
     baseCharacter: "\u89E3"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2324,7 +2324,7 @@ MonoBehaviour:
   - levelName: Level_46
     baseCharacter: "\u7586"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2535,7 +2535,7 @@ MonoBehaviour:
   - levelName: Level_47
     baseCharacter: "\u9AA4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2603,7 +2603,7 @@ MonoBehaviour:
   - levelName: Level_48
     baseCharacter: "\u997A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u516D"
       strokeSets:
@@ -2637,7 +2637,7 @@ MonoBehaviour:
   - levelName: Level_49
     baseCharacter: "\u683D"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2688,7 +2688,7 @@ MonoBehaviour:
   - levelName: Level_50
     baseCharacter: "\u8BD7"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2741,7 +2741,7 @@ MonoBehaviour:
   - levelName: Level_51
     baseCharacter: "\u65B0"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2789,7 +2789,7 @@ MonoBehaviour:
   - levelName: Level_52
     baseCharacter: "\u88F9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1.1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2874,7 +2874,7 @@ MonoBehaviour:
   - levelName: Level_53
     baseCharacter: "\u8D62"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -2945,7 +2945,7 @@ MonoBehaviour:
   - levelName: Level_54
     baseCharacter: "\u9F9B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -3004,7 +3004,7 @@ MonoBehaviour:
   - levelName: Level_55
     baseCharacter: "\u9616"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -3045,7 +3045,7 @@ MonoBehaviour:
   - levelName: Level_56
     baseCharacter: "\u5510"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -3123,7 +3123,7 @@ MonoBehaviour:
   - levelName: Level_57
     baseCharacter: "\u9B4F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9B4F"
       strokeSets:
@@ -3231,7 +3231,7 @@ MonoBehaviour:
   - levelName: Level_58
     baseCharacter: "\u6B66"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6B66"
       strokeSets:
@@ -3279,7 +3279,7 @@ MonoBehaviour:
   - levelName: Level_59
     baseCharacter: "\u6234"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -3454,7 +3454,7 @@ MonoBehaviour:
   - levelName: Level_60
     baseCharacter: "\u6881"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6881"
       strokeSets:
@@ -3494,7 +3494,7 @@ MonoBehaviour:
   - levelName: Level_61
     baseCharacter: "\u5609"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5609"
       strokeSets:
@@ -3578,7 +3578,7 @@ MonoBehaviour:
   - levelName: Level_62
     baseCharacter: "\u8BFB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8BFB"
       strokeSets:
@@ -3625,7 +3625,7 @@ MonoBehaviour:
   - levelName: Level_63
     baseCharacter: "\u5EA7"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -3718,7 +3718,7 @@ MonoBehaviour:
   - levelName: Level_64
     baseCharacter: "\u83DC"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u83DC"
       strokeSets:
@@ -3777,7 +3777,7 @@ MonoBehaviour:
   - levelName: Level_65
     baseCharacter: "\u5708"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5708"
       strokeSets:
@@ -3839,7 +3839,7 @@ MonoBehaviour:
   - levelName: Level_66
     baseCharacter: "\u5B6C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5B6C"
       strokeSets:
@@ -3889,7 +3889,7 @@ MonoBehaviour:
   - levelName: Level_67
     baseCharacter: "\u66F4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u66F4"
       strokeSets:
@@ -3928,7 +3928,7 @@ MonoBehaviour:
   - levelName: Level_68
     baseCharacter: "\u96C4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u96C4"
       strokeSets:
@@ -4038,7 +4038,7 @@ MonoBehaviour:
   - levelName: Level_69
     baseCharacter: "\u9997"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9997"
       strokeSets:
@@ -4108,7 +4108,7 @@ MonoBehaviour:
   - levelName: Level_70
     baseCharacter: "\u5269"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5269"
       strokeSets:
@@ -4170,7 +4170,7 @@ MonoBehaviour:
   - levelName: Level_71
     baseCharacter: "\u97F3"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -4221,7 +4221,7 @@ MonoBehaviour:
   - levelName: Level_72
     baseCharacter: "\u89E6"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u89E6"
       strokeSets:
@@ -4301,7 +4301,7 @@ MonoBehaviour:
   - levelName: Level_73
     baseCharacter: "\u837C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u837C"
       strokeSets:
@@ -4361,7 +4361,7 @@ MonoBehaviour:
   - levelName: Level_74
     baseCharacter: "\u6773"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6773"
       strokeSets:
@@ -4418,7 +4418,7 @@ MonoBehaviour:
   - levelName: Level_75
     baseCharacter: "\u79EF"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u79EF"
       strokeSets:
@@ -4463,7 +4463,7 @@ MonoBehaviour:
   - levelName: Level_76
     baseCharacter: "\u821E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u821E"
       strokeSets:
@@ -4558,7 +4558,7 @@ MonoBehaviour:
   - levelName: Level_77
     baseCharacter: "\u4FA0"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4FA0"
       strokeSets:
@@ -4599,7 +4599,7 @@ MonoBehaviour:
   - levelName: Level_78
     baseCharacter: "\u97F5"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u97F5"
       strokeSets:
@@ -4674,7 +4674,7 @@ MonoBehaviour:
   - levelName: Level_79
     baseCharacter: "\u978B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u978B"
       strokeSets:
@@ -4774,7 +4774,7 @@ MonoBehaviour:
   - levelName: Level_80
     baseCharacter: "\u7740"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7740"
       strokeSets:
@@ -4902,7 +4902,7 @@ MonoBehaviour:
   - levelName: Level_81
     baseCharacter: "\u6389"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6389"
       strokeSets:
@@ -4978,7 +4978,7 @@ MonoBehaviour:
   - levelName: Level_82
     baseCharacter: "\u594B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u594B"
       strokeSets:
@@ -5049,7 +5049,7 @@ MonoBehaviour:
   - levelName: Level_83
     baseCharacter: "\u8427"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8427"
       strokeSets:
@@ -5112,7 +5112,7 @@ MonoBehaviour:
   - levelName: Level_84
     baseCharacter: "\u73BA"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u73BA"
       strokeSets:
@@ -5168,7 +5168,7 @@ MonoBehaviour:
   - levelName: Level_85
     baseCharacter: "\u9189"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9189"
       strokeSets:
@@ -5254,7 +5254,7 @@ MonoBehaviour:
   - levelName: Level_86
     baseCharacter: "\u88D9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u88D9"
       strokeSets:
@@ -5300,7 +5300,7 @@ MonoBehaviour:
   - levelName: Level_87
     baseCharacter: "\u5BCC"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5BCC"
       strokeSets:
@@ -5368,7 +5368,7 @@ MonoBehaviour:
   - levelName: Level_88
     baseCharacter: "\u719F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u719F"
       strokeSets:
@@ -5437,7 +5437,7 @@ MonoBehaviour:
   - levelName: Level_89
     baseCharacter: "\u8C0B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8C0B"
       strokeSets:
@@ -5512,7 +5512,7 @@ MonoBehaviour:
   - levelName: Level_90
     baseCharacter: "\u5FB7"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5FB7"
       strokeSets:
@@ -5592,7 +5592,7 @@ MonoBehaviour:
   - levelName: Level_91
     baseCharacter: "\u5178"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5178"
       strokeSets:
@@ -5633,7 +5633,7 @@ MonoBehaviour:
   - levelName: Level_92
     baseCharacter: "\u50BB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u50BB"
       strokeSets:
@@ -5676,7 +5676,7 @@ MonoBehaviour:
   - levelName: Level_93
     baseCharacter: "\u798F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u798F"
       strokeSets:
@@ -5749,7 +5749,7 @@ MonoBehaviour:
   - levelName: Level_94
     baseCharacter: "\u610F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u610F"
       strokeSets:
@@ -5822,7 +5822,7 @@ MonoBehaviour:
   - levelName: Level_95
     baseCharacter: "\u5C5E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5C5E"
       strokeSets:
@@ -5928,7 +5928,7 @@ MonoBehaviour:
   - levelName: Level_96
     baseCharacter: "\u83AB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u83AB"
       strokeSets:
@@ -6009,7 +6009,7 @@ MonoBehaviour:
   - levelName: Level_97
     baseCharacter: "\u58A8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u58A8"
       strokeSets:
@@ -6125,7 +6125,7 @@ MonoBehaviour:
   - levelName: Level_98
     baseCharacter: "\u91CC"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u91CC"
       strokeSets:
@@ -6190,7 +6190,7 @@ MonoBehaviour:
   - levelName: Level_99
     baseCharacter: "\u7565"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7565"
       strokeSets:
@@ -6245,7 +6245,7 @@ MonoBehaviour:
   - levelName: Level_100
     baseCharacter: "\u613F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u613F"
       strokeSets:
@@ -6313,7 +6313,7 @@ MonoBehaviour:
   - levelName: Level_101
     baseCharacter: "\u86CB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u86CB"
       strokeSets:
@@ -6376,7 +6376,7 @@ MonoBehaviour:
   - levelName: Level_102
     baseCharacter: "\u751C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u751C"
       strokeSets:
@@ -6451,7 +6451,7 @@ MonoBehaviour:
   - levelName: Level_103
     baseCharacter: "\u9A91"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9A91"
       strokeSets:
@@ -6502,7 +6502,7 @@ MonoBehaviour:
   - levelName: Level_104
     baseCharacter: "\u8DA3"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8DA3"
       strokeSets:
@@ -6579,7 +6579,7 @@ MonoBehaviour:
   - levelName: Level_105
     baseCharacter: "\u67DA"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u67DA"
       strokeSets:
@@ -6628,7 +6628,7 @@ MonoBehaviour:
   - levelName: Level_106
     baseCharacter: "\u5F97"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5F97"
       strokeSets:
@@ -6720,7 +6720,7 @@ MonoBehaviour:
   - levelName: Level_107
     baseCharacter: "\u7470"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7470"
       strokeSets:
@@ -6794,7 +6794,7 @@ MonoBehaviour:
   - levelName: Level_108
     baseCharacter: "\u9890"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9890"
       strokeSets:
@@ -6842,7 +6842,7 @@ MonoBehaviour:
   - levelName: Level_109
     baseCharacter: "\u5706"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5706"
       strokeSets:
@@ -6881,7 +6881,7 @@ MonoBehaviour:
   - levelName: Level_110
     baseCharacter: "\u6B6A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6B6A"
       strokeSets:
@@ -6951,7 +6951,7 @@ MonoBehaviour:
   - levelName: Level_111
     baseCharacter: "\u5409"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -6986,7 +6986,7 @@ MonoBehaviour:
   - levelName: Level_112
     baseCharacter: "\u5446"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7018,7 +7018,7 @@ MonoBehaviour:
   - levelName: Level_113
     baseCharacter: "\u7C73"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7040,7 +7040,7 @@ MonoBehaviour:
   - levelName: Level_114
     baseCharacter: "\u67B6"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7078,7 +7078,7 @@ MonoBehaviour:
   - levelName: Level_115
     baseCharacter: "\u68A8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7125,7 +7125,7 @@ MonoBehaviour:
   - levelName: Level_116
     baseCharacter: "\u8BF4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7150,7 +7150,7 @@ MonoBehaviour:
   - levelName: Level_117
     baseCharacter: "\u5CD9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7197,7 +7197,7 @@ MonoBehaviour:
   - levelName: Level_118
     baseCharacter: "\u623F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7226,7 +7226,7 @@ MonoBehaviour:
   - levelName: Level_119
     baseCharacter: "\u8336"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7266,7 +7266,7 @@ MonoBehaviour:
   - levelName: Level_120
     baseCharacter: "\u7FB8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7367,7 +7367,7 @@ MonoBehaviour:
   - levelName: Level_121
     baseCharacter: "\u61AC"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7461,7 +7461,7 @@ MonoBehaviour:
   - levelName: Level_122
     baseCharacter: "\u775B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7556,7 +7556,7 @@ MonoBehaviour:
   - levelName: Level_123
     baseCharacter: "\u9547"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7647,7 +7647,7 @@ MonoBehaviour:
   - levelName: Level_124
     baseCharacter: "\u8E2A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7728,7 +7728,7 @@ MonoBehaviour:
   - levelName: Level_125
     baseCharacter: "\u5E55"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7828,7 +7828,7 @@ MonoBehaviour:
   - levelName: Level_126
     baseCharacter: "\u6D52"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8BB8"
       strokeSets:
@@ -7872,7 +7872,7 @@ MonoBehaviour:
   - levelName: Level_127
     baseCharacter: "\u9F13"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -7943,7 +7943,7 @@ MonoBehaviour:
   - levelName: Level_128
     baseCharacter: "\u5954"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5927"
       strokeSets:
@@ -8013,7 +8013,7 @@ MonoBehaviour:
   - levelName: Level_129
     baseCharacter: "\u9E44"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u544A"
       strokeSets:
@@ -8079,7 +8079,7 @@ MonoBehaviour:
   - levelName: Level_130
     baseCharacter: "\u60EB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53C8"
       strokeSets:
@@ -8136,7 +8136,7 @@ MonoBehaviour:
   - levelName: Level_131
     baseCharacter: "\u9E45"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6211"
       strokeSets:
@@ -8174,7 +8174,7 @@ MonoBehaviour:
   - levelName: Level_132
     baseCharacter: "\u7403"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u738B"
       strokeSets:
@@ -8229,7 +8229,7 @@ MonoBehaviour:
   - levelName: Level_133
     baseCharacter: "\u7C9F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u897F"
       strokeSets:
@@ -8292,7 +8292,7 @@ MonoBehaviour:
   - levelName: Level_134
     baseCharacter: "\u5B09"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -8381,7 +8381,7 @@ MonoBehaviour:
   - levelName: Level_135
     baseCharacter: "\u8471"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -8435,7 +8435,7 @@ MonoBehaviour:
   - levelName: Level_136
     baseCharacter: "\u9C81"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -8529,7 +8529,7 @@ MonoBehaviour:
   - levelName: Level_137
     baseCharacter: "\u7532"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -8556,7 +8556,7 @@ MonoBehaviour:
   - levelName: Level_138
     baseCharacter: "\u8354"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -8584,7 +8584,7 @@ MonoBehaviour:
   - levelName: Level_139
     baseCharacter: "\u7696"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u767D"
       strokeSets:
@@ -8628,7 +8628,7 @@ MonoBehaviour:
   - levelName: Level_140
     baseCharacter: "\u79CB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u79BE"
       strokeSets:
@@ -8674,7 +8674,7 @@ MonoBehaviour:
   - levelName: Level_141
     baseCharacter: "\u67D2"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E03"
       strokeSets:
@@ -8708,7 +8708,7 @@ MonoBehaviour:
   - levelName: Level_142
     baseCharacter: "\u6D3B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6C41"
       strokeSets:
@@ -8755,7 +8755,7 @@ MonoBehaviour:
   - levelName: Level_143
     baseCharacter: "\u4FFA"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4FFA"
       strokeSets:
@@ -8830,7 +8830,7 @@ MonoBehaviour:
   - levelName: Level_144
     baseCharacter: "\u684C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5360"
       strokeSets:
@@ -8911,7 +8911,7 @@ MonoBehaviour:
   - levelName: Level_145
     baseCharacter: "\u662F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -8962,7 +8962,7 @@ MonoBehaviour:
   - levelName: Level_146
     baseCharacter: "\u7533"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -8995,7 +8995,7 @@ MonoBehaviour:
   - levelName: Level_147
     baseCharacter: "\u5077"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6708"
       strokeSets:
@@ -9048,7 +9048,7 @@ MonoBehaviour:
   - levelName: Level_148
     baseCharacter: "\u4F6F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -9104,7 +9104,7 @@ MonoBehaviour:
   - levelName: Level_149
     baseCharacter: "\u7F24"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5175"
       strokeSets:
@@ -9155,7 +9155,7 @@ MonoBehaviour:
   - levelName: Level_150
     baseCharacter: "\u768E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u767D"
       strokeSets:
@@ -9218,7 +9218,7 @@ MonoBehaviour:
   - levelName: Level_151
     baseCharacter: "\u9E93"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -9312,7 +9312,7 @@ MonoBehaviour:
   - levelName: Level_152
     baseCharacter: "\u9E21"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53C8"
       strokeSets:
@@ -9337,7 +9337,7 @@ MonoBehaviour:
   - levelName: Level_153
     baseCharacter: "\u989C"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7ACB"
       strokeSets:
@@ -9385,7 +9385,7 @@ MonoBehaviour:
   - levelName: Level_154
     baseCharacter: "\u5CA9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5C71"
       strokeSets:
@@ -9411,7 +9411,7 @@ MonoBehaviour:
   - levelName: Level_155
     baseCharacter: "\u60E0"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E30"
       strokeSets:
@@ -9491,7 +9491,7 @@ MonoBehaviour:
   - levelName: Level_156
     baseCharacter: "\u623E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6237"
       strokeSets:
@@ -9532,7 +9532,7 @@ MonoBehaviour:
   - levelName: Level_157
     baseCharacter: "\u51DB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -9629,7 +9629,7 @@ MonoBehaviour:
   - levelName: Level_158
     baseCharacter: "\u538B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u738B"
       strokeSets:
@@ -9679,7 +9679,7 @@ MonoBehaviour:
   - levelName: Level_159
     baseCharacter: "\u666E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5170"
       strokeSets:
@@ -9748,7 +9748,7 @@ MonoBehaviour:
   - levelName: Level_160
     baseCharacter: "\u8F9E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5343"
       strokeSets:
@@ -9823,7 +9823,7 @@ MonoBehaviour:
   - levelName: Level_161
     baseCharacter: "\u6F6E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6C41"
       strokeSets:
@@ -9922,7 +9922,7 @@ MonoBehaviour:
   - levelName: Level_162
     baseCharacter: "\u672B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u516B"
       strokeSets:
@@ -9949,7 +9949,7 @@ MonoBehaviour:
   - levelName: Level_163
     baseCharacter: "\u5965"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6728"
       strokeSets:
@@ -10021,7 +10021,7 @@ MonoBehaviour:
   - levelName: Level_164
     baseCharacter: "\u767E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u767D"
       strokeSets:
@@ -10053,7 +10053,7 @@ MonoBehaviour:
   - levelName: Level_165
     baseCharacter: "\u8857"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -10143,7 +10143,7 @@ MonoBehaviour:
   - levelName: Level_166
     baseCharacter: "\u8C23"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5348"
       strokeSets:
@@ -10193,7 +10193,7 @@ MonoBehaviour:
   - levelName: Level_167
     baseCharacter: "\u5250"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -10230,7 +10230,7 @@ MonoBehaviour:
   - levelName: Level_168
     baseCharacter: "\u5F3A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5F13"
       strokeSets:
@@ -10302,7 +10302,7 @@ MonoBehaviour:
   - levelName: Level_169
     baseCharacter: "\u9526"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u767D"
       strokeSets:
@@ -10355,7 +10355,7 @@ MonoBehaviour:
   - levelName: Level_170
     baseCharacter: "\u6F14"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u516B"
       strokeSets:
@@ -10446,7 +10446,7 @@ MonoBehaviour:
   - levelName: Level_171
     baseCharacter: "\u8BD9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8BD9"
       strokeSets:
@@ -10477,7 +10477,7 @@ MonoBehaviour:
   - levelName: Level_172
     baseCharacter: "\u7C27"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -10657,7 +10657,7 @@ MonoBehaviour:
   - levelName: Level_173
     baseCharacter: "\u5C9A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5C71"
       strokeSets:
@@ -10679,7 +10679,7 @@ MonoBehaviour:
   - levelName: Level_174
     baseCharacter: "\u6771"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -10745,7 +10745,7 @@ MonoBehaviour:
   - levelName: Level_175
     baseCharacter: "\u9E26"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u7259"
       strokeSets:
@@ -10777,7 +10777,7 @@ MonoBehaviour:
   - levelName: Level_176
     baseCharacter: "\u7CBD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u516B"
       strokeSets:
@@ -10845,7 +10845,7 @@ MonoBehaviour:
   - levelName: Level_177
     baseCharacter: "\u8695"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -10946,7 +10946,7 @@ MonoBehaviour:
   - levelName: Level_178
     baseCharacter: "\u6E58"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -11011,7 +11011,7 @@ MonoBehaviour:
   - levelName: Level_179
     baseCharacter: "\u55FD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -11081,7 +11081,7 @@ MonoBehaviour:
   - levelName: Level_180
     baseCharacter: "\u9E2D"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u65E5"
       strokeSets:
@@ -11132,7 +11132,7 @@ MonoBehaviour:
   - levelName: Level_181
     baseCharacter: "\u5803"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u65B9"
       strokeSets:
@@ -11189,7 +11189,7 @@ MonoBehaviour:
   - levelName: Level_182
     baseCharacter: "\u5BE8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -11288,7 +11288,7 @@ MonoBehaviour:
   - levelName: Level_183
     baseCharacter: "\u6C05"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6BDB"
       strokeSets:
@@ -11338,7 +11338,7 @@ MonoBehaviour:
   - levelName: Level_184
     baseCharacter: "\u4E3E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5174"
       strokeSets:
@@ -11391,7 +11391,7 @@ MonoBehaviour:
   - levelName: Level_185
     baseCharacter: "\u68CD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -11454,7 +11454,7 @@ MonoBehaviour:
   - levelName: Level_186
     baseCharacter: "\u64B7"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -11518,7 +11518,7 @@ MonoBehaviour:
   - levelName: Level_187
     baseCharacter: "\u63C9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6728"
       strokeSets:
@@ -11568,7 +11568,7 @@ MonoBehaviour:
   - levelName: Level_188
     baseCharacter: "\u7845"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u77F3"
       strokeSets:
@@ -11688,7 +11688,7 @@ MonoBehaviour:
   - levelName: Level_189
     baseCharacter: "\u85A8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -11759,7 +11759,7 @@ MonoBehaviour:
   - levelName: Level_190
     baseCharacter: "\u5AE9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5973"
       strokeSets:
@@ -11830,7 +11830,7 @@ MonoBehaviour:
   - levelName: Level_191
     baseCharacter: "\u774F"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -11908,7 +11908,7 @@ MonoBehaviour:
   - levelName: Level_192
     baseCharacter: "\u570B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u570B"
       strokeSets:
@@ -11976,7 +11976,7 @@ MonoBehaviour:
   - levelName: Level_193
     baseCharacter: "\u8859"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u884C"
       strokeSets:
@@ -12039,7 +12039,7 @@ MonoBehaviour:
   - levelName: Level_194
     baseCharacter: "\u68B0"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6728"
       strokeSets:
@@ -12092,7 +12092,7 @@ MonoBehaviour:
   - levelName: Level_195
     baseCharacter: "\u54E9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -12178,7 +12178,7 @@ MonoBehaviour:
   - levelName: Level_196
     baseCharacter: "\u5FAD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5348"
       strokeSets:
@@ -12232,7 +12232,7 @@ MonoBehaviour:
   - levelName: Level_197
     baseCharacter: "\u55C5"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -12319,7 +12319,7 @@ MonoBehaviour:
   - levelName: Level_198
     baseCharacter: "\u9603"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u9603"
       strokeSets:
@@ -12387,7 +12387,7 @@ MonoBehaviour:
   - levelName: Level_199
     baseCharacter: "\u9E4B"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -12471,7 +12471,7 @@ MonoBehaviour:
   - levelName: Level_200
     baseCharacter: "\u69C3"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u821F"
       strokeSets:
@@ -12529,7 +12529,7 @@ MonoBehaviour:
   - levelName: Level_201
     baseCharacter: "\u5363"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5363"
       strokeSets:
@@ -12565,7 +12565,7 @@ MonoBehaviour:
   - levelName: Level_202
     baseCharacter: "\u97AD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u97AD"
       strokeSets:
@@ -12683,7 +12683,7 @@ MonoBehaviour:
   - levelName: Level_203
     baseCharacter: "\u7172"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EC0"
       strokeSets:
@@ -12750,7 +12750,7 @@ MonoBehaviour:
   - levelName: Level_204
     baseCharacter: "\u9609"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5927"
       strokeSets:
@@ -12830,7 +12830,7 @@ MonoBehaviour:
   - levelName: Level_205
     baseCharacter: "\u682A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -12885,7 +12885,7 @@ MonoBehaviour:
   - levelName: Level_206
     baseCharacter: "\u59FB"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5973"
       strokeSets:
@@ -12929,7 +12929,7 @@ MonoBehaviour:
   - levelName: Level_207
     baseCharacter: "\u7387"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5E7A"
       strokeSets:
@@ -12970,7 +12970,7 @@ MonoBehaviour:
   - levelName: Level_208
     baseCharacter: "\u7F8A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13009,7 +13009,7 @@ MonoBehaviour:
   - levelName: Level_209
     baseCharacter: "\u6B81"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6B79"
       strokeSets:
@@ -13037,7 +13037,7 @@ MonoBehaviour:
   - levelName: Level_210
     baseCharacter: "\u79F8"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13129,7 +13129,7 @@ MonoBehaviour:
   - levelName: Level_211
     baseCharacter: "\u79BD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -13166,7 +13166,7 @@ MonoBehaviour:
   - levelName: Level_212
     baseCharacter: "\u5C65"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13243,7 +13243,7 @@ MonoBehaviour:
   - levelName: Level_213
     baseCharacter: "\u73E9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13305,7 +13305,7 @@ MonoBehaviour:
   - levelName: Level_214
     baseCharacter: "\u56ED"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13347,7 +13347,7 @@ MonoBehaviour:
   - levelName: Level_215
     baseCharacter: "\u5A32"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5973"
       strokeSets:
@@ -13387,7 +13387,7 @@ MonoBehaviour:
   - levelName: Level_216
     baseCharacter: "\u66B4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13487,7 +13487,7 @@ MonoBehaviour:
   - levelName: Level_217
     baseCharacter: "\u6DE6"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13552,7 +13552,7 @@ MonoBehaviour:
   - levelName: Level_218
     baseCharacter: "\u9604"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E00"
       strokeSets:
@@ -13607,7 +13607,7 @@ MonoBehaviour:
   - levelName: Level_219
     baseCharacter: "\u636D"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -13678,7 +13678,7 @@ MonoBehaviour:
   - levelName: Level_220
     baseCharacter: "\u5A9A"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5973"
       strokeSets:
@@ -13733,7 +13733,7 @@ MonoBehaviour:
   - levelName: Level_221
     baseCharacter: "\u75D4"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5E7F"
       strokeSets:
@@ -13818,7 +13818,7 @@ MonoBehaviour:
   - levelName: Level_222
     baseCharacter: "\u8214"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5343"
       strokeSets:
@@ -13895,7 +13895,7 @@ MonoBehaviour:
   - levelName: Level_223
     baseCharacter: "\u8315"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5341"
       strokeSets:
@@ -13930,7 +13930,7 @@ MonoBehaviour:
   - levelName: Level_224
     baseCharacter: "\u754E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u53E3"
       strokeSets:
@@ -13975,7 +13975,7 @@ MonoBehaviour:
   - levelName: Level_225
     baseCharacter: "\u8723"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4E2D"
       strokeSets:
@@ -14038,7 +14038,7 @@ MonoBehaviour:
   - levelName: Level_226
     baseCharacter: "\u5E42"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5DFE"
       strokeSets:
@@ -14094,7 +14094,7 @@ MonoBehaviour:
   - levelName: Level_227
     baseCharacter: "\u7A0E"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u6728"
       strokeSets:
@@ -14150,7 +14150,7 @@ MonoBehaviour:
   - levelName: Level_228
     baseCharacter: "\u5F59"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u672A"
       strokeSets:
@@ -14230,7 +14230,7 @@ MonoBehaviour:
   - levelName: Level_229
     baseCharacter: "\u55EF"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u516B"
       strokeSets:
@@ -14295,7 +14295,7 @@ MonoBehaviour:
   - levelName: Level_230
     baseCharacter: "\u5162"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5405"
       strokeSets:
@@ -14358,7 +14358,7 @@ MonoBehaviour:
   - levelName: Level_231
     baseCharacter: "\u75F9"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u5E7F"
       strokeSets:
@@ -14450,7 +14450,7 @@ MonoBehaviour:
   - levelName: Level_232
     baseCharacter: "\u5026"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u4EBA"
       strokeSets:
@@ -14495,7 +14495,7 @@ MonoBehaviour:
   - levelName: Level_233
     baseCharacter: "\u9041"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u76FE"
       strokeSets:
@@ -14576,7 +14576,7 @@ MonoBehaviour:
   - levelName: Level_234
     baseCharacter: "\u83BD"
     positionOffset: {x: -2, y: -1}
-    customScale: 1
+    customScale: 1.15
     answers:
     - answerCharacter: "\u8279"
       strokeSets:

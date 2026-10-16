@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameLogic.Data;
 using TEngine;
@@ -19,8 +19,6 @@ namespace GameLogic.View
         private Vector2 _cachedOffset;
         private bool _cachedIndices;
         private bool _hasCachedGeometry;
-        private Bounds _localStrokeBounds;
-        private bool _hasStrokeBounds;
         private int _drawVersion;
         private const double DrawFrameBudgetSeconds = 0.003;
 
@@ -42,7 +40,6 @@ namespace GameLogic.View
             _strokeRenderers.Clear();
             _cachedPoints.Clear();
             _hasCachedGeometry = false;
-            _hasStrokeBounds = false;
         }
 
         private void OnDestroy()
@@ -91,44 +88,6 @@ namespace GameLogic.View
 
         public float CustomScale { get; set; } = 1f;
 
-        /// <summary>保持字形原有位置，按内容区域的四侧边界等比缩放。</summary>
-        public void FitToWorldRect(Vector3 center, float width, float height)
-        {
-            if (!_hasCachedGeometry || !_hasStrokeBounds || width <= 0f || height <= 0f) return;
-
-            // 用单位缩放计算边界，保留父节点变换，重复适配不会累积缩放。
-            Matrix4x4 matrix = Matrix4x4.TRS(transform.localPosition, transform.localRotation, Vector3.one);
-            if (transform.parent != null) matrix = transform.parent.localToWorldMatrix * matrix;
-            Vector3 pivot = matrix.MultiplyPoint3x4(Vector3.zero);
-            Vector3 boundsOffset = matrix.MultiplyVector(_localStrokeBounds.center);
-            Vector3 x = matrix.MultiplyVector(new Vector3(_localStrokeBounds.extents.x, 0f, 0f));
-            Vector3 y = matrix.MultiplyVector(new Vector3(0f, _localStrokeBounds.extents.y, 0f));
-            float extentX = Mathf.Abs(x.x) + Mathf.Abs(y.x);
-            float extentY = Mathf.Abs(x.y) + Mathf.Abs(y.y);
-
-            float leftRoom = pivot.x - (center.x - width * 0.5f);
-            float rightRoom = center.x + width * 0.5f - pivot.x;
-            float bottomRoom = pivot.y - (center.y - height * 0.5f);
-            float topRoom = center.y + height * 0.5f - pivot.y;
-            // 缩放中心不在内容区内时，单靠缩放不能保证适配，保留当前状态。
-            if (leftRoom <= 0f || rightRoom <= 0f || bottomRoom <= 0f || topRoom <= 0f) return;
-
-            float scale = float.PositiveInfinity;
-            LimitScale(ref scale, leftRoom, extentX - boundsOffset.x);
-            LimitScale(ref scale, rightRoom, extentX + boundsOffset.x);
-            LimitScale(ref scale, bottomRoom, extentY - boundsOffset.y);
-            LimitScale(ref scale, topRoom, extentY + boundsOffset.y);
-            if (float.IsInfinity(scale) || float.IsNaN(scale) || scale <= 0f) return;
-            scale = Mathf.Max(scale, 1f) * CustomScale;
-            transform.localScale = new Vector3(scale, scale, transform.localScale.z);
-        }
-
-        private static void LimitScale(ref float scale, float available, float distance)
-        {
-            // 轮廓可能全部位于中心的一侧；另一侧没有向外延伸，不限制缩放。
-            if (distance > 0f) scale = Mathf.Min(scale, available / distance);
-        }
-
         /// <summary>
         /// 清除所有已绘制的笔画
         /// </summary>
@@ -152,6 +111,7 @@ namespace GameLogic.View
         /// </summary>
         public async UniTask DrawAsync(TextGraphicData data, bool showStrokeIndices = false)
         {
+            transform.localScale = new Vector3(CustomScale, CustomScale, transform.localScale.z);
             CancelPendingDraw();
             if (CanReuse(data, showStrokeIndices))
             {
@@ -171,11 +131,6 @@ namespace GameLogic.View
             if (this == null || version != _drawVersion) return;
             if (template == null) return;
 
-            // 生成顶点时同步累计边界，完成后一次性缓存包围盒。
-            float minX = float.PositiveInfinity;
-            float minY = float.PositiveInfinity;
-            float maxX = float.NegativeInfinity;
-            float maxY = float.NegativeInfinity;
             double batchStart = Time.realtimeSinceStartupAsDouble;
             for (int i = 0; i < data.strokes.Count; i++)
             {
@@ -235,10 +190,6 @@ namespace GameLogic.View
                     float x = points[p].x + PositionOffset.x;
                     float y = points[p].y + PositionOffset.y;
                     verts[p] = new Vector3(x, y, 0f);
-                    minX = Mathf.Min(minX, x);
-                    minY = Mathf.Min(minY, y);
-                    maxX = Mathf.Max(maxX, x);
-                    maxY = Mathf.Max(maxY, y);
                 }
                 for (int j = 0; j < triangles.Length; j += 3)
                 {
@@ -266,12 +217,6 @@ namespace GameLogic.View
                 {
                     AddStrokeIndexLabel(strokeObj, strokeIndex, points);
                 }
-            }
-            _hasStrokeBounds = minX <= maxX && minY <= maxY;
-            if (_hasStrokeBounds)
-            {
-                _localStrokeBounds.SetMinMax(
-                    new Vector3(minX, minY, 0f), new Vector3(maxX, maxY, 0f));
             }
             _cachedCharacter = data.character;
             _cachedOffset = PositionOffset;
