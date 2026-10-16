@@ -8,6 +8,19 @@ namespace GameSDK
     {
         private bool _nativeReady;
         private int _loginAttempt;
+        private int _pendingCompletedLevel;
+        private int _uploadedCompletedLevel;
+        private bool _completedLevelUploading;
+        private const string RecommendOpenLink =
+            "TWFRCqV5WeM2AkMXhKwJ03MhfPOieJfAsvXKUbWvQFQtLyyA5etMPabBehga950uzfZcH3Vi3QeEh41xRGEVFw";
+        private WXPageManager _recommendPageManager;
+        private bool _recommendRequested;
+        private bool _recommendLoading;
+        private bool _recommendLoaded;
+        private bool _recommendShowing;
+        private bool _recommendShown;
+        private bool _recommendUnsupported;
+        private Func<bool> _recommendCanShow;
         [Serializable]
         private sealed class OpenIdResponse { public string openid; }
 
@@ -53,6 +66,8 @@ namespace GameSDK
             {
                 if (attempt != _loginAttempt) return;
                 _nativeReady = true;
+                FlushCompletedLevel();
+                if (_recommendRequested) LoadRecommend();
                 try { login(); } catch (Exception e) { onFailure(e.Message); }
             });
         }
@@ -164,6 +179,112 @@ namespace GameSDK
         public void ReportGameStart()
         {
             WX.ReportGameStart();
+        }
+
+        public void UploadCompletedLevel(int levelId)
+        {
+            if (levelId < 1) return;
+            // 同一会话只上传最高通关号，串行写入，避免旧请求晚到覆盖新进度。
+            _pendingCompletedLevel = Math.Max(_pendingCompletedLevel, levelId);
+            FlushCompletedLevel();
+        }
+
+        private void FlushCompletedLevel()
+        {
+            if (!_nativeReady || _completedLevelUploading || _pendingCompletedLevel <= _uploadedCompletedLevel) return;
+            int levelId = _pendingCompletedLevel;
+            _completedLevelUploading = true;
+            try
+            {
+                WX.SetUserCloudStorage(new SetUserCloudStorageOption
+                {
+                    KVDataList = new[]
+                    {
+                        new KVData { key = "ToLevel", value = levelId.ToString(System.Globalization.CultureInfo.InvariantCulture) }
+                    },
+                    success = _ =>
+                    {
+                        _completedLevelUploading = false;
+                        _uploadedCompletedLevel = levelId;
+                        FlushCompletedLevel();
+                    },
+                    fail = error => CompletedLevelUploadFailed(levelId, error.errMsg)
+                });
+            }
+            catch (Exception e) { CompletedLevelUploadFailed(levelId, e.Message); }
+        }
+
+        private void CompletedLevelUploadFailed(int levelId, string message)
+        {
+            _completedLevelUploading = false;
+            UnityEngine.Debug.LogWarning($"[Leaderboard] ToLevel={levelId} 上传失败: {message}");
+            // 保留待上传值，下次通关再尝试；已有更高关卡等待时直接提交最新值。
+            if (_pendingCompletedLevel > levelId) FlushCompletedLevel();
+        }
+
+        public void LoadRecommend()
+        {
+            _recommendRequested = true;
+            if (!_nativeReady || _recommendUnsupported || _recommendLoading || _recommendLoaded || _recommendShown) return;
+            try
+            {
+                if (!WX.CanIUse("createPageManager"))
+                {
+                    _recommendUnsupported = true;
+                    _recommendCanShow = null;
+                    UnityEngine.Debug.LogWarning("[Recommend] 当前基础库不支持评价与推荐组件");
+                    return;
+                }
+                _recommendPageManager ??= WX.CreatePageManager();
+                _recommendLoading = true;
+                _recommendPageManager.Load(new LoadOption
+                {
+                    openlink = RecommendOpenLink,
+                    success = _ =>
+                    {
+                        _recommendLoading = false;
+                        _recommendLoaded = true;
+                        TryShowRecommend();
+                    },
+                    fail = error => RecommendFailed("load", error.errMsg)
+                });
+            }
+            catch (Exception e) { RecommendFailed("load", e.Message); }
+        }
+
+        public void ShowRecommend(Func<bool> canShow)
+        {
+            if (_recommendShown || _recommendShowing || _recommendUnsupported || canShow == null || !canShow()) return;
+            _recommendCanShow = canShow;
+            if (_recommendLoaded) TryShowRecommend();
+            else LoadRecommend();
+        }
+
+        private void TryShowRecommend()
+        {
+            if (!_recommendLoaded || _recommendShowing || _recommendShown || _recommendCanShow == null) return;
+            var canShow = _recommendCanShow;
+            _recommendCanShow = null;
+            if (!canShow()) return; // 结算页已关闭或正在离场，不补弹。
+            _recommendShowing = true;
+            try
+            {
+                _recommendPageManager.Show(new ShowOption
+                {
+                    openlink = RecommendOpenLink,
+                    success = _ => { _recommendShowing = false; _recommendShown = true; },
+                    fail = error => RecommendFailed("show", error.errMsg)
+                });
+            }
+            catch (Exception e) { RecommendFailed("show", e.Message); }
+        }
+
+        private void RecommendFailed(string stage, string message)
+        {
+            _recommendLoading = false;
+            _recommendShowing = false;
+            _recommendCanShow = null;
+            UnityEngine.Debug.LogWarning($"[Recommend] {stage} failed: {message}");
         }
 
         public void ReportEvent(string eventId , Dictionary<string,string> data)

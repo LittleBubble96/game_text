@@ -15,7 +15,12 @@
 
         void OpenGameClub();
 
+        void LoadRecommend();
+        void ShowRecommend(System.Func<bool> canShow);
+
         void ReportGameStart();
+
+        void UploadCompletedLevel(int levelId);
 
         void ReportEvent(string eventId, System.Collections.Generic.Dictionary<string, string> data);
     }

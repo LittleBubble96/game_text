@@ -59,6 +59,20 @@ namespace GameSDK
             Log.Info($"[ReportGameStart] 上报");
         }
 
+        private bool _recommendShown;
+        public void UploadCompletedLevel(int levelId)
+        {
+            if (levelId > 0) Log.Info($"[Leaderboard] ToLevel={levelId}（编辑器模拟）");
+        }
+
+        public void LoadRecommend() => Log.Info("[Recommend] 预加载评价与推荐组件（编辑器模拟）");
+        public void ShowRecommend(System.Func<bool> canShow)
+        {
+            if (_recommendShown || canShow == null || !canShow()) return;
+            _recommendShown = true;
+            Log.Info("[Recommend] 第10关结算展示评价与推荐组件（编辑器模拟）");
+        }
+
         public void ReportEvent(string eventId, System.Collections.Generic.Dictionary<string, string> data)
         {
             var fields = new System.Collections.Generic.List<string>();

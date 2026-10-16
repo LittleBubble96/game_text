@@ -207,6 +207,9 @@ namespace GameLogic
             if (_levelConfig.GetLevelNameByLevelId(startLevelId) == null)
                 startLevelId = 1;
 
+            // 提前加载；直接从第10关存档进入也能在结算前发起请求。
+            if (startLevelId <= 10) GameSDK.SDK.LoadRecommend();
+
             // 重置存档、GM 跳关、首次预加载失败时也走同一入口。
             PreloadGameplayUI(startLevelId);
             PreloadFinishUI();
@@ -251,6 +254,9 @@ namespace GameLogic
             // 通关即发放奖励数据（金币/提示道具），强退也不丢、不重复领；
             // 结算界面点击按钮只播奖励飞行动画表现，不再改数据。
             GrantLevelReward(levelId);
+
+            // 上传刚通关的关卡号，不能使用已推进到下一关的存档值。
+            GameSDK.SDK.UploadCompletedLevel(levelId);
 
             if (!_corePlayGamePlay.HasNextLevel())
             {

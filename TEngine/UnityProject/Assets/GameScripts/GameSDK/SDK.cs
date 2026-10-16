@@ -53,7 +53,10 @@ namespace GameSDK
         public static void ShareAppMessage(string title) => _sdk?.ShareAppMessage(title);
         public static void CreateGameClubButton() => _sdk?.CreateGameClubButton();
         public static void OpenGameClub() => _sdk?.OpenGameClub();
+        public static void LoadRecommend() => _sdk?.LoadRecommend();
+        public static void ShowRecommend(Func<bool> canShow) => _sdk?.ShowRecommend(canShow);
         public static void ReportGameStart() => _session.ReportGameStart();
+        public static void UploadCompletedLevel(int levelId) => _sdk?.UploadCompletedLevel(levelId);
 
         /// <summary>true 表示本地已接收（可能等待登录或重试），不代表远端送达。</summary>
         public static bool ReportEvent(string eventId, Dictionary<string, string> data = null)

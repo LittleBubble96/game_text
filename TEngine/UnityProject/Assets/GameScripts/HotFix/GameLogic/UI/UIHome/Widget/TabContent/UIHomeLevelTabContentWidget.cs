@@ -104,7 +104,7 @@ namespace GameLogic.UI
         {
             BiMgr.HomeAction("share", GetHomeLevelId());
             BiMgr.ShareClicked("home");
-            SDK.ShareAppMessage($"这个游戏还不错，一起来挑战吧！");
+            SDK.ShareAppMessage("考考你的眼力！一个汉字里还能找出多少字？一起来试试！");
         }
         
         private void OnSetting()

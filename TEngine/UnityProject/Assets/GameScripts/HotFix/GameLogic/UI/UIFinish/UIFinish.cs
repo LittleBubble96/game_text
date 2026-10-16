@@ -180,9 +180,13 @@ namespace GameLogic
 
         protected override void OnInAnimation()
         {
+            int openVersion = OpenVersion;
             _animation.PlayAnimWithDelayAnimLen(_animShowName, () =>
             {
                 CompleteInAnimation();
+                if (_completedLevelId == 10)
+                    SDK.ShowRecommend(() => IsOpen && OpenVersion == openVersion &&
+                        _completedLevelId == 10 && !_hasClaimedReward && !_doubleRewardInFlight);
                 // 入场动画完成后播放入场奖励动画
                 // PlayRewardShowAnim();
             }, CloseToken).Forget();
