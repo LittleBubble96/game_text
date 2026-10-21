@@ -200,10 +200,11 @@ namespace GameLogic
             CloseOverlay(request);
             Trace("ad_overlay", "timeout", "15s_overlay_closed", request, Now - request.Started);
             if (!request.Shown) { Finish(request, false, true, "show_callback_timeout"); return; }
-            // 正常视频可超过15秒；展示成功但永远没有close/error，也必须有限时结束请求。
+            // 已确认展示成功；60秒仍未收到close/error时兜底发奖，避免回调丢失导致道具无法领取。
             double remaining = AdSystem.CloseCallbackTimeoutSeconds - (Now - request.Started);
             if (remaining > 0) await UniTask.Delay(TimeSpan.FromSeconds(remaining), DelayType.Realtime);
-            if (_request == request) Finish(request, false, true, "close_callback_timeout");
+            // 废弃旧实例，迟到的关闭回调不会重复发奖；BI保留超时原因以便排查。
+            if (_request == request) Finish(request, true, true, "close_callback_timeout");
         }
         private void CloseOverlay(Request request)
         {

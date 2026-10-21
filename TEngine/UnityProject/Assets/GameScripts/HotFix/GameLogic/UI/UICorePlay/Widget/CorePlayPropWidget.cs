@@ -339,7 +339,7 @@ namespace GameLogic
 
         // ================ 三档付费状态机 ================
 
-        /// <summary>库存、金币即时支付；广告必须等待完整观看。</summary>
+        /// <summary>库存、金币即时支付；广告等待完整观看或展示成功后的关闭回调超时兜底。</summary>
         private async UniTask<(bool paid, string payment, int cost)> PayPropAsync(System.Func<bool> useByCount)
         {
             if (PropDefine.IsPropAvailable(_propType))
