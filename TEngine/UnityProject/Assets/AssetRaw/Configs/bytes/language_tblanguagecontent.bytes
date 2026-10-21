@@ -1,4 +1,4 @@
-7select_language_ch中文中文select_language_enEnglishEnglishback_btn返回Back
+hselect_language_ch中文中文select_language_enEnglishEnglishback_btn返回Back
 submit_btn提交Submitstart_game_btn开始游戏Startnext_level_btn	下一关
 Next Levellevel_title第{0}关-{1}Level {0}-{1}home_social社交Social
 home_share考考好友Challenge Friendshome_setting设置Settingsetting_title设置SETTINGsetting_music音乐MUSICsetting_sfx音效SFXsetting_notify通知NOTIFICATIONsetting_language语言LANGUAGEsetting_version当前版本:{0}Version:{0}finish_reward奖励REWARDfinish_title关卡胜利Victoryfinish_share考考好友Challenge Friendsfinish_completeAllTitle抱歉Sorry
@@ -9,4 +9,10 @@ game_tips1游戏未运行Game not running
 game_tips2请先选择笔画Select stroke first
 game_tips3该答案已找到Answer found already
 game_tips4所选笔画组合不正确Invalid stroke combination
-game_tips5'未完成广告观看，请稍后重试Ad view incomplete. Retry laterfinish_double_reward双倍奖励Double Rewardsfinish_double_reward_claimed	已领取Claimedback_home_btn返回主页Homefinish_share_titleK我已通过第{0}关，考考你的眼力，看看你能闯到哪一关！)I cleared level {0}! How far can you get?
+game_tips5'未完成广告观看，请稍后重试Ad view incomplete. Retry laterfinish_double_reward双倍奖励Double Rewardsfinish_double_reward_claimed	已领取Claimedback_home_btn返回主页Homefinish_share_titleK我已通过第{0}关，考考你的眼力，看看你能闯到哪一关！)I cleared level {0}! How far can you get?motivation_nice	不错！Nice!motivation_accurate找得准！Spot on!motivation_great	真棒！
+Great job!motivation_sharp_eyes好眼力！Sharp eyes!motivation_on_a_roll状态不错！You're on a roll!motivation_keep_it_up继续保持！Keep it up!motivation_awesome厉害了你！Awesome!motivation_amazing太厉害了！Amazing!motivation_hidden藏这么深也找到了！You found even that one!motivation_thats_you不愧是你！That's so you!motivation_incredible不可思议！Incredible!motivation_impossible这不可能！No way!motivation_all_found全部找到！
+All found!motivation_before1拆得有章法！Split with style!motivation_before2开局不错！Great start!motivation_before3起步很稳！Steady start!motivation_before4有感觉了！You've got it!motivation_before5找到手感了！Found your groove!motivation_before6渐入佳境！Getting better!motivation_before7热身完毕！
+Warmed up!motivation5_before1眼力在线！Sharp eyes!motivation5_before2这字藏不住！No hiding this one!motivation5_before3越找越顺！Smooth sailing!motivation5_before4状态火热！On fire!motivation5_before5手感全开！In the zone!motivation5_before6手感火热！Feeling hot!motivation5_before7火力全开！Full power!motivation5_before8拆字如神！Splitting like a pro!motivation5_before9一笔一划尽在掌握！Every stroke yours!motivation8_before1势如破竹！Unstoppable!motivation8_before2一鼓作气！Keep it going!motivation8_before3稳中带秀！Cool and steady!motivation8_before4拿捏住了！
+Nailed it!motivation8_before5拆得漂亮！Nice split!motivation8_before6好拆技！Nice moves!motivation_after1你是我见过最厉害的！
+Best ever!motivation_after2这都被你发现了！You found it!motivation_after3拆得干净利落！Clean split!motivation_after4收工在即！Almost done!motivation_after5这笔快藏不住了！This one can't hide!motivation_after6冲刺阶段！Final push!motivation_after7胜利在望！Victory in sight!motivation_success1满分眼力！Perfect eyes!motivation_success2一个不落大满贯！Grand slam!motivation_success3无字可藏！Nowhere to hide!motivation_success4全拆达成！
+All split!motivation_success5满分拆字手！Perfect splitter!motivation_success6!字里藏的都被你挖空了！Nothing left hidden!motivation_success7拆字大师！Split Master!

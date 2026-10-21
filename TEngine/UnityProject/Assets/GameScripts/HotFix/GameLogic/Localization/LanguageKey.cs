@@ -8,7 +8,7 @@
 namespace GameLogic.Localization
 {
     /// <summary>
-    /// 多语言 Key 常量类（共 55 个 Key）。
+    /// 多语言 Key 常量类（共 104 个 Key）。
     /// </summary>
     public static class LanguageKey
     {
@@ -67,5 +67,54 @@ namespace GameLogic.Localization
         public const string finish_double_reward_claimed = "finish_double_reward_claimed";
         public const string back_home_btn = "back_home_btn";
         public const string finish_share_title = "finish_share_title";
+        public const string motivation_nice = "motivation_nice";
+        public const string motivation_accurate = "motivation_accurate";
+        public const string motivation_great = "motivation_great";
+        public const string motivation_sharp_eyes = "motivation_sharp_eyes";
+        public const string motivation_on_a_roll = "motivation_on_a_roll";
+        public const string motivation_keep_it_up = "motivation_keep_it_up";
+        public const string motivation_awesome = "motivation_awesome";
+        public const string motivation_amazing = "motivation_amazing";
+        public const string motivation_hidden = "motivation_hidden";
+        public const string motivation_thats_you = "motivation_thats_you";
+        public const string motivation_incredible = "motivation_incredible";
+        public const string motivation_impossible = "motivation_impossible";
+        public const string motivation_all_found = "motivation_all_found";
+        public const string motivation_before1 = "motivation_before1";
+        public const string motivation_before2 = "motivation_before2";
+        public const string motivation_before3 = "motivation_before3";
+        public const string motivation_before4 = "motivation_before4";
+        public const string motivation_before5 = "motivation_before5";
+        public const string motivation_before6 = "motivation_before6";
+        public const string motivation_before7 = "motivation_before7";
+        public const string motivation5_before1 = "motivation5_before1";
+        public const string motivation5_before2 = "motivation5_before2";
+        public const string motivation5_before3 = "motivation5_before3";
+        public const string motivation5_before4 = "motivation5_before4";
+        public const string motivation5_before5 = "motivation5_before5";
+        public const string motivation5_before6 = "motivation5_before6";
+        public const string motivation5_before7 = "motivation5_before7";
+        public const string motivation5_before8 = "motivation5_before8";
+        public const string motivation5_before9 = "motivation5_before9";
+        public const string motivation8_before1 = "motivation8_before1";
+        public const string motivation8_before2 = "motivation8_before2";
+        public const string motivation8_before3 = "motivation8_before3";
+        public const string motivation8_before4 = "motivation8_before4";
+        public const string motivation8_before5 = "motivation8_before5";
+        public const string motivation8_before6 = "motivation8_before6";
+        public const string motivation_after1 = "motivation_after1";
+        public const string motivation_after2 = "motivation_after2";
+        public const string motivation_after3 = "motivation_after3";
+        public const string motivation_after4 = "motivation_after4";
+        public const string motivation_after5 = "motivation_after5";
+        public const string motivation_after6 = "motivation_after6";
+        public const string motivation_after7 = "motivation_after7";
+        public const string motivation_success1 = "motivation_success1";
+        public const string motivation_success2 = "motivation_success2";
+        public const string motivation_success3 = "motivation_success3";
+        public const string motivation_success4 = "motivation_success4";
+        public const string motivation_success5 = "motivation_success5";
+        public const string motivation_success6 = "motivation_success6";
+        public const string motivation_success7 = "motivation_success7";
     }
 }

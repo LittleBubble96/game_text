@@ -30,6 +30,18 @@ namespace GameLogic
         private RTLTextMeshPro _toastTmp;
         private float _resultTipTimer;
         private bool _isShowingTip;
+
+        private const string MotivationAsset = "MotivationInstance";
+        private Transform _motivationPos;
+        private GameObject _motivationInstance;
+        private RTLTextMeshPro _motivationText;
+        private Animation _motivationAnimation;
+        private float _motivationTimeRemaining;
+        private int _lastObservedAnswerCount;
+        private string _lastMotivationKey;
+
+        public bool IsShowingMotivation => _motivationInstance != null &&
+            _motivationInstance.activeInHierarchy && _motivationTimeRemaining > 0f;
         
         private CorePlayLayoutWidget _layoutWidget;
         
@@ -50,6 +62,7 @@ namespace GameLogic
             _submitButton = CreateWidget<XYButton>("Panel/Buttom/SubmitBtn");
             _toastRoot = FindChildComponent<Transform>("Panel/Toast");
             _toastTmp = FindChildComponent<RTLTextMeshPro>("Panel/Toast/UIToastEffect/bg/m_text");
+            _motivationPos = FindChildComponent<Transform>("Panel/Layout/MotivationPos");
             _layoutWidget = CreateWidget<CorePlayLayoutWidget>("Panel/Layout");
             _tipsPropWidget = CreateWidget<CorePlayPropWidget>("Panel/Buttom/Props/TipProp");
             _tipsPropWidget.OnInit(PropType.Tip);
@@ -71,6 +84,7 @@ namespace GameLogic
         {
             base.RegisterEvent();
             AddUIEvent<bool, string, string>(EventDefine.Event_AnswerSubmitted, OnAnswerSubmitted);
+            AddUIEvent<int>(EventDefine.Event_LevelCompleted, OnMotivationLevelCompleted);
             AddUIEvent(EventDefine.Event_PropResetDone, OnPropResetDone);
         }
         
@@ -78,6 +92,9 @@ namespace GameLogic
         {
             base.OnRefresh();
             _guideRequested = false;
+            HideMotivation();
+            _lastMotivationKey = null;
+            _lastObservedAnswerCount = (GameManager.Instance.CurrentGamePlay as CorePlayGamePlay)?.FoundAnswerIndices.Count ?? 0;
             AdSystem.EnterPage(AdIds.Tip, AdIds.Next);
             _tipsPropWidget.Refresh();
             _resetPropWidget.Refresh();
@@ -117,6 +134,11 @@ namespace GameLogic
                 _resultTipTimer -= Time.deltaTime;
                 if (_resultTipTimer <= 0) HideResultTip();
             }
+            if (_motivationTimeRemaining > 0f)
+            {
+                _motivationTimeRemaining -= Time.deltaTime;
+                if (_motivationTimeRemaining <= 0f) HideMotivation();
+            }
         }
         
         // ================ 关卡信息 ================
@@ -132,6 +154,80 @@ namespace GameLogic
         private void OnAnswerSubmitted(bool success, string answerCharacter, string message)
         {
             ShowSubmitResult(success, answerCharacter, message);
+            // 完成时由统一通关事件展示，兼容下一关道具补齐答案的流程。
+            if (success && GameManager.Instance.CurrentGamePlay is CorePlayGamePlay game && !game.IsLevelComplete())
+                ShowMotivationForProgress(game);
+        }
+
+        private void OnMotivationLevelCompleted(int levelId)
+        {
+            if (GameManager.Instance.CurrentGamePlay is CorePlayGamePlay game && game.CurrentLevelId == levelId)
+                ShowMotivationForProgress(game);
+        }
+
+        private void ShowMotivationForProgress(CorePlayGamePlay game)
+        {
+            int foundCount = game.FoundAnswerIndices.Count;
+            if (foundCount <= _lastObservedAnswerCount) return;
+            _lastObservedAnswerCount = foundCount;
+            var keys = CorePlayMotivationRules.GetKeys(foundCount, game.GetRequiredAnswerCount());
+            if (keys == null) return;
+
+            // 后续共用同一词库时，排除上一条，避免连续重复。
+            int previousIndex = System.Array.IndexOf(keys, _lastMotivationKey);
+            int index = Random.Range(0, keys.Length - (previousIndex >= 0 && keys.Length > 1 ? 1 : 0));
+            if (previousIndex >= 0 && keys.Length > 1 && index >= previousIndex) index++;
+            string key = keys[index];
+            try
+            {
+                if (!EnsureMotivationInstance()) return;
+                _lastMotivationKey = key;
+                _motivationText.text = LocalizationHelper.GetLocalText(key);
+                _motivationInstance.SetActive(true);
+                _motivationAnimation.Stop();
+                var state = _motivationAnimation[MotivationAsset];
+                state.wrapMode = WrapMode.Once;
+                state.speed = 1f;
+                state.time = 0f;
+                _motivationAnimation.Play(MotivationAsset, PlayMode.StopAll);
+                _motivationAnimation.Sample();
+                _motivationTimeRemaining = state.length;
+            }
+            catch (System.Exception error)
+            {
+                // 表现资源异常不能中断玩法层的通关与存档事件。
+                HideMotivation();
+                Log.Error("[UICorePlay] 激励展示失败: " + error);
+            }
+        }
+
+        private bool EnsureMotivationInstance()
+        {
+            if (_motivationInstance == null)
+            {
+                if (_motivationPos == null) return false;
+                _motivationInstance = UIModule.Resource.LoadGameObject(MotivationAsset, _motivationPos);
+                if (_motivationInstance == null) return false;
+                _motivationInstance.SetActive(false);
+                var rect = _motivationInstance.GetComponent<RectTransform>();
+                rect.anchoredPosition3D = Vector3.zero;
+                rect.localRotation = Quaternion.identity;
+                rect.localScale = Vector3.one;
+                _motivationText = _motivationInstance.transform.Find("bg/m_text").GetComponent<RTLTextMeshPro>();
+                _motivationAnimation = _motivationInstance.GetComponent<Animation>();
+                if (_motivationAnimation != null) _motivationAnimation.playAutomatically = false;
+            }
+            if (_motivationText != null && _motivationAnimation != null &&
+                _motivationAnimation[MotivationAsset] != null) return true;
+            Log.Error("[UICorePlay] MotivationInstance 缺少文字组件或同名动画。");
+            return false;
+        }
+
+        private void HideMotivation()
+        {
+            _motivationTimeRemaining = 0f;
+            if (_motivationAnimation != null) _motivationAnimation.Stop();
+            if (_motivationInstance != null) _motivationInstance.SetActive(false);
         }
 
         /// <summary>重置道具使用完成</summary>
@@ -171,6 +267,7 @@ namespace GameLogic
 
         protected override void OnClose()
         {
+            HideMotivation();
             AdSystem.ExitPage(AdIds.Tip, AdIds.Next);
             GameModule.UI.CloseUI<UIGuide>();
             base.OnClose();

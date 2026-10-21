@@ -166,6 +166,7 @@ namespace Builder
                     ShowError("所有语言均未配置字体文件名 (Font 字段为空)，无法生成。");
                     return;
                 }
+                HashSet<char> levelChars = CollectLevelCharsForFontGroup();
 
                 // 构建「设置面板 key」集合（TbLanguage 中定义的 Name）
                 HashSet<string> settingKeys = BuildSettingKeySet(langTable);
@@ -185,6 +186,10 @@ namespace Builder
 
                     HashSet<char> normalChars = CollectCharsForFontGroup(langs, contentTable, settingKeys, settingOnly: false);
 
+                    if (fontFileName.Equals("TaiWanQuanZiKuZhengKaiTi-2"))
+                    {
+                        normalChars.ExceptWith(levelChars);
+                    }
                     // 3b. 生成普通字体 SDF 资源
                     step++;
                     progress = 0.1f + 0.85f * (step / totalSteps);
@@ -227,16 +232,15 @@ namespace Builder
 
                 // ---- 4.5 收集关卡文字并生成独立的关卡字体资源 ----
                 EditorUtility.DisplayProgressBar("多语言字体生成", "收集关卡文字 ...", 0.93f);
-                HashSet<char> levelChars = CollectLevelCharsForFontGroup();
-
+                
                 if (levelChars.Count > 0)
                 {
                     string levelDir = Path.Combine(OutputFontDir, LevelSubDir);
                     EnsureDirectory(levelDir);
-
+                
                     // 关卡文字使用主游戏字体，优先匹配 AlibabaPuHuiTi-3-95-ExtraBold
                     string levelFont = "TaiWanQuanZiKuZhengKaiTi-2";
-
+                
                     BuildFontAsset(levelFont, levelChars, levelDir, LevelSuffix);
                 }
                 else

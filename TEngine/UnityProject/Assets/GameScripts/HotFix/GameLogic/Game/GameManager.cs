@@ -290,6 +290,10 @@ namespace GameLogic
                 {
                     await UniTask.Delay(FinishDelayMilliseconds, ignoreTimeScale: true,
                         cancellationToken: cancellation.Token);
+                    var coreUI = await GameModule.UI.GetUIAsyncAwait<UICorePlay>(cancellation.Token);
+                    if (coreUI != null)
+                        await UniTask.WaitUntil(() => !coreUI.IsShowingMotivation,
+                            cancellationToken: cancellation.Token);
                     await GameModule.UI.ShowUIAsyncAwait<UIFinish>(levelId);
                 }
                 catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
