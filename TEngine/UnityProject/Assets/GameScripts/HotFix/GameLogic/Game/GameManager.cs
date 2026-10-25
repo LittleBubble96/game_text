@@ -291,7 +291,8 @@ namespace GameLogic
                     await UniTask.Delay(FinishDelayMilliseconds, ignoreTimeScale: true,
                         cancellationToken: cancellation.Token);
                     var coreUI = await GameModule.UI.GetUIAsyncAwait<UICorePlay>(cancellation.Token);
-                    if (coreUI != null)
+                    // 尚未加载完成、没有播放激励时，直接进入结算。
+                    if (coreUI != null && coreUI.IsShowingMotivation)
                         await UniTask.WaitUntil(() => !coreUI.IsShowingMotivation,
                             cancellationToken: cancellation.Token);
                     await GameModule.UI.ShowUIAsyncAwait<UIFinish>(levelId);

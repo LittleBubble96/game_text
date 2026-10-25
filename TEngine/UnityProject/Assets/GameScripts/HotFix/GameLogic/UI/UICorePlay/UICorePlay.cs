@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GameLogic.GamePlay.CorePlay;
+using Cysharp.Threading.Tasks;
 using GameLogic.Localization;
 using TEngine;
 using TMPro;
@@ -39,6 +40,7 @@ namespace GameLogic
         private float _motivationTimeRemaining;
         private int _lastObservedAnswerCount;
         private string _lastMotivationKey;
+        private bool _motivationLoading;
 
         public bool IsShowingMotivation => _motivationInstance != null &&
             _motivationInstance.activeInHierarchy && _motivationTimeRemaining > 0f;
@@ -156,16 +158,16 @@ namespace GameLogic
             ShowSubmitResult(success, answerCharacter, message);
             // 完成时由统一通关事件展示，兼容下一关道具补齐答案的流程。
             if (success && GameManager.Instance.CurrentGamePlay is CorePlayGamePlay game && !game.IsLevelComplete())
-                ShowMotivationForProgress(game);
+                ShowMotivationForProgressAsync(game).Forget();
         }
 
         private void OnMotivationLevelCompleted(int levelId)
         {
             if (GameManager.Instance.CurrentGamePlay is CorePlayGamePlay game && game.CurrentLevelId == levelId)
-                ShowMotivationForProgress(game);
+                ShowMotivationForProgressAsync(game).Forget();
         }
 
-        private void ShowMotivationForProgress(CorePlayGamePlay game)
+        private async UniTask ShowMotivationForProgressAsync(CorePlayGamePlay game)
         {
             int foundCount = game.FoundAnswerIndices.Count;
             if (foundCount <= _lastObservedAnswerCount) return;
@@ -180,7 +182,7 @@ namespace GameLogic
             string key = keys[index];
             try
             {
-                if (!EnsureMotivationInstance()) return;
+                if (!await EnsureMotivationInstanceAsync()) return;
                 _lastMotivationKey = key;
                 _motivationText.text = LocalizationHelper.GetLocalText(key);
                 _motivationInstance.SetActive(true);
@@ -192,6 +194,7 @@ namespace GameLogic
                 _motivationAnimation.Play(MotivationAsset, PlayMode.StopAll);
                 _motivationAnimation.Sample();
                 _motivationTimeRemaining = state.length;
+                AudioSystem.Instance.PlayAudio(AudioDefine.motivation_SFX);
             }
             catch (System.Exception error)
             {
@@ -201,12 +204,21 @@ namespace GameLogic
             }
         }
 
-        private bool EnsureMotivationInstance()
+        private async UniTask<bool> EnsureMotivationInstanceAsync()
         {
             if (_motivationInstance == null)
             {
-                if (_motivationPos == null) return false;
-                _motivationInstance = UIModule.Resource.LoadGameObject(MotivationAsset, _motivationPos);
+                if (_motivationPos == null || _motivationLoading) return false;
+                _motivationLoading = true;
+                try
+                {
+                    _motivationInstance = await UIModule.Resource.LoadGameObjectAsync(MotivationAsset, _motivationPos);
+                }
+                finally
+                {
+                    _motivationLoading = false;
+                }
+
                 if (_motivationInstance == null) return false;
                 _motivationInstance.SetActive(false);
                 var rect = _motivationInstance.GetComponent<RectTransform>();

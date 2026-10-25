@@ -6,5 +6,6 @@
         public const string game_Bgm = "game_Bgm";
         public const string btnClick_SFX = "btnClick_SFX";
         public const string clickCharacter_SFX = "clickCharacter_SFX";
+        public const string motivation_SFX = "motivation_SFX";
     }
 }
