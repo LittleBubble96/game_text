@@ -387,6 +387,7 @@ MonoBehaviour:
       - strokeIndices: 02000000
       - strokeIndices: 06000000
       - strokeIndices: 08000000
+      - strokeIndices: 04000000
     - answerCharacter: "\u4E8C"
       strokeSets:
       - strokeIndices: 0600000008000000
@@ -5555,6 +5556,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0000000001000000070000000300000005000000
       - strokeIndices: 0000000001000000070000000300000006000000
+    - answerCharacter: "\u571F"
+      strokeSets:
+      - strokeIndices: 020000000300000007000000
+      - strokeIndices: 020000000400000007000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_90
@@ -5635,6 +5640,10 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0b0000000d000000
       - strokeIndices: 0b0000000e000000
+    - answerCharacter: "\u4EDC"
+      strokeSets:
+      - strokeIndices: 0300000007000000090000000100000002000000
+      - strokeIndices: 0100000002000000030000000800000009000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_91
@@ -5865,6 +5874,9 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 0200000004000000090000000c000000
       - strokeIndices: 0000000001000000090000000c000000
+    - answerCharacter: "\u97F3"
+      strokeSets:
+      - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_95
