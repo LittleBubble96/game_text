@@ -16,6 +16,12 @@ namespace YooAsset.Editor
 
         public bool IsCollectAsset(FilterRuleData data)
         {
+#if TE_RELEASE
+            if (data.GroupName.Equals("Develop"))
+            {
+                return false;
+            }
+#endif
             return true;
         }
     }
@@ -45,7 +51,8 @@ namespace YooAsset.Editor
 
         public bool IsCollectAsset(FilterRuleData data)
         {
-            return Path.GetExtension(data.AssetPath) == ".prefab";
+            bool isPrefab = Path.GetExtension(data.AssetPath) == ".prefab";
+            return isPrefab;
         }
     }
 

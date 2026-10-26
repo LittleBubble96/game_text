@@ -4551,9 +4551,12 @@ MonoBehaviour:
       strokeSets:
       - strokeIndices: 010000000200000004000000
       - strokeIndices: 010000000200000005000000
+      - strokeIndices: 010000000200000006000000
+      - strokeIndices: 070000000b0000000d000000
     - answerCharacter: "\u5348"
       strokeSets:
       - strokeIndices: 00000000010000000200000005000000
+      - strokeIndices: 00000000010000000400000002000000
     - answerCharacter: "\u5F00"
       strokeSets:
       - strokeIndices: 01000000020000000400000005000000
@@ -4788,6 +4791,10 @@ MonoBehaviour:
     - answerCharacter: "\u5E72"
       strokeSets:
       - strokeIndices: 0b0000000c0000000d000000
+      - strokeIndices: 000000000700000008000000
+      - strokeIndices: 030000000700000008000000
+      - strokeIndices: 030000000600000008000000
+      - strokeIndices: 000000000600000008000000
     - answerCharacter: "\u572D"
       strokeSets:
       - strokeIndices: 090000000a0000000b0000000c0000000d0000000e000000
@@ -4804,6 +4811,10 @@ MonoBehaviour:
     - answerCharacter: "\u5DE5"
       strokeSets:
       - strokeIndices: 0b0000000e0000000d000000
+    - answerCharacter: "\u53F6"
+      strokeSets:
+      - strokeIndices: 0400000005000000060000000c0000000d000000
+      - strokeIndices: 050000000400000006000000090000000a000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_80
@@ -4972,6 +4983,7 @@ MonoBehaviour:
     - answerCharacter: "\u4E0A"
       strokeSets:
       - strokeIndices: 030000000400000007000000
+      - strokeIndices: 050000000700000009000000
     - answerCharacter: "\u53E3"
       strokeSets:
       - strokeIndices: 050000000600000008000000
@@ -5236,6 +5248,7 @@ MonoBehaviour:
     - answerCharacter: "\u4EBA"
       strokeSets:
       - strokeIndices: 090000000a000000
+      - strokeIndices: 0b0000000c000000
     - answerCharacter: "\u513F"
       strokeSets:
       - strokeIndices: 0300000004000000
