@@ -423,6 +423,7 @@ namespace GameLogic.GamePlay.CorePlay
 
             ClearSelection();             // 清选中笔画，逐个回调 OnStrokeSelectionChanged=false
             _foundAnswerIndices.Clear();  // 清已找到答案
+            BiMgr.UpdateLevelProgress(0);
             return true;
         }
 
@@ -456,6 +457,7 @@ namespace GameLogic.GamePlay.CorePlay
             }
 
             bool prepared = answerCharacters.Count > 0 && IsLevelComplete();
+            if (prepared) BiMgr.UpdateLevelProgress(_foundAnswerIndices.Count);
             if (prepared) _completionMethod = "next_prop";
             return prepared;
         }

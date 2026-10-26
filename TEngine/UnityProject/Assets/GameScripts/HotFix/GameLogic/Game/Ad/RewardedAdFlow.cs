@@ -166,6 +166,7 @@ namespace GameLogic
             {
                 if (_request != request || request.Shown) return;
                 request.Shown = true;
+                BiMgr.SetAdShowing(request.Id, true);
                 Trace("ad_show", "success", "", request, Now - request.Started);
                 ReportBi("ad_show", "shown", request);
             }, error =>
@@ -218,6 +219,7 @@ namespace GameLogic
         {
             if (_request != request) return;
             _request = null;
+            BiMgr.SetAdShowing(request.Id, false);
             Trace("ad_result", rewarded ? "rewarded" : "failed", reason, request, Now - request.Started);
             ReportBi("ad_result", rewarded ? "success" : "failed", request, reason);
             CloseOverlay(request);

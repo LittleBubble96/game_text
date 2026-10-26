@@ -58,6 +58,8 @@ namespace GameSDK
         public static void ReportGameStart() => _session.ReportGameStart();
         public static void UploadCompletedLevel(int levelId) => _sdk?.UploadCompletedLevel(levelId);
 
+        public static bool ReportLevel(LevelReport report) => _session.ReportLevel(report);
+
         /// <summary>true 表示本地已接收（可能等待登录或重试），不代表远端送达。</summary>
         public static bool ReportEvent(string eventId, Dictionary<string, string> data = null)
             => _session.ReportEvent(eventId, data);

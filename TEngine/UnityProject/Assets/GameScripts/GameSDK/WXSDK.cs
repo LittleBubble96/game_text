@@ -6,6 +6,17 @@ namespace GameSDK
 {
     public class WXSDK : ISdk
     {
+        private WXMiniReportManager _levelReporter;
+
+        public void ReportLevel(LevelReport report)
+        {
+            // 微信 Unity SDK 在 JS 桥接中将该 JSON 解析为 report 所需的对象。
+            if (_levelReporter == null)
+                _levelReporter = WX.GetMiniReportManager(new GetMiniReportManagerParam { debug = UnityEngine.Debug.isDebugBuild });
+            if (_levelReporter == null) throw new InvalidOperationException("微信关卡上报组件创建失败");
+            _levelReporter.Report(report.ToJson());
+        }
+
         private bool _nativeReady;
         private int _loginAttempt;
         private int _pendingCompletedLevel;

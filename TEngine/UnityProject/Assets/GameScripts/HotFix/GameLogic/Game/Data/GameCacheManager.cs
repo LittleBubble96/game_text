@@ -65,6 +65,9 @@ namespace GameLogic.Data
             }
         }
 
+        /// <summary>只更新内存计数，随原有存档流程保存。</summary>
+        public int RecordLevelEntry() => CorePlayRestore.RecordLevelEntry();
+
         /// <summary>
         /// 从本地 JSON 文件加载全部缓存。
         /// 如果文件不存在或加载失败，自动初始化所有子缓存。

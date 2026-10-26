@@ -22,6 +22,8 @@
 
         void UploadCompletedLevel(int levelId);
 
+        void ReportLevel(LevelReport report);
+
         void ReportEvent(string eventId, System.Collections.Generic.Dictionary<string, string> data);
     }
 }

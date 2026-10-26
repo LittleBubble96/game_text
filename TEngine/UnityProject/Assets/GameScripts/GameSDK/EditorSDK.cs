@@ -83,5 +83,7 @@ namespace GameSDK
             }
             Log.Info($"[BI] {eventId} | {string.Join(", ", fields)}");
         }
+
+        public void ReportLevel(LevelReport report) => Log.Info("[LevelReport] " + report.ToJson());
     }
 }

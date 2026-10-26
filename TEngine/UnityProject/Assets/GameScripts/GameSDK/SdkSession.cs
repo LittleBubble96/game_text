@@ -15,6 +15,7 @@ namespace GameSDK
             public Dictionary<string, string> Data;
             public int Failures;
             public bool NativeGameStart;
+            public LevelReport Level;
         }
         private readonly Queue<Event> _pending = new Queue<Event>();
         private readonly Func<double> _now;
@@ -93,7 +94,10 @@ namespace GameSDK
 
         public bool ReportGameStart() => Enqueue("native_game_start", null, true);
 
-        private bool Enqueue(string name, Dictionary<string, string> data, bool nativeGameStart)
+        public bool ReportLevel(LevelReport report)
+            => report != null && Enqueue(LevelReport.EventId, null, false, report);
+
+        private bool Enqueue(string name, Dictionary<string, string> data, bool nativeGameStart, LevelReport level = null)
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
             if (_pending.Count >= 512) { _warn("[BI] Queue full; dropped new event: " + name); return false; }
@@ -106,7 +110,7 @@ namespace GameSDK
             copy["sdk_session_id"] = _sessionId;
             copy["event_seq"] = (++_sequence).ToString(CultureInfo.InvariantCulture);
             copy["event_time_ms"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
-            _pending.Enqueue(new Event { Name = name, Data = copy, NativeGameStart = nativeGameStart });
+            _pending.Enqueue(new Event { Name = name, Data = copy, NativeGameStart = nativeGameStart, Level = level });
             Flush();
             return true;
         }
@@ -136,6 +140,7 @@ namespace GameSDK
                     try
                     {
                         if (item.NativeGameStart) _platform.ReportGameStart();
+                        else if (item.Level != null) _platform.ReportLevel(item.Level);
                         else _platform.ReportEvent(item.Name, new Dictionary<string, string>(item.Data));
                     }
                     catch (Exception e)

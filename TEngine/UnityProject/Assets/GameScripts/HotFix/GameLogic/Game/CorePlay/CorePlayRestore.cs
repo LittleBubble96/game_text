@@ -12,6 +12,9 @@ namespace GameLogic.GamePlay.CorePlay
     {
         public int currentLevelId = 1;
 
+        /// <summary>仅累计当前关卡的进入次数，推进下一关时清零。</summary>
+        public int enterCount;
+
         /// <summary>当前关卡已找到的答案索引</summary>
         public List<int> foundAnswerIndices = new List<int>();
 
@@ -42,7 +45,17 @@ namespace GameLogic.GamePlay.CorePlay
         public void SetCurrentLevel(int levelId)
         {
             if (SaveData == null) InitOrResetData();
+            if (SaveData.currentLevelId != levelId) SaveData.enterCount = 0;
             SaveData.currentLevelId = levelId;
+        }
+
+        /// <summary>只累加现有存档的次数，不设置关卡ID或初始化业务存档。</summary>
+        public int RecordLevelEntry()
+        {
+            if (SaveData == null) return 1;
+            SaveData.enterCount = SaveData.enterCount < int.MaxValue
+                ? Math.Max(0, SaveData.enterCount) + 1 : int.MaxValue;
+            return SaveData.enterCount;
         }
 
         /// <summary>保存当前关卡进度（答案 + 关卡数据快照）</summary>
@@ -50,6 +63,7 @@ namespace GameLogic.GamePlay.CorePlay
         public void SaveCurrentProgress(int levelId, List<int> foundAnswerIndices, TextLevelData levelDataCache)
         {
             if (SaveData == null) InitOrResetData();
+            if (SaveData.currentLevelId != levelId) SaveData.enterCount = 0;
             SaveData.currentLevelId = levelId;
             SaveData.foundAnswerIndices = new List<int>(foundAnswerIndices);
             // 防御：只传入了有效关卡数据时才更新缓存快照，
@@ -69,6 +83,7 @@ namespace GameLogic.GamePlay.CorePlay
         {
             if (SaveData == null) InitOrResetData();
             SaveData.currentLevelId = nextLevelId;
+            SaveData.enterCount = 0;
             SaveData.foundAnswerIndices = new List<int>();
             // 必须清空旧关卡快照，否则下一关会复用上一关的缓存数据
             SaveData.cachedLevelData = null;

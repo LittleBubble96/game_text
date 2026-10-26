@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using GameSDK;
+using UnityEngine;
 
 namespace GameLogic
 {
@@ -9,6 +11,9 @@ namespace GameLogic
     {
         // 仅用于计时，不上报 app_lifecycle；暂停期间不累计关卡、引导、结算时长。
         private static readonly Stopwatch ForegroundClock = Stopwatch.StartNew();
+        // 使用不暂停的时间源，由 tracker 对后台与广告时间取并集扣除。
+        private static readonly LevelReportTracker LevelReporter = new LevelReportTracker(
+            () => (double)Stopwatch.GetTimestamp() / Stopwatch.Frequency, ReportLevel);
         private static Dictionary<string, string> _levelContext;
         private static bool _attemptActive;
         private static double _levelStartedAt;
@@ -29,8 +34,27 @@ namespace GameLogic
 
         public static void SetPaused(bool paused)
         {
+            LevelReporter.SetPaused(paused);
             if (paused) ForegroundClock.Stop();
             else ForegroundClock.Start();
+        }
+
+        public static void SetAdShowing(int requestId, bool showing) => LevelReporter.SetAdShowing(requestId, showing);
+
+        public static void UpdateLevelProgress(int foundCount)
+        {
+            _foundCount = foundCount;
+            LevelReporter.UpdateProgress(foundCount);
+        }
+
+        private static void ReportLevel(LevelReport report)
+        {
+            if (!Enabled) return;
+            try
+            {
+                if (!SDK.ReportLevel(report)) TEngine.Log.Warning("[LevelReport] SDK缓存未接收关卡事件。");
+            }
+            catch (Exception exception) { TEngine.Log.Warning("[LevelReport] " + exception.Message); }
         }
 
         private static Dictionary<string, string> Context()
@@ -70,12 +94,16 @@ namespace GameLogic
             data["entry"] = entry;
             data["restored"] = restored ? "1" : "0";
             ReportEvent("level_start", data);
+            int loginCount = GameManager.Instance.CacheManager?.RecordLevelEntry() ?? 1;
+            LevelReporter.Start(levelId, levelName, foundCount, requiredCount, loginCount,
+                LevelReport.EncodeVersion(Application.version));
         }
 
         public static void AnswerSubmitted(string result, string answer, int foundCount, int strokeCount)
         {
             if (!_attemptActive) return;
             _foundCount = foundCount;
+            LevelReporter.UpdateProgress(foundCount);
             _submitCount++;
             if (result == "wrong") _wrongCount++;
             var data = Progress();
@@ -94,6 +122,7 @@ namespace GameLogic
             var data = Progress();
             data["completion_method"] = completionMethod;
             ReportEvent("level_complete", data);
+            LevelReporter.Complete(foundCount);
         }
 
         public static void LeaveLevelForHome(int foundCount)
@@ -106,6 +135,7 @@ namespace GameLogic
                 var data = Progress();
                 data["reason"] = "home";
                 ReportEvent("level_leave", data);
+                LevelReporter.Leave(foundCount);
             }
             // 主页领取资源不应携带上一关的 attempt_id。
             _levelContext = null;
@@ -122,6 +152,7 @@ namespace GameLogic
             data["result"] = success ? "success" : "failed";
             data["reason"] = reason;
             ReportEvent("prop_use", data);
+            if (success) LevelReporter.PropUsed();
         }
 
         public static void ResourceChanged(string resource, int before, int after, string source)
