@@ -7413,6 +7413,7 @@ MonoBehaviour:
     - answerCharacter: "\u5341"
       strokeSets:
       - strokeIndices: 0d0000000f000000
+      - strokeIndices: 0e0000000f000000
     - answerCharacter: "\u7FB8"
       strokeSets:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000
@@ -7422,6 +7423,9 @@ MonoBehaviour:
     - answerCharacter: "\u43CE"
       strokeSets:
       - strokeIndices: 06000000070000000800000009000000100000001100000012000000
+    - answerCharacter: "\u4E2B"
+      strokeSets:
+      - strokeIndices: 0a0000000b0000000f000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_121
