@@ -15,6 +15,7 @@ public class BendText : MonoBehaviour
     public bool AlwaysChange = false;
     float m_OldCurveScale;
     Keyframe[] m_OldKeys;
+    bool m_IsUpdatingMesh;
 
     void Awake()
     {
@@ -33,7 +34,20 @@ public class BendText : MonoBehaviour
 
     void OnEnable()
     {
+        if (m_TextComponent == null) m_TextComponent = GetComponent<TMP_Text>();
+        TMPro_EventManager.TEXT_CHANGED_EVENT.Add(OnTextChanged);
         ForceChange = true;
+    }
+
+    void OnDisable()
+    {
+        TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(OnTextChanged);
+    }
+
+    void OnTextChanged(Object changedText)
+    {
+        // Canvas可能已完成TMP重建并清除havePropertiesChanged，仍需重新弯曲文字。
+        if (changedText == m_TextComponent && !m_IsUpdatingMesh) ForceChange = true;
     }
 
     bool NeedChange()
@@ -86,7 +100,10 @@ public class BendText : MonoBehaviour
         Vector3[] vertices;
         Matrix4x4 matrix;
 
-        m_TextComponent.ForceMeshUpdate(); // Generate the mesh and populate the textInfo with data we can use and manipulate.
+        // 自己触发的TMP通知不能再标脏，否则会重新变成每帧重建。
+        m_IsUpdatingMesh = true;
+        try { m_TextComponent.ForceMeshUpdate(); }
+        finally { m_IsUpdatingMesh = false; }
 
         TMP_TextInfo textInfo = m_TextComponent.textInfo;
         int characterCount = textInfo.characterCount;

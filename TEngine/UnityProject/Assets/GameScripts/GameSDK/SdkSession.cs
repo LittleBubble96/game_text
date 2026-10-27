@@ -101,15 +101,24 @@ namespace GameSDK
         {
             if (string.IsNullOrWhiteSpace(name)) return false;
             if (_pending.Count >= 512) { _warn("[BI] Queue full; dropped new event: " + name); return false; }
-            var copy = new Dictionary<string, string>();
-            if (data != null) foreach (var pair in data)
+            Dictionary<string, string> copy = null;
+            if (!nativeGameStart && level == null)
             {
-                if (string.IsNullOrWhiteSpace(pair.Key)) return false;
-                copy.Add(pair.Key, pair.Value ?? "");
+                copy = new Dictionary<string, string>();
+                if (data != null) foreach (var pair in data)
+                {
+                    if (string.IsNullOrWhiteSpace(pair.Key)) return false;
+                    copy.Add(pair.Key, pair.Value ?? "");
+                }
             }
-            copy["sdk_session_id"] = _sessionId;
-            copy["event_seq"] = (++_sequence).ToString(CultureInfo.InvariantCulture);
-            copy["event_time_ms"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+            // 原生事件无需自定义 BI 字段，仍保留原有的事件序号递增。
+            long sequence = ++_sequence;
+            if (copy != null)
+            {
+                copy["sdk_session_id"] = _sessionId;
+                copy["event_seq"] = sequence.ToString(CultureInfo.InvariantCulture);
+                copy["event_time_ms"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+            }
             _pending.Enqueue(new Event { Name = name, Data = copy, NativeGameStart = nativeGameStart, Level = level });
             Flush();
             return true;

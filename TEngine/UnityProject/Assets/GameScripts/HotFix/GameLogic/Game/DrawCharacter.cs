@@ -12,8 +12,21 @@ namespace GameLogic.View
         private List<GameObject> _strokeObjects = new List<GameObject>();
         private readonly List<MeshRenderer> _strokeRenderers = new List<MeshRenderer>();
         private Color _defaultStrokeColor = Color.white;
-        private readonly List<Mesh> _ownedMeshes = new List<Mesh>();
-        private readonly List<Material> _ownedMaterials = new List<Material>();
+        // 只保存本视图的峰值笔画数量；切字时复用，视图销毁时统一释放。
+        private sealed class StrokeSlot
+        {
+            public GameObject Object;
+            public MeshFilter Filter;
+            public MeshRenderer Renderer;
+            public PolygonCollider2D Collider;
+            public Mesh Mesh;
+            public Material Material;
+            public TextMesh IndexLabel;
+            public Vector2[] SourcePoints;
+            public readonly List<Vector3> Vertices = new List<Vector3>();
+        }
+        private readonly List<StrokeSlot> _strokePool = new List<StrokeSlot>();
+        private readonly HashSet<GameObject> _pooledObjects = new HashSet<GameObject>();
         private readonly List<Vector2[]> _cachedPoints = new List<Vector2[]>();
         private string _cachedCharacter;
         private Vector2 _cachedOffset;
@@ -33,10 +46,14 @@ namespace GameLogic.View
 
         private void ReleaseGeometry()
         {
-            foreach (var mesh in _ownedMeshes) ReleaseObject(mesh);
-            foreach (var material in _ownedMaterials) ReleaseObject(material);
-            _ownedMeshes.Clear();
-            _ownedMaterials.Clear();
+            foreach (var slot in _strokePool)
+            {
+                ReleaseObject(slot.Mesh);
+                ReleaseObject(slot.Material);
+            }
+            _strokePool.Clear();
+            _pooledObjects.Clear();
+            _strokeObjects.Clear();
             _strokeRenderers.Clear();
             _cachedPoints.Clear();
             _hasCachedGeometry = false;
@@ -89,20 +106,69 @@ namespace GameLogic.View
         public float CustomScale { get; set; } = 1f;
 
         /// <summary>
-        /// 清除所有已绘制的笔画
+        /// 清除显示与当前字形缓存，笔画资源留在局部池中。
         /// </summary>
         public void Clear()
         {
             CancelPendingDraw();
-            ReleaseGeometry();
             _strokeObjects.Clear();
+            _strokeRenderers.Clear();
+            _cachedPoints.Clear();
+            _hasCachedGeometry = false;
             int childCount = transform.childCount;
             for (int i = childCount - 1; i >= 0; i--)
             {
                 var child = transform.GetChild(i).gameObject;
                 child.SetActive(false);
-                ReleaseObject(child);
+                // 编辑器重载后可能留下旧预览子物体，仍按原逻辑清理非池对象。
+                if (!_pooledObjects.Contains(child)) ReleaseObject(child);
             }
+        }
+
+        private StrokeSlot GetStrokeSlot(int index)
+        {
+            while (_strokePool.Count <= index) _strokePool.Add(new StrokeSlot());
+            return _strokePool[index];
+        }
+
+        private void PrepareStroke(StrokeSlot slot, int index, Material template)
+        {
+            if (slot.Object == null || slot.Mesh == null || slot.Material == null)
+            {
+                _pooledObjects.Remove(slot.Object);
+                ReleaseObject(slot.Object);
+                ReleaseObject(slot.Mesh);
+                ReleaseObject(slot.Material);
+                slot.Object = new GameObject($"Stroke_{index}");
+                slot.Object.SetActive(false);
+                slot.Object.transform.SetParent(transform, false);
+                slot.Filter = slot.Object.AddComponent<MeshFilter>();
+                slot.Renderer = slot.Object.AddComponent<MeshRenderer>();
+                slot.Collider = slot.Object.AddComponent<PolygonCollider2D>();
+                slot.Mesh = new Mesh();
+                slot.Mesh.MarkDynamic();
+                slot.Material = new Material(template);
+                slot.IndexLabel = null;
+                _pooledObjects.Add(slot.Object);
+            }
+            else
+            {
+                if (slot.Material.shader != template.shader) slot.Material.shader = template.shader;
+                slot.Material.CopyPropertiesFromMaterial(template);
+            }
+
+            // 清掉上一个字的选择偏移、引导层级和颜色，保持首次创建时的状态。
+            slot.Object.layer = 0;
+            slot.Object.transform.localPosition = Vector3.zero;
+            slot.Object.transform.localRotation = Quaternion.identity;
+            slot.Object.transform.localScale = Vector3.one;
+            slot.Renderer.sortingLayerID = 0;
+            slot.Renderer.sortingOrder = 0;
+            slot.Renderer.enabled = true;
+            slot.Collider.enabled = true;
+            slot.Material.color = _defaultStrokeColor;
+            slot.Renderer.sharedMaterial = slot.Material;
+            slot.Filter.sharedMesh = slot.Mesh;
         }
 
         /// <summary>
@@ -146,7 +212,11 @@ namespace GameLogic.View
                 int strokeIndex = i;
                 List<Vector2> points = data.strokes[i].points;
 
-                Vector2[] sourcePoints = points.ToArray();
+                StrokeSlot slot = GetStrokeSlot(strokeIndex);
+                if (slot.SourcePoints == null || slot.SourcePoints.Length != points.Count)
+                    slot.SourcePoints = new Vector2[points.Count];
+                points.CopyTo(slot.SourcePoints);
+                Vector2[] sourcePoints = slot.SourcePoints;
                 _cachedPoints.Add(sourcePoints);
                 if (points.Count < 3)
                 {
@@ -164,32 +234,20 @@ namespace GameLogic.View
                     continue;
                 }
 
-                // 1. 创建笔画物体
-                GameObject strokeObj = new GameObject($"Stroke_{strokeIndex}");
-                strokeObj.transform.SetParent(transform, false);
-                strokeObj.transform.localPosition = Vector3.zero;
-                _strokeObjects.Add(strokeObj);
+                // 1～3. 复用笔画物体、组件和逐笔画独立材质。
+                PrepareStroke(slot, strokeIndex, template);
+                _strokeObjects.Add(slot.Object);
+                _strokeRenderers.Add(slot.Renderer);
 
-                // 2. 组件
-                MeshFilter mf = strokeObj.AddComponent<MeshFilter>();
-                MeshRenderer mr = strokeObj.AddComponent<MeshRenderer>();
-                _strokeRenderers.Add(mr);
-
-                // 3. 默认材质：克隆材质模板（保留逐笔画独立着色），shader 引用随模板资源打包进包
-                Material mat = new Material(template);
-                _ownedMaterials.Add(mat);
-                mat.color = _defaultStrokeColor;
-                mr.sharedMaterial = mat;
-
-                // 4. 生成实心Mesh（应用位置偏移）
-                Mesh mesh = new Mesh();
-                _ownedMeshes.Add(mesh);
-                Vector3[] verts = new Vector3[points.Count];
+                // 4. 复用 Mesh 与顶点工作区，三角剖分及绕序保持原样。
+                Mesh mesh = slot.Mesh;
+                var verts = slot.Vertices;
+                verts.Clear();
                 for (int p = 0; p < points.Count; p++)
                 {
                     float x = points[p].x + PositionOffset.x;
                     float y = points[p].y + PositionOffset.y;
-                    verts[p] = new Vector3(x, y, 0f);
+                    verts.Add(new Vector3(x, y, 0f));
                 }
                 for (int j = 0; j < triangles.Length; j += 3)
                 {
@@ -198,25 +256,25 @@ namespace GameLogic.View
                     triangles[j + 2] = second;
                 }
 
-                mesh.vertices = verts;
+                mesh.Clear();
+                mesh.SetVertices(verts);
                 mesh.triangles = triangles;
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
 
-                mf.sharedMesh = mesh;
-
-                // 5. 添加2D碰撞器（应用位置偏移）
-                PolygonCollider2D collider = strokeObj.AddComponent<PolygonCollider2D>();
+                // 5. 复用2D碰撞器，碰撞轮廓简化算法保持原样。
                 Vector2[] simplified = SimplifyColliderPoints(points);
                 for (int k = 0; k < simplified.Length; k++)
                     simplified[k] += PositionOffset;
-                collider.points = simplified;
+                slot.Collider.points = simplified;
 
                 // 6. 标注笔画索引
                 if (showStrokeIndices)
                 {
-                    AddStrokeIndexLabel(strokeObj, strokeIndex, points);
+                    AddStrokeIndexLabel(slot, strokeIndex, points);
                 }
+                if (slot.IndexLabel != null) slot.IndexLabel.gameObject.SetActive(showStrokeIndices);
+                slot.Object.SetActive(true);
             }
             _cachedCharacter = data.character;
             _cachedOffset = PositionOffset;
@@ -262,7 +320,7 @@ namespace GameLogic.View
         /// <summary>
         /// 给笔画的起始点添加索引标签
         /// </summary>
-        private void AddStrokeIndexLabel(GameObject strokeObj, int index, List<Vector2> points)
+        private void AddStrokeIndexLabel(StrokeSlot slot, int index, List<Vector2> points)
         {
             // 计算笔画中心点作为标签位置（含偏移）
             Vector2 center = Vector2.zero;
@@ -270,25 +328,22 @@ namespace GameLogic.View
             center /= points.Count;
             center += PositionOffset;
 
-            GameObject labelObj = new GameObject($"Idx_{index}");
-            labelObj.transform.SetParent(strokeObj.transform);
-            labelObj.transform.localPosition = center;
-
-            TextMesh tm = labelObj.AddComponent<TextMesh>();
-            tm.text = index.ToString();
-            tm.fontSize = 40;
-            tm.characterSize = 0.04f;
-            tm.anchor = TextAnchor.MiddleCenter;
-            tm.color = Color.red;
-            tm.alignment = TextAlignment.Center;
-            tm.fontStyle = FontStyle.Bold;
-
-            // 给标签一个白色背景一样的 quad，使其在任何颜色笔画上都可见
-            MeshRenderer labelRenderer = labelObj.GetComponent<MeshRenderer>();
-            if (labelRenderer != null)
+            if (slot.IndexLabel == null)
             {
-                labelRenderer.sortingOrder = 10;
+                GameObject labelObj = new GameObject($"Idx_{index}");
+                labelObj.transform.SetParent(slot.Object.transform, false);
+                TextMesh tm = slot.IndexLabel = labelObj.AddComponent<TextMesh>();
+                tm.text = index.ToString();
+                tm.fontSize = 40;
+                tm.characterSize = 0.04f;
+                tm.anchor = TextAnchor.MiddleCenter;
+                tm.color = Color.red;
+                tm.alignment = TextAlignment.Center;
+                tm.fontStyle = FontStyle.Bold;
+                MeshRenderer labelRenderer = labelObj.GetComponent<MeshRenderer>();
+                if (labelRenderer != null) labelRenderer.sortingOrder = 10;
             }
+            slot.IndexLabel.transform.localPosition = center;
         }
 
         #region Collider Optimization

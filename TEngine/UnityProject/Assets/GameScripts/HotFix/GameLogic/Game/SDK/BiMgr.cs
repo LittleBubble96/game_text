@@ -11,7 +11,7 @@ namespace GameLogic
         public static bool Enabled { get; set; } = true;
 
         /// <summary>
-        /// 参数复制后转发，null 值按空字符串处理。
+        /// 校验后转发，由 SDK 复制入队，null 值按空字符串处理。
         /// true 表示 SDK 本地已接收，可能等待登录或补发，不代表服务端接收成功。
         /// SDK 负责缓存和有限重试，参数无效或队列已满时返回 false。
         /// </summary>
@@ -26,7 +26,6 @@ namespace GameLogic
 
             try
             {
-                var payload = new Dictionary<string, string>();
                 if (data != null)
                 {
                     foreach (var field in data)
@@ -36,11 +35,10 @@ namespace GameLogic
                             Log.Warning($"[BI] {eventId} 包含空参数名，已忽略上报。");
                             return false;
                         }
-                        payload.Add(field.Key, field.Value ?? string.Empty);
                     }
                 }
 
-                if (SDK.ReportEvent(eventId, payload)) return true;
+                if (SDK.ReportEvent(eventId, data)) return true;
                 Log.Warning($"[BI] {eventId} 未接收：参数无效或 SDK 缓存已满。");
                 return false;
             }
