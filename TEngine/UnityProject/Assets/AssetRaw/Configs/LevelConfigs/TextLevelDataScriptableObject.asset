@@ -144,6 +144,35 @@ MonoBehaviour:
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_6
+    baseCharacter: "\u660E"
+    positionOffset: {x: -2, y: -1}
+    customScale: 1.15
+    answers:
+    - answerCharacter: "\u53E3"
+      strokeSets:
+      - strokeIndices: 000000000100000003000000
+    - answerCharacter: "\u65E5"
+      strokeSets:
+      - strokeIndices: 00000000010000000200000003000000
+    - answerCharacter: "\u4E00"
+      strokeSets:
+      - strokeIndices: 02000000
+      - strokeIndices: 03000000
+      - strokeIndices: 06000000
+      - strokeIndices: 07000000
+    - answerCharacter: "\u4E8C"
+      strokeSets:
+      - strokeIndices: 0200000003000000
+      - strokeIndices: 0600000007000000
+    - answerCharacter: "\u660E"
+      strokeSets:
+      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
+    - answerCharacter: "\u6708"
+      strokeSets:
+      - strokeIndices: 04000000050000000600000007000000
+    answerCountMode: 0
+    requiredAnswerCount: 6
+  - levelName: Level_7
     baseCharacter: "\u52AB"
     positionOffset: {x: -2, y: -1}
     customScale: 1.15
@@ -178,35 +207,6 @@ MonoBehaviour:
       - strokeIndices: 00000000010000000200000003000000040000000500000006000000
     answerCountMode: 0
     requiredAnswerCount: 0
-  - levelName: Level_7
-    baseCharacter: "\u660E"
-    positionOffset: {x: -2, y: -1}
-    customScale: 1.15
-    answers:
-    - answerCharacter: "\u53E3"
-      strokeSets:
-      - strokeIndices: 000000000100000003000000
-    - answerCharacter: "\u65E5"
-      strokeSets:
-      - strokeIndices: 00000000010000000200000003000000
-    - answerCharacter: "\u4E00"
-      strokeSets:
-      - strokeIndices: 02000000
-      - strokeIndices: 03000000
-      - strokeIndices: 06000000
-      - strokeIndices: 07000000
-    - answerCharacter: "\u4E8C"
-      strokeSets:
-      - strokeIndices: 0200000003000000
-      - strokeIndices: 0600000007000000
-    - answerCharacter: "\u660E"
-      strokeSets:
-      - strokeIndices: 0000000001000000020000000300000004000000050000000600000007000000
-    - answerCharacter: "\u6708"
-      strokeSets:
-      - strokeIndices: 04000000050000000600000007000000
-    answerCountMode: 0
-    requiredAnswerCount: 6
   - levelName: Level_8
     baseCharacter: "\u7389"
     positionOffset: {x: -2, y: -1.1}
