@@ -9550,6 +9550,17 @@ MonoBehaviour:
       - strokeIndices: 04000000050000000600000008000000090000000a0000000b000000
       - strokeIndices: 03000000050000000600000008000000090000000a0000000b000000
       - strokeIndices: 00000000050000000600000008000000090000000a0000000b000000
+    - answerCharacter: "\u535C"
+      strokeSets:
+      - strokeIndices: 0500000007000000
+    - answerCharacter: "\u516B"
+      strokeSets:
+      - strokeIndices: 080000000b000000
+      - strokeIndices: 080000000a000000
+    - answerCharacter: "\u53EA"
+      strokeSets:
+      - strokeIndices: 010000000200000004000000080000000b000000
+      - strokeIndices: 010000000200000004000000080000000a000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_156
@@ -9641,6 +9652,10 @@ MonoBehaviour:
     - answerCharacter: "\u516D"
       strokeSets:
       - strokeIndices: 02000000030000000d0000000e000000
+      - strokeIndices: 020000000b0000000d0000000e000000
+      - strokeIndices: 020000000a0000000d0000000e000000
+      - strokeIndices: 02000000090000000d0000000e000000
+      - strokeIndices: 02000000080000000d0000000e000000
     - answerCharacter: "\u53EA"
       strokeSets:
       - strokeIndices: 0400000005000000090000000d0000000e000000
@@ -9839,6 +9854,8 @@ MonoBehaviour:
     - answerCharacter: "\u4EC1"
       strokeSets:
       - strokeIndices: 0000000002000000070000000a000000
+      - strokeIndices: 0000000002000000070000000b000000
+      - strokeIndices: 00000000020000000a0000000b000000
     - answerCharacter: "\u4F4D"
       strokeSets:
       - strokeIndices: 0000000002000000060000000700000008000000090000000a000000
@@ -9853,7 +9870,7 @@ MonoBehaviour:
       - strokeIndices: 060000000700000008000000090000000a0000000b0000000c000000
     - answerCharacter: "\u58EB"
       strokeSets:
-      - strokeIndices: 0a0000000b0000000c000000
+      - strokeIndices: 010000000200000005000000
     - answerCharacter: "\u4E2B"
       strokeSets:
       - strokeIndices: 08000000090000000c000000
@@ -9882,6 +9899,9 @@ MonoBehaviour:
     - answerCharacter: "\u4E09"
       strokeSets:
       - strokeIndices: 070000000a0000000b000000
+    - answerCharacter: "\u4EE0"
+      strokeSets:
+      - strokeIndices: 00000000020000000a0000000b0000000c000000
     answerCountMode: 0
     requiredAnswerCount: 21
   - levelName: Level_161
@@ -14755,32 +14775,22 @@ MonoBehaviour:
     tone: dong
   - character: "\u52AB"
     tone: jie
-  - character: "\u8BD9"
-    tone: hui
-  - character: "\u4EBA"
-    tone: ren
-  - character: "\u7070"
-    tone: hui
-  - character: "\u706B"
-    tone: huo
-  - character: "\u706D"
-    tone: mie
-  - character: "\u8BA4"
-    tone: ren
-  - character: "\u5927"
-    tone: da
+  - character: "\u660E"
+    tone: ming
+  - character: "\u6708"
+    tone: yue
   - character: "\u7389"
     tone: yu
   - character: "\u535C"
     tone: bu
   - character: "\u4E0B"
     tone: xia
-  - character: "\u4EA9"
-    tone: mu
-  - character: "\u4E3B"
-    tone: zhu
-  - character: "\u4EA1"
-    tone: wang
+  - character: "\u674E"
+    tone: li
+  - character: "\u5B50"
+    tone: zi
+  - character: "\u4E86"
+    tone: le
   - character: "\u513F"
     tone: er
   - character: "\u53E4"
@@ -14797,6 +14807,8 @@ MonoBehaviour:
     tone: yuan
   - character: "\u5382"
     tone: chang
+  - character: "\u4EBA"
+    tone: ren
   - character: "\u91D1"
     tone: jin
   - character: "\u4E2A"
@@ -14813,12 +14825,12 @@ MonoBehaviour:
     tone: zhong
   - character: "\u5DFE"
     tone: jin
-  - character: "\u674E"
-    tone: li
-  - character: "\u5B50"
-    tone: zi
-  - character: "\u4E86"
-    tone: le
+  - character: "\u4EA9"
+    tone: mu
+  - character: "\u4E3B"
+    tone: zhu
+  - character: "\u4EA1"
+    tone: wang
   - character: "\u9C7C"
     tone: yu
   - character: "\u65E6"
@@ -14835,8 +14847,6 @@ MonoBehaviour:
     tone: zhou
   - character: "\u5409"
     tone: ji
-  - character: "\u6708"
-    tone: yue
   - character: "\u53F8"
     tone: si
   - character: "\u7B54"
@@ -14851,6 +14861,8 @@ MonoBehaviour:
     tone: he
   - character: "\u4E96"
     tone: si
+  - character: "\u5927"
+    tone: da
   - character: "\u5929"
     tone: tian
   - character: "\u7F8E"
@@ -15295,6 +15307,8 @@ MonoBehaviour:
     tone: mai
   - character: "\u4E70"
     tone: mai
+  - character: "\u8BA4"
+    tone: ren
   - character: "\u5EA7"
     tone: zuo
   - character: "\u5DEB"
@@ -15321,6 +15335,8 @@ MonoBehaviour:
     tone: juan
   - character: "\u592B"
     tone: fu
+  - character: "\u706B"
+    tone: huo
   - character: "\u5B6C"
     tone: nao
   - character: "\u4E0D"
@@ -15445,6 +15461,8 @@ MonoBehaviour:
     tone: wa
   - character: "\u5410"
     tone: tu
+  - character: "\u53F6"
+    tone: ye
   - character: "\u7740"
     tone: zhe
   - character: "\u770B"
@@ -15497,8 +15515,6 @@ MonoBehaviour:
     tone: cui
   - character: "\u53ED"
     tone: ba
-  - character: "\u53F6"
-    tone: ye
   - character: "\u5416"
     tone: a
   - character: "\u88D9"
@@ -15699,8 +15715,6 @@ MonoBehaviour:
     tone: qing
   - character: "\u775B"
     tone: jing
-  - character: "\u660E"
-    tone: ming
   - character: "\u4E14"
     tone: qie
   - character: "\u76F4"
@@ -15989,6 +16003,12 @@ MonoBehaviour:
     tone: zhu
   - character: "\u6CB9"
     tone: you
+  - character: "\u8BD9"
+    tone: hui
+  - character: "\u7070"
+    tone: hui
+  - character: "\u706D"
+    tone: mie
   - character: "\u9EC4"
     tone: huang
   - character: "\u7C27"
