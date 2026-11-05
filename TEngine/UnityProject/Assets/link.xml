@@ -1,4 +1,29 @@
 <linker>
+  <!-- ModuleSystem resolves implementations by name and creates them with
+       Activator.CreateInstance. Preserve the implementations and constructors,
+       not just the interfaces referenced by hot-update code. -->
+  <assembly fullname="TEngine.Runtime">
+    <type fullname="TEngine.UpdateDriver" preserve="all" />
+    <type fullname="TEngine.ResourceModule" preserve="all" />
+    <type fullname="TEngine.DebuggerModule" preserve="all" />
+    <type fullname="TEngine.FsmModule" preserve="all" />
+    <type fullname="TEngine.ProcedureModule" preserve="all" />
+    <type fullname="TEngine.ObjectPoolModule" preserve="all" />
+    <type fullname="TEngine.AudioModule" preserve="all" />
+    <type fullname="TEngine.SceneModule" preserve="all" />
+    <type fullname="TEngine.TimerModule" preserve="all" />
+    <type fullname="TEngine.LocalizationModule" preserve="all" />
+
+    <!-- RootModule loads these helpers from type names stored in the prefab. -->
+    <type fullname="TEngine.DefaultTextHelper" preserve="all" />
+    <type fullname="TEngine.DefaultLogHelper" preserve="all" />
+    <type fullname="TEngine.DefaultJsonHelper" preserve="all" />
+  </assembly>
+  <!-- ProcedureSetting stores type names rather than constructor references. -->
+  <assembly fullname="Assembly-CSharp">
+    <type fullname="Procedure.*" preserve="all" />
+  </assembly>
+
   <!-- UIGuide uses these APIs from hot-update code. Keep this manual file
        separate from the generated HybridCLRGenerate/link.xml. -->
   <assembly fullname="UnityEngine.CoreModule">
