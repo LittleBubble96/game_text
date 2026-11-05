@@ -18,7 +18,7 @@ namespace Builder
     /// 核心思路：以「字体文件」为维度，而非以「语言」为维度。
     /// 一种字体(.ttf)可能被多种语言共用（如中日文共用同一款字体），
     /// 我们只生成一份 SDF 资源，包含所有使用该字体的语言中出现的全部字符。
-    /// 最终输出两套资源：普通文本字体 和 设置面板字体（加 _Setting 后缀）。
+    /// 设置面板与普通 UI 共用主字体，关卡文字仍生成独立字体资源。
     /// </summary>
     public static class LanguageGenerateEditor
     {
@@ -38,12 +38,6 @@ namespace Builder
 
         /// <summary>普通字体 SDF 资源输出目录</summary>
         private const string OutputFontDir = "Assets/AssetRaw/Fonts";
-
-        /// <summary>设置面板字体 SDF 资源输出子目录</summary>
-        private const string SettingSubDir = "Setting";
-
-        /// <summary>设置面板字体名称后缀</summary>
-        private const string SettingSuffix = "_Setting";
 
         /// <summary>关卡字体输出子目录</summary>
         private const string LevelSubDir = "Level";
@@ -131,7 +125,7 @@ namespace Builder
         /// 1) 加载配置表
         /// 2) 将语言按「字体文件」分组
         /// 3) 每组收集其涵盖的所有多语言文本的唯一字符
-        /// 4) 为每组字体生成两个 TMPro SDF 资源（普通 + 设置面板）
+        /// 4) 为每组字体生成主 UI 字体（包含设置面板），并单独生成关卡字体
         /// 5) 刷新资源数据库
         /// </summary>
         [MenuItem("TEngine/Localization/生成语言文件", priority = -100)]
@@ -168,10 +162,10 @@ namespace Builder
                 }
                 HashSet<char> levelChars = CollectLevelCharsForFontGroup();
 
-                // 构建「设置面板 key」集合（TbLanguage 中定义的 Name）
-                HashSet<string> settingKeys = BuildSettingKeySet(langTable);
-                // ---- 3 & 4. 逐字体收集字符并生成 SDF 资源 ----
-                float totalSteps = fontGroups.Count * 2f;   // 每种字体 × 2（普通 + 设置）
+                var languageNameKeys = new HashSet<string>(langTable.DataMap.Values
+                    .Select(language => language.Name).Where(name => !string.IsNullOrEmpty(name)));
+                // ---- 3 & 4. 逐字体收集全部 UI 字符并生成 SDF 资源 ----
+                float totalSteps = fontGroups.Count * 2f;   // 每种字体：收集字符 + 生成主字体
                 int   step = 0;
 
                 foreach (var kv in fontGroups)
@@ -179,17 +173,21 @@ namespace Builder
                     string fontFileName    = kv.Key;
                     List<ConfLanguage> langs = kv.Value;
 
-                    // 3a. 收集普通文本字符（排除设置面板 key）
+                    // 3a. 收集全部 UI 多语言，包括设置文案和语言选择项。
                     step++;
                     float progress = 0.1f + 0.85f * (step / totalSteps);
                     EditorUtility.DisplayProgressBar("多语言字体生成", $"分析字符 [{fontFileName}] 普通文本 ...", progress);
 
-                    HashSet<char> normalChars = CollectCharsForFontGroup(langs, contentTable, settingKeys, settingOnly: false);
+                    HashSet<char> normalChars = CollectCharsForFontGroup(langs, contentTable);
+                    HashSet<char> settingChars = CollectCharsForFontGroup(langs, contentTable,
+                        key => key.StartsWith("setting_", StringComparison.Ordinal) || languageNameKeys.Contains(key));
 
                     if (fontFileName.Equals("TaiWanQuanZiKuZhengKaiTi-2"))
                     {
                         normalChars.ExceptWith(levelChars);
                     }
+                    // 设置文案、语言名称及白名单直接进入主字库，不依赖关卡字库回退。
+                    normalChars.UnionWith(settingChars);
                     // 3b. 生成普通字体 SDF 资源
                     step++;
                     progress = 0.1f + 0.85f * (step / totalSteps);
@@ -204,30 +202,6 @@ namespace Builder
                         Debug.LogWarning($"[字体生成] [{fontFileName}] 无普通文本字符，跳过。");
                     }
 
-                    // 4a. 收集设置面板文本字符（仅设置面板 key）
-                    step++;
-                    progress = 0.1f + 0.85f * (step / totalSteps);
-                    EditorUtility.DisplayProgressBar("多语言字体生成",
-                        $"分析字符 [{fontFileName}] 设置面板 ...", progress);
-
-                    HashSet<char> settingChars = CollectCharsForFontGroup(langs, contentTable, settingKeys, settingOnly: true);
-
-                    // 4b. 生成设置面板字体 SDF 资源
-                    step++;
-                    progress = 0.1f + 0.85f * (step / totalSteps);
-                    EditorUtility.DisplayProgressBar("多语言字体生成",
-                        $"生成 [{fontFileName}] 设置面板 SDF 字体 ...", progress);
-
-                    string settingDir = Path.Combine(OutputFontDir, SettingSubDir);
-                    if (settingChars.Count > 0)
-                    {
-                        EnsureDirectory(settingDir);
-                        BuildFontAsset(fontFileName, settingChars, settingDir, SettingSuffix);
-                    }
-                    else
-                    {
-                        Debug.LogWarning($"[字体生成] [{fontFileName}] 无设置面板字符，跳过。");
-                    }
                 }
 
                 // ---- 4.5 收集关卡文字并生成独立的关卡字体资源 ----
@@ -321,28 +295,19 @@ namespace Builder
         /// </summary>
         /// <param name="langs">使用该字体的语言配置列表</param>
         /// <param name="contentTable">多语言内容表</param>
-        /// <param name="settingKeys">设置面板 key 集合</param>
-        /// <param name="settingOnly">
-        ///   false = 收集普通文本字符（排除设置 key）；
-        ///   true  = 仅收集设置面板文本字符。
-        /// </param>
+        /// <param name="includeKey">可选的 key 筛选条件，省略时收集全部 UI 文本</param>
         /// <returns>去重后的字符集合</returns>
         private static HashSet<char> CollectCharsForFontGroup(
             List<ConfLanguage> langs,
             TbLanguageContent contentTable,
-            HashSet<string> settingKeys,
-            bool settingOnly)
+            Func<string, bool> includeKey = null)
         {
             HashSet<char> charSet = new HashSet<char>();
 
             // 遍历所有多语言内容条目
             foreach (var contentEntry in contentTable.DataMap)
             {
-                bool isSettingKey = settingKeys.Contains(contentEntry.Key);
-
-                // 按 settingOnly 过滤
-                if (settingOnly && !isSettingKey) continue;
-                if (!settingOnly && isSettingKey) continue;
+                if (includeKey != null && !includeKey(contentEntry.Key)) continue;
 
                 string[] values = contentEntry.Value.Value;
 
@@ -416,23 +381,6 @@ namespace Builder
             return str;
         }
 
-        /// <summary>
-        /// 构建「设置面板 key」集合。
-        /// TbLanguage 中的每条记录的 Name 即为语言选择的 key，
-        /// 这些 key 对应的文本属于设置面板专属文本，
-        /// 需要单独导出为 _Setting 字体。
-        /// </summary>
-        private static HashSet<string> BuildSettingKeySet(TbLanguage langTable)
-        {
-            var set = new HashSet<string>();
-            foreach (var kv in langTable.DataMap)
-            {
-                if (!string.IsNullOrEmpty(kv.Value.Name))
-                    set.Add(kv.Value.Name);
-            }
-            return set;
-        }
-
         // ================================================================
         //  字体 SDF 资源生成
         // ================================================================
@@ -456,7 +404,7 @@ namespace Builder
         /// <param name="fontFileName">字体文件名（如 "AaFengKuangYuanShiRen.ttf"）</param>
         /// <param name="characters">该字体需要支持的全部唯一字符（会被原地修改：移除字体不存在的字符）</param>
         /// <param name="outDir">输出目录</param>
-        /// <param name="nameSuffix">资源名后缀（"" 或 "_Setting"）</param>
+        /// <param name="nameSuffix">资源名后缀（"" 或 "_Level"）</param>
         private static void BuildFontAsset(string fontFileName, HashSet<char> characters,
             string outDir, string nameSuffix)
         {

@@ -1,5 +1,6 @@
 #if ENABLE_HYBRIDCLR
 using HybridCLR.Editor;
+using HybridCLR.Editor.AOT;
 using HybridCLR.Editor.Commands;
 #endif
 using System.IO;
@@ -152,8 +153,9 @@ public static class BuildDLLCommand
                 continue;
             }
             string dllBytesPath = $"{aotAssembliesDstDir}/{dll}.bytes";
-            System.IO.File.Copy(srcDllPath, dllBytesPath, true);
-            Debug.Log($"[CopyAOTAssembliesToStreamingAssets] copy AOT dll {srcDllPath} -> {dllBytesPath}");
+            // 补充元数据只需保留泛型方法体；精简副本，保留原始裁剪 DLL 供桥接生成使用。
+            AOTAssemblyMetadataStripper.Strip(srcDllPath, dllBytesPath);
+            Debug.Log($"[CopyAOTAssembliesToStreamingAssets] write optimized AOT metadata {srcDllPath} -> {dllBytesPath}");
         }
 #endif
     }
