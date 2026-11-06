@@ -51,6 +51,14 @@ namespace Builder
         /// <summary>图集最大尺寸（CJK 大字集建议 4096）</summary>
         private const int AtlasMaxSize = 4096;
 
+        /// <summary>完整预烘焙的静态字体导出独立 PNG，并启用平台纹理压缩。</summary>
+        private const bool CompressFontAtlas = true;
+
+        /// <summary>Android、iOS、WebGL 图集格式；调整后需重新生成并检查小字号和描边。</summary>
+        private const TextureImporterFormat AtlasCompressionFormat = TextureImporterFormat.ASTC_6x6;
+
+        private const int AtlasCompressionQuality = 100;
+
         #endregion
 
         // ================================================================
@@ -60,64 +68,8 @@ namespace Builder
         [MenuItem("TEngine/Localization/测试", priority = -100)]
         public static void Generate_Test()
         {
-            string srcPath = SourceFontDir + "/AaFengKuangYuanShiRen.ttf";
-            Font sourceFont = AssetDatabase.LoadAssetAtPath<Font>(srcPath);
-            //创建一个没有字符得tmp资源
-            TMP_FontAsset fontAsset = TMP_FontAsset.CreateFontAsset(
-                sourceFont,
-                SamplingPointSize,
-                AtlasPadding,
-                RenderMode,
-                AtlasMaxSize,
-                AtlasMaxSize,
-                AtlasPopulationMode.Dynamic,
-                false
-            );
-            //加入需要用到得字
-            fontAsset.TryAddCharacters("A");
-            string assetName    = $"AaFengKuangYuanShiRen SDF.asset";
-            string assetPath    = Path.Combine(OutputFontDir + "/Test", assetName).Replace('\\', '/');
-            //获取之前得字体资源
-            TMP_FontAsset oldFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
-            //设置名字 （必须在 CopySerialized 之前）
-            fontAsset.name = "AaFengKuangYuanShiRen SDF";
-            if (oldFontAsset != null)
-            {
-                var material = oldFontAsset.material;
-                var atlasTexture = oldFontAsset.atlasTexture;
-                //设置名字 防止为空 （必须在 CopySerialized 之前）
-                fontAsset.atlasTexture.name = $"AaFengKuangYuanShiRen SDF Atlas";
-                //复制之前得设置
-                EditorUtility.CopySerialized(fontAsset, oldFontAsset);
-                EditorUtility.CopySerialized(fontAsset.atlasTexture, oldFontAsset.atlasTexture);
-                oldFontAsset.material = material;
-                oldFontAsset.atlasTextures[0] = atlasTexture;
-                
-                //更新材质属性
-                GenerateTMPUtility.UpdateMaterialProperty(material, oldFontAsset);
-                fontAsset = oldFontAsset;
-            }
-            else
-            {
-                // 创建材质并绑定
-                Material material = new Material(Shader.Find("TextMeshPro/Distance Field"));
-                material.name = $"AaFengKuangYuanShiRen SDF Material";
-                fontAsset.atlasTexture.name = $"AaFengKuangYuanShiRen SDF Atlas";
-                GenerateTMPUtility.UpdateMaterialProperty(material, fontAsset);
-                fontAsset.material = material;
-                AssetDatabase.CreateAsset(fontAsset, assetPath);
-                AssetDatabase.AddObjectToAsset(material, fontAsset);
-                AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
-            }
-            GenerateTMPUtility.SetTextureReadable(fontAsset.atlasTexture, false);
-            fontAsset.ReadFontAssetDefinition();
-            
-            AssetDatabase.SaveAssets();
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(fontAsset));  // Re-import font asset to get the new updated version.
-            
-            AssetDatabase.Refresh();
-            
-            TMPro_EventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
+            BuildFontAsset("AaFengKuangYuanShiRen", new HashSet<char>("A"),
+                OutputFontDir + "/Test", string.Empty);
         }
         
         /// <summary>
@@ -392,10 +344,9 @@ namespace Builder
         /// 最终使用 Dynamic 模式兜底——运行时仍可动态生成缺失字形。
         /// 
         /// 生成流程参照 TMPro 标准做法：
-        ///   - 新建时：创建 Material → UpdateMaterialProperty → AddObjectToAsset 嵌入子资源
-        ///   - 更新时：通过 CopySerialized 保留旧的材质/图集引用
-        ///   - 收尾：SetTextureReadable → ReadFontAssetDefinition → ImportAsset →
-        ///           ON_FONT_PROPERTY_CHANGED
+        ///   - 静态图集导出 PNG 并压缩，动态兜底图集保持内嵌和可写
+        ///   - 更新时保留字体/主材质引用，并重新绑定图集和材质预设
+        ///   - 收尾：ReadFontAssetDefinition → ImportAsset → ON_FONT_PROPERTY_CHANGED
         /// 
         /// 注意：一种 .ttf 只生成一份 SDF 资源。
         /// 若多种语言共用同一字体，它们共享这份资源。
@@ -453,75 +404,108 @@ namespace Builder
                 return;
             }
 
-            // ================================================================
-            //  保存/更新资源（参照 Generate_Test 标准流程）
-            // ================================================================
-
-            // 设置名字（必须在 CopySerialized 之前）
-            fontAsset.name = assetCoreName;
-            fontAsset.atlasTexture.name = $"{assetCoreName} Atlas";
-
-            // 获取已有的字体资源
-            TMP_FontAsset oldFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
-
-            if (oldFontAsset != null)
-            {
-                // ---- 更新已有资源：通过 CopySerialized 增量更新，保留旧材质引用 ----
-                var material     = oldFontAsset.material;
-                var atlasTexture = oldFontAsset.atlasTexture;
-                List<TMP_FontAsset> fullBacks = new List<TMP_FontAsset>();
-                fullBacks.AddRange(oldFontAsset.fallbackFontAssetTable);
-                EditorUtility.CopySerialized(fontAsset, oldFontAsset);
-                EditorUtility.CopySerialized(fontAsset.atlasTexture, oldFontAsset.atlasTexture);
-                oldFontAsset.material = material;
-                oldFontAsset.atlasTextures[0] = atlasTexture;
-
-                // 更新材质属性
-                GenerateTMPUtility.UpdateMaterialProperty(material, oldFontAsset);
-                //关联fullback
-                foreach (var tmpFontAsset in fullBacks)
-                {
-                    oldFontAsset.fallbackFontAssetTable.Add(tmpFontAsset);
-                }
-                fontAsset = oldFontAsset;
-            }
-            else
-            {
-                // ---- 新建资源：创建材质并绑定，子资源嵌入主 .asset ----
-                Material material = new Material(Shader.Find(SDFShaderName));
-                material.name = $"{assetCoreName} Material";
-                GenerateTMPUtility.UpdateMaterialProperty(material, fontAsset);
-                fontAsset.material = material;
-
-                AssetDatabase.CreateAsset(fontAsset, assetPath);
-                AssetDatabase.AddObjectToAsset(material, fontAsset);
-                AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
-            }
-
-            // ---- 后处理 ----
-            // 静态设置
-            fontAsset.atlasPopulationMode = AtlasPopulationMode.Static;
-            // 清空源字体映射
-            SerializedObject serializedFontAsset = new SerializedObject(fontAsset);
-            SerializedProperty sourceFontProp = serializedFontAsset.FindProperty("m_SourceFontFile_EditorRef");
-            if (sourceFontProp != null)
-            {
-                sourceFontProp.objectReferenceValue = null;
-                serializedFontAsset.ApplyModifiedProperties();
-            }
-            
-            GenerateTMPUtility.SetTextureReadable(fontAsset.atlasTexture, false);
-            // 设置图集纹理为不可读（优化内存/性能）
-            GenerateTMPUtility.SetTextureReadable(fontAsset.atlasTexture, false);
-            // 重新读取字体定义，确保内部数据一致
-            fontAsset.ReadFontAssetDefinition();
-            // 保存
-            AssetDatabase.SaveAssets();
-            // 重新导入字体资源以刷新 Unity 内部缓存
-            AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(fontAsset));
-            // 通知 TMPro 字体属性已变更（刷新使用该字体的 Text 组件）
-            TMPro_EventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
+            SaveFontAsset(fontAsset, assetPath, assetCoreName);
             Debug.Log($"[字体生成] ✔ {assetPath}  |  字符数={characters.Count}");
+        }
+
+        private static void SaveFontAsset(TMP_FontAsset generatedFont, string assetPath, string assetCoreName)
+        {
+            EnsureDirectory(Path.GetDirectoryName(assetPath));
+            generatedFont.name = assetCoreName;
+            Texture2D[] generatedAtlases = generatedFont.atlasTextures;
+            Material generatedMaterial = generatedFont.material;
+            TMP_FontAsset fontAsset = generatedFont;
+            try
+            {
+                TMP_FontAsset oldFontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
+                Texture2D[] oldAtlases = oldFontAsset != null
+                    ? (Texture2D[])oldFontAsset.atlasTextures.Clone() : Array.Empty<Texture2D>();
+                Dictionary<Material, int> materials = TMPAtlasConverter.FindMaterials(oldAtlases);
+
+                bool isStatic = generatedFont.atlasPopulationMode == AtlasPopulationMode.Static;
+                Texture2D[] atlases = CompressFontAtlas && isStatic
+                    ? TMPAtlasConverter.ExportAtlases(generatedFont, assetPath, AtlasCompressionFormat,
+                        AtlasMaxSize, AtlasCompressionQuality)
+                    : generatedAtlases;
+
+                if (oldFontAsset != null)
+                {
+                    Material material = oldFontAsset.material;
+                    var fallbacks = new List<TMP_FontAsset>(oldFontAsset.fallbackFontAssetTable);
+                    EditorUtility.CopySerialized(generatedFont, oldFontAsset);
+                    oldFontAsset.material = material != null ? material : generatedMaterial;
+                    oldFontAsset.fallbackFontAssetTable = fallbacks;
+                    fontAsset = oldFontAsset;
+                }
+                else
+                {
+                    generatedMaterial.shader = Shader.Find(SDFShaderName);
+                    AssetDatabase.CreateAsset(fontAsset, assetPath);
+                }
+
+                GenerateTMPUtility.SetAtlasTextures(fontAsset, atlases);
+                if (!AssetDatabase.Contains(fontAsset.material))
+                {
+                    fontAsset.material.name = $"{assetCoreName} Material";
+                    AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+                }
+                for (int i = 0; i < atlases.Length; i++)
+                {
+                    if (!AssetDatabase.Contains(atlases[i]))
+                    {
+                        atlases[i].name = $"{assetCoreName} Atlas {i}";
+                        AssetDatabase.AddObjectToAsset(atlases[i], fontAsset);
+                    }
+                    // 动态兜底仍需 FontEngine 写入，不能关闭可读性。
+                    if (isStatic && !CompressFontAtlas)
+                        GenerateTMPUtility.SetTextureReadable(atlases[i], false);
+                }
+
+                GenerateTMPUtility.UpdateMaterialProperty(fontAsset.material, fontAsset);
+                EditorUtility.SetDirty(fontAsset.material);
+                foreach (var pair in materials)
+                {
+                    if (pair.Key == null) continue;
+                    int atlasIndex = pair.Value < atlases.Length ? pair.Value : 0;
+                    GenerateTMPUtility.UpdateMaterialProperty(pair.Key, fontAsset, atlases[atlasIndex]);
+                    EditorUtility.SetDirty(pair.Key);
+                }
+
+                // 仅删除当前字体拥有的旧内嵌图集；外部 PNG 保留 GUID，后续生成直接覆盖内容。
+                foreach (Texture2D oldAtlas in oldAtlases)
+                {
+                    if (oldAtlas != null && !atlases.Contains(oldAtlas) && AssetDatabase.IsSubAsset(oldAtlas)
+                        && AssetDatabase.GetAssetPath(oldAtlas) == assetPath)
+                        UnityEngine.Object.DestroyImmediate(oldAtlas, true);
+                }
+
+                if (isStatic)
+                {
+                    var serializedFont = new SerializedObject(fontAsset);
+                    SerializedProperty sourceFont = serializedFont.FindProperty("m_SourceFontFile_EditorRef");
+                    if (sourceFont != null)
+                    {
+                        sourceFont.objectReferenceValue = null;
+                        serializedFont.ApplyModifiedPropertiesWithoutUndo();
+                    }
+                }
+
+                fontAsset.ReadFontAssetDefinition();
+                EditorUtility.SetDirty(fontAsset);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.ImportAsset(assetPath);
+                TMPro_EventManager.ON_FONT_PROPERTY_CHANGED(true, fontAsset);
+            }
+            finally
+            {
+                // 导出 PNG 或更新已有字体后，清理不再使用的临时生成对象。
+                foreach (Texture2D atlas in generatedAtlases)
+                    if (atlas != null && !AssetDatabase.Contains(atlas)) UnityEngine.Object.DestroyImmediate(atlas);
+                if (generatedMaterial != null && !AssetDatabase.Contains(generatedMaterial))
+                    UnityEngine.Object.DestroyImmediate(generatedMaterial);
+                if (generatedFont != null && !AssetDatabase.Contains(generatedFont))
+                    UnityEngine.Object.DestroyImmediate(generatedFont);
+            }
         }
 
         /// <summary>
@@ -545,6 +529,9 @@ namespace Builder
                 // 如果之前创建的失败资源还在，需要销毁
                 if (fontAsset != null)
                 {
+                    foreach (Texture2D atlas in fontAsset.atlasTextures)
+                        UnityEngine.Object.DestroyImmediate(atlas);
+                    UnityEngine.Object.DestroyImmediate(fontAsset.material);
                     UnityEngine.Object.DestroyImmediate(fontAsset);
                     fontAsset = null;
                 }
@@ -573,6 +560,7 @@ namespace Builder
                 if (fontAsset.TryAddCharacters(charString, out var missingChars))
                 {
                     // 全部字符装入成功
+                    fontAsset.atlasPopulationMode = AtlasPopulationMode.Static;
                     Debug.Log($"[字体生成] '{fontBaseName}{nameSuffix}' 字符预烘焙成功，" +
                                $"图集={currentW}×{currentH}，字符数={charString.Length}");
                     return true;
@@ -603,17 +591,8 @@ namespace Builder
                 }
             }
 
-            // 已尝试所有扩容方案，仍有字符装不下（可能是个别异常字符）
-            // 记录警告但不阻断——Dynamic 模式会在运行时处理缺失字符
-            if (fontAsset != null && fontAsset.TryAddCharacters(charString, out var finalMissing))
-            {
-                Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 扩容至 {currentW}×{currentH} 后" +
-                                 $"仍有 {finalMissing.Length} 个字符无法预烘焙，" +
-                                 "将由 Dynamic 模式运行时生成。");
-                return true;
-            }
-
-            // 最终兜底：直接返回已创建的 FontAsset，不全量预烘焙也 OK
+            // 图集已满时必须允许新图集，否则 Dynamic 也无法再添加缺失字符。
+            if (fontAsset != null) fontAsset.isMultiAtlasTexturesEnabled = true;
             Debug.LogWarning($"[字体生成] '{fontBaseName}{nameSuffix}' 无法全量预烘焙字符，" +
                              $"图集={currentW}×{currentH}，将依赖 Dynamic 模式。");
             return fontAsset != null;

@@ -8,16 +8,30 @@ namespace Builder
 {
     public static class GenerateTMPUtility
     {
+        private static readonly FieldInfo AtlasTextureCache = typeof(TMP_FontAsset).GetField(
+            "m_AtlasTexture", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        /// <summary>TMP 3.0 会缓存首张图集，替换数组时必须同步清空缓存。</summary>
+        public static void SetAtlasTextures(TMP_FontAsset fontAsset, Texture2D[] textures)
+        {
+            if (AtlasTextureCache == null)
+                throw new MissingFieldException(typeof(TMP_FontAsset).FullName, "m_AtlasTexture");
+
+            fontAsset.atlasTextures = textures;
+            AtlasTextureCache.SetValue(fontAsset, null);
+        }
+
         /// <summary>
         /// 更新字体材质属性
         /// </summary>
         /// <param name="m"></param>
         /// <param name="fontAsset"></param>
-        public static void UpdateMaterialProperty(Material m, TMP_FontAsset fontAsset)
+        public static void UpdateMaterialProperty(Material m, TMP_FontAsset fontAsset, Texture2D atlasTexture = null)
         {
-            m.SetTexture(ShaderUtilities.ID_MainTex, fontAsset.atlasTexture);
-            m.SetFloat(ShaderUtilities.ID_TextureWidth, fontAsset.atlasTexture.width);
-            m.SetFloat(ShaderUtilities.ID_TextureHeight, fontAsset.atlasTexture.height);
+            if (atlasTexture == null) atlasTexture = fontAsset.atlasTextures[0];
+            m.SetTexture(ShaderUtilities.ID_MainTex, atlasTexture);
+            m.SetFloat(ShaderUtilities.ID_TextureWidth, atlasTexture.width);
+            m.SetFloat(ShaderUtilities.ID_TextureHeight, atlasTexture.height);
 
             int spread = fontAsset.atlasPadding + 1;
             m.SetFloat(ShaderUtilities.ID_GradientScale, spread); // Spread = Padding for Brute Force SDF.
