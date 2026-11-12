@@ -110,6 +110,13 @@ namespace GameLogic
             await CreateTopBtnAsync("局内");
 
             await CreateGmGroupAsync("关卡");
+            await CreateBtnAsync("跳转关卡到183", () =>
+            {
+                if (GameManager.Instance.TrySetCorePlayLevel(183))
+                    Log.Info($"[GM] 关卡数据已切换并保存为 {183}，重新进入游戏后显示目标关卡");
+                else
+                    Log.Warning($"[GM] 跳关失败，请检查关卡 {183} 的配置；原进度未修改");
+            });
             await CreateBtnAndInputAsync("跳转关卡", (levelId) =>
             {
                 if (!int.TryParse(levelId, out int id) || id < 1)

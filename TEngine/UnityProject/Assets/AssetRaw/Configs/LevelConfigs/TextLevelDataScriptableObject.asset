@@ -11736,11 +11736,12 @@ MonoBehaviour:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a000000
     - answerCharacter: "\u77FC"
       strokeSets:
-      - strokeIndices: 000000000100000002000000030000000400000005000000090000000a000000
+      - strokeIndices: 0000000001000000020000000300000004000000090000000a00000007000000
+      - strokeIndices: 00000000010000000200000003000000040000000500000008000000090000000a000000
     - answerCharacter: "\u77F8"
       strokeSets:
-      - strokeIndices: 0000000001000000020000000300000004000000050000000800000009000000
-      - strokeIndices: 0000000001000000020000000300000004000000070000000800000009000000
+      - strokeIndices: 0000000001000000020000000300000004000000080000000900000007000000
+      - strokeIndices: 0000000001000000020000000300000004000000080000000900000005000000
     - answerCharacter: "\u4ED5"
       strokeSets:
       - strokeIndices: 0100000002000000050000000600000007000000
@@ -11864,9 +11865,6 @@ MonoBehaviour:
     - answerCharacter: "\u5973"
       strokeSets:
       - strokeIndices: 000000000100000002000000
-    - answerCharacter: "\u6535"
-      strokeSets:
-      - strokeIndices: 0a0000000b0000000c0000000d000000
     - answerCharacter: "\u4E2D"
       strokeSets:
       - strokeIndices: 04000000050000000600000007000000
@@ -11880,6 +11878,7 @@ MonoBehaviour:
     - answerCharacter: "\u5341"
       strokeSets:
       - strokeIndices: 0300000007000000
+      - strokeIndices: 0600000007000000
     - answerCharacter: "\u53E3"
       strokeSets:
       - strokeIndices: 040000000500000006000000
@@ -12105,8 +12104,10 @@ MonoBehaviour:
       - strokeIndices: 06000000090000000c000000
     - answerCharacter: "\u4EC1"
       strokeSets:
-      - strokeIndices: 01000000020000000300000004000000
+      - strokeIndices: 0100000002000000090000000c000000
       - strokeIndices: 01000000020000000600000009000000
+      - strokeIndices: 0100000002000000060000000c000000
+      - strokeIndices: 01000000020000000300000004000000
     - answerCharacter: "\u4EE8"
       strokeSets:
       - strokeIndices: 010000000200000006000000090000000c000000
@@ -12134,6 +12135,10 @@ MonoBehaviour:
     - answerCharacter: "\u4EC3"
       strokeSets:
       - strokeIndices: 01000000020000000400000005000000
+    - answerCharacter: "\u4EDC"
+      strokeSets:
+      - strokeIndices: 0100000002000000060000000700000009000000
+      - strokeIndices: 010000000200000006000000070000000c000000
     answerCountMode: 0
     requiredAnswerCount: 16
   - levelName: Level_194
@@ -12273,6 +12278,10 @@ MonoBehaviour:
     - answerCharacter: "\u536B"
       strokeSets:
       - strokeIndices: 040000000700000009000000
+    - answerCharacter: "\u4E0A"
+      strokeSets:
+      - strokeIndices: 030000000500000009000000
+      - strokeIndices: 030000000500000008000000
     answerCountMode: 0
     requiredAnswerCount: 19
   - levelName: Level_196
@@ -12327,6 +12336,10 @@ MonoBehaviour:
     - answerCharacter: "\u4EC1"
       strokeSets:
       - strokeIndices: 01000000020000000800000009000000
+    - answerCharacter: "\u4EE0"
+      strokeSets:
+      - strokeIndices: 010000000200000008000000090000000a000000
+      - strokeIndices: 0000000002000000090000000a00000008000000
     answerCountMode: 0
     requiredAnswerCount: 15
   - levelName: Level_197
@@ -12529,6 +12542,7 @@ MonoBehaviour:
     - answerCharacter: "\u53E4"
       strokeSets:
       - strokeIndices: 0000000001000000030000000400000007000000
+      - strokeIndices: 0000000002000000030000000400000007000000
     - answerCharacter: "\u8279"
       strokeSets:
       - strokeIndices: 000000000100000002000000
@@ -12544,6 +12558,7 @@ MonoBehaviour:
     - answerCharacter: "\u9E2A"
       strokeSets:
       - strokeIndices: 000000000100000003000000040000000700000008000000090000000a0000000b0000000c000000
+      - strokeIndices: 000000000200000003000000040000000700000008000000090000000a0000000b0000000c000000
     - answerCharacter: "\u4E8C"
       strokeSets:
       - strokeIndices: 0000000005000000
@@ -12845,6 +12860,9 @@ MonoBehaviour:
     - answerCharacter: "\u4E8C"
       strokeSets:
       - strokeIndices: 0400000005000000
+    - answerCharacter: "\u4EE0"
+      strokeSets:
+      - strokeIndices: 0000000001000000050000000400000006000000
     answerCountMode: 0
     requiredAnswerCount: 0
   - levelName: Level_204
@@ -13395,8 +13413,8 @@ MonoBehaviour:
       - strokeIndices: 05000000060000000800000009000000
     - answerCharacter: "\u738E"
       strokeSets:
-      - strokeIndices: 000000000100000002000000030000000700000009000000
       - strokeIndices: 000000000100000002000000030000000800000009000000
+      - strokeIndices: 000000000100000002000000030000000700000009000000
     - answerCharacter: "\u73E9"
       strokeSets:
       - strokeIndices: 00000000010000000200000003000000040000000500000006000000070000000800000009000000
@@ -13553,9 +13571,9 @@ MonoBehaviour:
       - strokeIndices: 04000000070000000a000000
     - answerCharacter: "\u793A"
       strokeSets:
-      - strokeIndices: 02000000070000000c0000000e0000000a000000
-      - strokeIndices: 03000000070000000c0000000e0000000a000000
-      - strokeIndices: 04000000070000000c0000000e0000000a000000
+      - strokeIndices: 070000000c0000000a0000000e00000004000000
+      - strokeIndices: 030000000c0000000e0000000a00000004000000
+      - strokeIndices: 0c0000000a00000003000000070000000e000000
     - answerCharacter: "\u571F"
       strokeSets:
       - strokeIndices: 040000000500000007000000
@@ -14506,6 +14524,7 @@ MonoBehaviour:
       - strokeIndices: 00000000010000000500000006000000070000000800000009000000
     - answerCharacter: "\u738B"
       strokeSets:
+      - strokeIndices: 01000000070000000800000009000000
       - strokeIndices: 0100000007000000080000000a000000
     - answerCharacter: "\u5E72"
       strokeSets:
@@ -14602,10 +14621,7 @@ MonoBehaviour:
       - strokeIndices: 000000000100000002000000030000000400000005000000060000000700000008000000
     - answerCharacter: "\u8FD1"
       strokeSets:
-      - strokeIndices: 00000000010000000200000003000000090000000a0000000b000000
-    - answerCharacter: "\u65A4"
-      strokeSets:
-      - strokeIndices: 00000000010000000200000004000000
+      - strokeIndices: 000000000100000002000000090000000a0000000b00000004000000
     - answerCharacter: "\u5341"
       strokeSets:
       - strokeIndices: 0200000003000000
@@ -14671,6 +14687,11 @@ MonoBehaviour:
     - answerCharacter: "\u9005"
       strokeSets:
       - strokeIndices: 090000000a0000000b000000000000000100000002000000040000000500000008000000
+    - answerCharacter: "\u58EB"
+      strokeSets:
+      - strokeIndices: 020000000300000006000000
+      - strokeIndices: 020000000300000007000000
+      - strokeIndices: 020000000300000008000000
     answerCountMode: 0
     requiredAnswerCount: 17
   - levelName: Level_234
@@ -14713,8 +14734,8 @@ MonoBehaviour:
       - strokeIndices: 040000000500000009000000
     - answerCharacter: "\u5E72"
       strokeSets:
-      - strokeIndices: 000000000700000009000000
-      - strokeIndices: 030000000700000009000000
+      - strokeIndices: 070000000900000003000000
+      - strokeIndices: 070000000900000000000000
     - answerCharacter: "\u5347"
       strokeSets:
       - strokeIndices: 04000000070000000800000009000000
